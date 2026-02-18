@@ -6,6 +6,9 @@ import useAppStore from '@/store/appStore';
 const AIChatbotPage = () => {
   const results = useAppStore(state => state.results);
   const students = useAppStore(state => state.students);
+  const fetchAll = useAppStore(state => state.fetchAll);
+
+  useEffect(() => { fetchAll(); }, []);
 
   const [messages, setMessages] = useState([
     { id: 1, text: "Hello! I'm your AI assistant. Ask me about any student's marks, class performance, or school data. For example, type a student's name to see their results.", sender: 'bot', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
@@ -27,28 +30,30 @@ const AIChatbotPage = () => {
       if (results.length === 0) return "No results have been recorded yet.";
       let response = `There are ${results.length} result records:\n\n`;
       results.forEach(r => {
-        response += `- ${r.studentName} (Class ${r.standard}-${r.section})`;
-        if (r.subjects?.length > 0) { const avg = Math.round(r.subjects.reduce((sum, s) => sum + parseInt(s.marks || '0'), 0) / r.subjects.length); response += ` - Average: ${avg}%`; }
-        response += '\n';
+        const studentName = r.student?.name || 'Unknown';
+        response += `- ${studentName}: ${r.subject} - ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)\n`;
       });
       return response;
     }
-    const matchingResults = results.filter(r => r.studentName?.toLowerCase().includes(lowerQuery));
+    const matchingResults = results.filter(r => r.student?.name?.toLowerCase().includes(lowerQuery));
     if (matchingResults.length > 0) {
       let response = '';
-      matchingResults.forEach(result => {
-        response += `Results for ${result.studentName} (Class ${result.standard}-${result.section}):\n`;
-        if (result.subjects?.length > 0) {
-          result.subjects.forEach(sub => { response += `  - ${sub.name}: ${sub.marks}\n`; });
-          const avg = Math.round(result.subjects.reduce((sum, s) => sum + parseInt(s.marks || '0'), 0) / result.subjects.length);
-          response += `  Average: ${avg}%\n`;
-        } else { response += '  No subject marks recorded.\n'; }
+      const grouped: Record<string, typeof matchingResults> = {};
+      matchingResults.forEach(r => {
+        const name = r.student?.name || 'Unknown';
+        if (!grouped[name]) grouped[name] = [];
+        grouped[name].push(r);
+      });
+      Object.entries(grouped).forEach(([name, recs]) => {
+        const student = recs[0].student;
+        response += `Results for ${name} (Class ${student?.standard}-${student?.section}):\n`;
+        recs.forEach(r => { response += `  - ${r.subject}: ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)\n`; });
         response += '\n';
       });
       return response.trim();
     }
     const matchingStudent = students.find(s => s.name?.toLowerCase().includes(lowerQuery));
-    if (matchingStudent) return `Found student: ${matchingStudent.name} (Class ${matchingStudent.standard}-${matchingStudent.section})\nParent: ${matchingStudent.parentName}\nContact: ${matchingStudent.parentContact}\n\nNo result records found for this student yet.`;
+    if (matchingStudent) return `Found student: ${matchingStudent.name} (Class ${matchingStudent.standard}-${matchingStudent.section})\nParent: ${matchingStudent.parent_name}\nContact: ${matchingStudent.parent_contact}\n\nNo result records found for this student yet.`;
     return `Sorry, I couldn't find any student or results matching "${query}".\n\nTry:\n- Type a student's name to see their marks\n- Type "all students" to see all registered students\n- Type "all results" to see a summary of all results`;
   };
 

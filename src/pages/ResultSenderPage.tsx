@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Upload, Trash2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
@@ -9,12 +10,25 @@ const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '
 const ResultSenderPage = () => {
   const { toast } = useToast();
   const addResult = useAppStore(state => state.addResult);
-  const [studentName, setStudentName] = useState('');
+  const allStudents = useAppStore(state => state.students);
+  const fetchStudents = useAppStore(state => state.fetchStudents);
+
+  const [studentId, setStudentId] = useState('');
   const [standard, setStandard] = useState('');
   const [section, setSection] = useState('');
   const [file, setFile] = useState<File | null>(null);
-  const [subjects, setSubjects] = useState([{ name: '', marks: '' }]);
+  const [subjects, setSubjects] = useState([{ name: '', marks_obtained: '', total_marks: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => { fetchStudents(); }, []);
+
+  const filteredStudents = useMemo(() => {
+    return allStudents.filter(s => {
+      if (standard && section) return s.standard === standard && s.section === section;
+      if (standard) return s.standard === standard;
+      return true;
+    });
+  }, [allStudents, standard, section]);
 
   const handleSubjectChange = (index: number, field: string, value: string) => {
     const newSubjects = [...subjects];
@@ -30,15 +44,25 @@ const ResultSenderPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studentName || !standard || !section) {
-      toast({ title: 'Missing Information', description: 'Please fill all fields.', variant: 'destructive' });
+    const validSubjects = subjects.filter(s => s.name && s.marks_obtained && s.total_marks);
+    if (!studentId || validSubjects.length === 0) {
+      toast({ title: 'Missing Information', description: 'Please select a student and add at least one subject with marks.', variant: 'destructive' });
       return;
     }
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    addResult({ studentName, standard, section, subjects: subjects.filter(s => s.name && s.marks), fileName: file ? file.name : null });
-    toast({ title: 'Result Sent Successfully!', description: `Marks for ${studentName} have been recorded.` });
-    setStudentName(''); setStandard(''); setSection(''); setFile(null); setSubjects([{ name: '', marks: '' }]);
+    for (const sub of validSubjects) {
+      await addResult({
+        student_id: studentId,
+        subject: sub.name,
+        marks_obtained: parseFloat(sub.marks_obtained),
+        total_marks: parseFloat(sub.total_marks),
+        file_name: file ? file.name : null,
+      });
+    }
+    const student = allStudents.find(s => s.id === studentId);
+    toast({ title: 'Result Sent Successfully!', description: `Marks for ${student?.name || 'student'} have been recorded.` });
+    setStudentId(''); setStandard(''); setSection(''); setFile(null);
+    setSubjects([{ name: '', marks_obtained: '', total_marks: '' }]);
     setIsSubmitting(false);
   };
 
@@ -49,11 +73,7 @@ const ResultSenderPage = () => {
         <p className="text-foreground/70">Enter or upload student marks</p>
       </div>
       <form onSubmit={handleSubmit} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-3">
-            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STUDENT NAME</label>
-            <input type="text" value={studentName} onChange={e => setStudentName(e.target.value)} placeholder="e.g., Rohan Kumar" className="w-full p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>
             <select value={standard} onChange={e => setStandard(e.target.value)} className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
@@ -71,16 +91,32 @@ const ResultSenderPage = () => {
             <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
           </div>
         </div>
+
+        <div>
+          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SELECT STUDENT</label>
+          {filteredStudents.length > 0 ? (
+            <Select value={studentId} onValueChange={setStudentId}>
+              <SelectTrigger className="w-full p-3 bg-black/40 border border-primary/20 rounded-lg text-foreground"><SelectValue placeholder="Select a student" /></SelectTrigger>
+              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                {filteredStudents.map(s => <SelectItem key={s.id} value={s.id} className="text-foreground focus:bg-primary/10 focus:text-primary">{s.name} ({s.standard}-{s.section})</SelectItem>)}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-foreground/40 text-sm py-3">No students found. Add students first.</p>
+          )}
+        </div>
+
         <div className="space-y-3">
           <label className="block text-xs font-bold tracking-wider text-primary/60">SUBJECTS & MARKS</label>
           {subjects.map((subject, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <input type="text" value={subject.name} onChange={e => handleSubjectChange(index, 'name', e.target.value)} placeholder="Subject Name" className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-              <input type="number" value={subject.marks} onChange={e => handleSubjectChange(index, 'marks', e.target.value)} placeholder="Marks" className="w-28 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-              <Button type="button" onClick={() => setSubjects(subjects.filter((_, i) => i !== index))} variant="destructive" className="p-3 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30"><Trash2 size={16} /></Button>
+            <div key={index} className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <input type="text" value={subject.name} onChange={e => handleSubjectChange(index, 'name', e.target.value)} placeholder="Subject" className="flex-1 min-w-0 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
+              <input type="number" value={subject.marks_obtained} onChange={e => handleSubjectChange(index, 'marks_obtained', e.target.value)} placeholder="Obtained" className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
+              <input type="number" value={subject.total_marks} onChange={e => handleSubjectChange(index, 'total_marks', e.target.value)} placeholder="Total" className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
+              <Button type="button" onClick={() => setSubjects(subjects.filter((_, i) => i !== index))} variant="destructive" className="p-3 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30 flex-shrink-0"><Trash2 size={16} /></Button>
             </div>
           ))}
-          <Button type="button" onClick={() => setSubjects([...subjects, { name: '', marks: '' }])} className="text-primary/80 hover:text-primary bg-black/40 hover:bg-primary/10 w-full border border-primary/20">+ Add Another Subject</Button>
+          <Button type="button" onClick={() => setSubjects([...subjects, { name: '', marks_obtained: '', total_marks: '' }])} className="text-primary/80 hover:text-primary bg-black/40 hover:bg-primary/10 w-full border border-primary/20">+ Add Another Subject</Button>
         </div>
         <div className="text-center text-foreground/50 my-4 text-sm">OR</div>
         <div>

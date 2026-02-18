@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle } from 'lucide-react';
@@ -12,7 +12,10 @@ const ComplaintSenderPage = () => {
   const { toast } = useToast();
   const allStudents = useAppStore(state => state.students);
   const addComplaint = useAppStore(state => state.addComplaint);
-  const [formData, setFormData] = useState({ studentName: '', standard: '', class: '', description: '' });
+  const fetchStudents = useAppStore(state => state.fetchStudents);
+  const [formData, setFormData] = useState({ studentId: '', standard: '', class: '', description: '' });
+
+  useEffect(() => { fetchStudents(); }, []);
 
   const filteredStudents = useMemo(() => {
     return allStudents.filter(s => {
@@ -22,15 +25,16 @@ const ComplaintSenderPage = () => {
     });
   }, [allStudents, formData.standard, formData.class]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.standard || !formData.class || !formData.studentName || !formData.description) {
+    if (!formData.standard || !formData.class || !formData.studentId || !formData.description) {
       toast({ title: "Incomplete Form", description: "Please fill out all required fields.", variant: "destructive" });
       return;
     }
-    addComplaint({ studentName: formData.studentName, standard: formData.standard, section: formData.class, description: formData.description });
-    toast({ title: "Complaint Registered!", description: `Your complaint regarding ${formData.studentName} has been submitted.` });
-    setFormData({ studentName: '', standard: '', class: '', description: '' });
+    const student = allStudents.find(s => s.id === formData.studentId);
+    await addComplaint({ student_id: formData.studentId, description: formData.description });
+    toast({ title: "Complaint Registered!", description: `Your complaint regarding ${student?.name || 'student'} has been submitted.` });
+    setFormData({ studentId: '', standard: '', class: '', description: '' });
   };
 
   return (
@@ -41,7 +45,7 @@ const ComplaintSenderPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">STANDARD *</label>
-              <Select value={formData.standard} onValueChange={value => setFormData({ ...formData, standard: value, studentName: '' })}>
+              <Select value={formData.standard} onValueChange={value => setFormData({ ...formData, standard: value, studentId: '' })}>
                 <SelectTrigger className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground"><SelectValue placeholder="Select Standard" /></SelectTrigger>
                 <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
                   {standards.map(std => <SelectItem key={std} value={std} className="text-foreground focus:bg-primary/10 focus:text-primary">{std}</SelectItem>)}
@@ -50,7 +54,7 @@ const ComplaintSenderPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">CLASS *</label>
-              <Select value={formData.class} onValueChange={value => setFormData({ ...formData, class: value, studentName: '' })}>
+              <Select value={formData.class} onValueChange={value => setFormData({ ...formData, class: value, studentId: '' })}>
                 <SelectTrigger className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground"><SelectValue placeholder="Select Class" /></SelectTrigger>
                 <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
                   {classes.map(cls => <SelectItem key={cls} value={cls} className="text-foreground focus:bg-primary/10 focus:text-primary">{cls}</SelectItem>)}
@@ -61,10 +65,10 @@ const ComplaintSenderPage = () => {
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">STUDENT NAME *</label>
             {filteredStudents.length > 0 ? (
-              <Select value={formData.studentName} onValueChange={value => setFormData({ ...formData, studentName: value })}>
+              <Select value={formData.studentId} onValueChange={value => setFormData({ ...formData, studentId: value })}>
                 <SelectTrigger className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground"><SelectValue placeholder="Select a student" /></SelectTrigger>
                 <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                  {filteredStudents.map(student => <SelectItem key={student.id} value={student.name} className="text-foreground focus:bg-primary/10 focus:text-primary">{student.name}</SelectItem>)}
+                  {filteredStudents.map(student => <SelectItem key={student.id} value={student.id} className="text-foreground focus:bg-primary/10 focus:text-primary">{student.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             ) : (
