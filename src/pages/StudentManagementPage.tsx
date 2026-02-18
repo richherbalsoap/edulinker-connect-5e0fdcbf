@@ -21,13 +21,29 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   } : { name: '', standard: '', section: '', parent_name: '', parent_contact: '', avatar_url: null });
   const [fileName, setFileName] = useState('');
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only JPEG, PNG, and WebP images are allowed.');
+        return;
+      }
+      if (file.size > 7 * 1024 * 1024) {
+        alert('File size must be under 7MB.');
+        return;
+      }
+      const ext = file.name.split('.').pop() || 'jpg';
+      const filePath = `avatars/${crypto.randomUUID()}.${ext}`;
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error } = await supabase.storage.from('edulinker-files').upload(filePath, file, { contentType: file.type, upsert: false });
+      if (error) {
+        alert('Upload failed: ' + error.message);
+        return;
+      }
+      const { data: signedData } = await supabase.storage.from('edulinker-files').createSignedUrl(filePath, 60 * 60 * 24 * 365);
       setFileName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData((prev: any) => ({ ...prev, avatar_url: reader.result }));
-      reader.readAsDataURL(file);
+      setFormData((prev: any) => ({ ...prev, avatar_url: signedData?.signedUrl ?? null }));
     }
   };
 
