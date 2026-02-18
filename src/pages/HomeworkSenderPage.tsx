@@ -89,8 +89,8 @@ const HomeworkSenderPage = () => {
           <textarea value={formData.homework} onChange={(e) => handleInputChange('homework', e.target.value)} placeholder="Enter homework description..." className="w-full p-3 h-32 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y" />
         </div>
         <div className="relative">
-          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">DUE DATE</label>
           
+          <input type="date" value={formData.dueDate} onChange={(e) => handleInputChange('dueDate', e.target.value)} className="w-full p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
         </div>
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
           <Send size={20} className="mr-2" /> Send Homework
