@@ -14,7 +14,163 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      announcements: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          title: string | null
+          type: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string | null
+          type?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      complaints: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          section: string
+          standard: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          section: string
+          standard: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          section?: string
+          standard?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      results: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          id: string
+          marks_obtained: number
+          percentage: number
+          student_id: string
+          subject: string
+          total_marks: number
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          marks_obtained: number
+          percentage?: number
+          student_id: string
+          subject: string
+          total_marks: number
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          marks_obtained?: number
+          percentage?: number
+          student_id?: string
+          subject?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          name: string
+          parent_contact: string | null
+          parent_name: string | null
+          secret_id: string
+          section: string
+          standard: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          parent_contact?: string | null
+          parent_name?: string | null
+          secret_id: string
+          section: string
+          standard: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          parent_contact?: string | null
+          parent_name?: string | null
+          secret_id?: string
+          section?: string
+          standard?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

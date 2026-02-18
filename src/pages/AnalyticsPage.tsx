@@ -1,23 +1,22 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { TrendingUp, Users, BookOpen, Award } from 'lucide-react';
 import useAppStore from '@/store/appStore';
 
 const AnalyticsPage = () => {
   const results = useAppStore(state => state.results);
   const students = useAppStore(state => state.students);
+  const fetchAll = useAppStore(state => state.fetchAll);
+
+  useEffect(() => { fetchAll(); }, []);
 
   const subjectPerformance = useMemo(() => {
     const subjectMap: Record<string, { total: number; count: number }> = {};
     results.forEach(result => {
-      if (result.subjects && Array.isArray(result.subjects)) {
-        result.subjects.forEach(sub => {
-          const name = sub.name;
-          const marks = parseInt(sub.marks) || 0;
-          if (!subjectMap[name]) subjectMap[name] = { total: 0, count: 0 };
-          subjectMap[name].total += marks;
-          subjectMap[name].count += 1;
-        });
-      }
+      const name = result.subject;
+      const marks = result.percentage || 0;
+      if (!subjectMap[name]) subjectMap[name] = { total: 0, count: 0 };
+      subjectMap[name].total += marks;
+      subjectMap[name].count += 1;
     });
     const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500', 'bg-pink-500', 'bg-cyan-500', 'bg-red-500', 'bg-indigo-500'];
     return Object.entries(subjectMap).map(([subject, data], index) => ({
@@ -26,17 +25,18 @@ const AnalyticsPage = () => {
   }, [results]);
 
   const classPerformance = useMemo(() => {
-    const classMap: Record<string, { totalMarks: number; subjectCount: number; students: Set<string> }> = {};
+    const classMap: Record<string, { totalPercentage: number; count: number; students: Set<string> }> = {};
     results.forEach(result => {
-      const key = `${result.standard}-${result.section}`;
-      if (!classMap[key]) classMap[key] = { totalMarks: 0, subjectCount: 0, students: new Set() };
-      if (result.subjects && Array.isArray(result.subjects)) {
-        result.subjects.forEach(sub => { classMap[key].totalMarks += parseInt(sub.marks) || 0; classMap[key].subjectCount += 1; });
-      }
-      classMap[key].students.add(result.studentName);
+      const student = result.student;
+      if (!student) return;
+      const key = `${student.standard}-${student.section}`;
+      if (!classMap[key]) classMap[key] = { totalPercentage: 0, count: 0, students: new Set() };
+      classMap[key].totalPercentage += result.percentage || 0;
+      classMap[key].count += 1;
+      classMap[key].students.add(student.name);
     });
     return Object.entries(classMap).map(([cls, data]) => ({
-      class: cls, avgScore: data.subjectCount > 0 ? Math.round(data.totalMarks / data.subjectCount) : 0, students: data.students.size,
+      class: cls, avgScore: data.count > 0 ? Math.round(data.totalPercentage / data.count) : 0, students: data.students.size,
     })).sort((a, b) => b.avgScore - a.avgScore);
   }, [results]);
 

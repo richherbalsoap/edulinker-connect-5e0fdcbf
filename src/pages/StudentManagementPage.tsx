@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, X, Upload, User, Phone } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Upload, User, Phone, Key } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 
@@ -15,7 +15,10 @@ const getSortableClassIndex = (classVal: string) => {
 };
 
 const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
-  const [formData, setFormData] = useState(student || { name: '', standard: '', section: '', parentName: '', parentContact: '', avatar: null });
+  const [formData, setFormData] = useState(student ? {
+    name: student.name, standard: student.standard, section: student.section,
+    parent_name: student.parent_name || '', parent_contact: student.parent_contact || '', avatar_url: student.avatar_url || null,
+  } : { name: '', standard: '', section: '', parent_name: '', parent_contact: '', avatar_url: null });
   const [fileName, setFileName] = useState('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +26,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       const file = e.target.files[0];
       setFileName(file.name);
       const reader = new FileReader();
-      reader.onloadend = () => setFormData((prev: any) => ({ ...prev, avatar: reader.result }));
+      reader.onloadend = () => setFormData((prev: any) => ({ ...prev, avatar_url: reader.result }));
       reader.readAsDataURL(file);
     }
   };
@@ -38,7 +41,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
         <div className="space-y-5">
           <div className="flex flex-col items-center space-y-3">
             <div className="w-28 h-28 rounded-full bg-black/40 border-2 border-dashed border-primary/30 flex items-center justify-center overflow-hidden">
-              {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-full h-full object-cover" /> : <User size={48} className="text-primary/40" />}
+              {formData.avatar_url ? <img src={formData.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User size={48} className="text-primary/40" />}
             </div>
             <div className="relative">
               <Button asChild variant="outline" className="bg-black/40 border-primary/20 hover:bg-primary/10 text-foreground/80"><div><Upload size={16} className="mr-2" /> Upload Photo</div></Button>
@@ -61,8 +64,8 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
               </SelectContent>
             </Select>
           </div>
-          <input type="text" placeholder="Parent's Name" value={formData.parentName} onChange={e => setFormData({ ...formData, parentName: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
-          <input type="text" placeholder="Parent's Contact" value={formData.parentContact} onChange={e => setFormData({ ...formData, parentContact: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          <input type="text" placeholder="Parent's Name" value={formData.parent_name} onChange={e => setFormData({ ...formData, parent_name: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          <input type="text" placeholder="Parent's Contact" value={formData.parent_contact} onChange={e => setFormData({ ...formData, parent_contact: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
           <Button onClick={() => onSave(formData)} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">Save Changes</Button>
         </div>
       </div>
@@ -75,6 +78,7 @@ const StudentManagementPage = () => {
   const addStudent = useAppStore(state => state.addStudent);
   const updateStudent = useAppStore(state => state.updateStudent);
   const deleteStudentFromStore = useAppStore(state => state.deleteStudent);
+  const fetchStudents = useAppStore(state => state.fetchStudents);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [selectedClass, setSelectedClass] = useState('All Classes');
@@ -82,15 +86,20 @@ const StudentManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  const handleSaveStudent = (studentData: any) => {
-    if (studentData.id) {
-      updateStudent(studentData.id, studentData);
+  useEffect(() => { fetchStudents(); }, []);
+
+  const handleSaveStudent = async (studentData: any) => {
+    if (editingStudent) {
+      await updateStudent(editingStudent.id, studentData);
       toast({ title: "Success", description: "Student details updated." });
     } else {
-      addStudent({ ...studentData, id: Date.now().toString() });
-      toast({ title: "Success", description: "New student added." });
+      const newStudent = await addStudent(studentData);
+      if (newStudent) {
+        toast({ title: "Student Added!", description: `Secret ID: ${newStudent.secret_id}` });
+      }
     }
     setIsModalOpen(false);
+    setEditingStudent(null);
   };
 
   const allAvailableClasses = useMemo(() => standards.map(s => `Class ${s}`).sort((a, b) => getSortableClassIndex(a) - getSortableClassIndex(b)), []);
@@ -116,14 +125,14 @@ const StudentManagementPage = () => {
   return (
     <>
       <div className="space-y-6 relative z-10 px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-bold text-foreground">Manage Student Records</h1>
           <Button onClick={() => { setEditingStudent(null); setIsModalOpen(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
             <Plus size={20} className="mr-2" /> Add Student
           </Button>
         </div>
 
-        <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 w-full mx-auto space-y-4">
+        <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 w-full mx-auto space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">CLASS</label>
@@ -156,27 +165,28 @@ const StudentManagementPage = () => {
           Object.keys(groupedStudents).map(classGroup => (
             <div key={classGroup}>
               <h2 className="text-foreground text-2xl font-bold mb-4 px-2">{classGroup}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {groupedStudents[classGroup].map((student: any) => (
-                  <div key={student.id} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-5 space-y-4 flex flex-col hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300">
+                  <div key={student.id} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-5 space-y-4 flex flex-col hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300">
                     <div className="flex items-center gap-4 flex-grow">
-                      <div className="w-16 h-16 rounded-full bg-black/40 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden flex-shrink-0 border border-primary/20">
-                        {student.avatar ? <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" /> : student.name.charAt(0).toUpperCase()}
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/40 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden flex-shrink-0 border border-primary/20">
+                        {student.avatar_url ? <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" /> : student.name.charAt(0).toUpperCase()}
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-foreground">{student.name}</h3>
-                        <div className="flex gap-2 text-xs mt-1">
+                      <div className="min-w-0">
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">{student.name}</h3>
+                        <div className="flex gap-2 text-xs mt-1 flex-wrap">
                           <span className="bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">Section {student.section}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-black/40 p-4 rounded-lg space-y-2 text-foreground/80 text-sm mt-4 border border-primary/10">
-                      <div className="flex items-center gap-3"><User size={16} className="text-primary/50" /><span>Parent: {student.parentName}</span></div>
-                      <div className="flex items-center gap-3"><Phone size={16} className="text-primary/50" /><span>{student.parentContact}</span></div>
+                    <div className="bg-black/40 p-3 sm:p-4 rounded-lg space-y-2 text-foreground/80 text-sm border border-primary/10">
+                      <div className="flex items-center gap-3"><Key size={16} className="text-primary/50 flex-shrink-0" /><span className="font-mono text-primary text-xs truncate">{student.secret_id}</span></div>
+                      <div className="flex items-center gap-3"><User size={16} className="text-primary/50 flex-shrink-0" /><span className="truncate">Parent: {student.parent_name || '--'}</span></div>
+                      <div className="flex items-center gap-3"><Phone size={16} className="text-primary/50 flex-shrink-0" /><span className="truncate">{student.parent_contact || '--'}</span></div>
                     </div>
                     <div className="flex gap-3 mt-4">
                       <Button onClick={() => { setEditingStudent(student); setIsModalOpen(true); }} variant="outline" className="w-full bg-black/40 hover:bg-primary/10 border-primary/20 text-foreground"><Edit size={16} className="mr-2" /> Edit</Button>
-                      <Button onClick={() => { deleteStudentFromStore(student.id); toast({ title: "Success", description: "Student record deleted." }); }} variant="destructive" className="w-full bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive"><Trash2 size={16} className="mr-2" /> Delete</Button>
+                      <Button onClick={async () => { await deleteStudentFromStore(student.id); toast({ title: "Success", description: "Student record deleted." }); }} variant="destructive" className="w-full bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive"><Trash2 size={16} className="mr-2" /> Delete</Button>
                     </div>
                   </div>
                 ))}
@@ -190,7 +200,7 @@ const StudentManagementPage = () => {
           </div>
         )}
       </div>
-      <StudentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveStudent} student={editingStudent} />
+      <StudentModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingStudent(null); }} onSave={handleSaveStudent} student={editingStudent} />
     </>
   );
 };
