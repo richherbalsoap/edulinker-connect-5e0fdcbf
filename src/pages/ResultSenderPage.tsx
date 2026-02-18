@@ -38,8 +38,17 @@ const ResultSenderPage = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile && selectedFile.size < 5 * 1024 * 1024) setFile(selectedFile);
-    else toast({ title: 'File Error', description: 'File is too large or invalid. Max size: 5MB.', variant: 'destructive' });
+    if (!selectedFile) return;
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast({ title: 'File Error', description: 'Only PDF, JPEG, PNG, and WebP files are allowed.', variant: 'destructive' });
+      return;
+    }
+    if (selectedFile.size > 7 * 1024 * 1024) {
+      toast({ title: 'File Error', description: 'File is too large. Max size: 7MB.', variant: 'destructive' });
+      return;
+    }
+    setFile(selectedFile);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

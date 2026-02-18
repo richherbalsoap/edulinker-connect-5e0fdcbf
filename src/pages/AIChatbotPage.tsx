@@ -53,7 +53,7 @@ const AIChatbotPage = () => {
       return response.trim();
     }
     const matchingStudent = students.find(s => s.name?.toLowerCase().includes(lowerQuery));
-    if (matchingStudent) return `Found student: ${matchingStudent.name} (Class ${matchingStudent.standard}-${matchingStudent.section})\nParent: ${matchingStudent.parent_name}\nContact: ${matchingStudent.parent_contact}\n\nNo result records found for this student yet.`;
+    if (matchingStudent) return `Found student: ${matchingStudent.name} (Class ${matchingStudent.standard}-${matchingStudent.section})\n\nNo result records found for this student yet.`;
     return `Sorry, I couldn't find any student or results matching "${query}".\n\nTry:\n- Type a student's name to see their marks\n- Type "all students" to see all registered students\n- Type "all results" to see a summary of all results`;
   };
 
