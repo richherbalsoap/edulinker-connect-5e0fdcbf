@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
+import { LogIn, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [isSignup, setIsSignup] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { login, signup, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoggedIn) navigate('/dashboard', { replace: true });
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -22,11 +29,19 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
-      await login();
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed:', error);
+      if (isSignup) {
+        await signup(email, password);
+        toast.success('Account created! Check your email to confirm your account.');
+      } else {
+        await login(email, password);
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Authentication failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -62,7 +77,9 @@ const LoginPage = () => {
               >
                 EDULinker
               </motion.h1>
-              <p className="text-gray-400 text-sm font-medium tracking-wide opacity-80">Enter your credentials to access the portal</p>
+              <p className="text-gray-400 text-sm font-medium tracking-wide opacity-80">
+                {isSignup ? 'Create your account to get started' : 'Enter your credentials to access the portal'}
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -74,14 +91,25 @@ const LoginPage = () => {
               </div>
               <div className="space-y-2">
                 <label htmlFor="password" className="block text-xs font-semibold text-gray-500 uppercase tracking-widest ml-1">Password</label>
-                <input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                <input id="password" type="password" autoComplete={isSignup ? 'new-password' : 'current-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
                   className="w-full px-5 py-4 bg-white/[0.02] border border-white/10 rounded-2xl text-white placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ff1a75]/20 focus:border-[#ff1a75]/40 transition-all duration-500 hover:bg-white/[0.04] focus:bg-white/[0.05]"
                   placeholder="••••••••" />
               </div>
-              <Button type="submit" className="w-full h-14 bg-[#ff1a75] text-white hover:bg-[#ff1a75]/90 font-bold rounded-2xl transition-all duration-300 transform active:scale-[0.98] shadow-[0_0_20px_rgba(255,26,117,0.3)] hover:shadow-[0_0_30px_rgba(255,26,117,0.5)]">
-                <LogIn size={20} className="mr-2" /> Sign In
+              <Button type="submit" disabled={submitting} className="w-full h-14 bg-[#ff1a75] text-white hover:bg-[#ff1a75]/90 font-bold rounded-2xl transition-all duration-300 transform active:scale-[0.98] shadow-[0_0_20px_rgba(255,26,117,0.3)] hover:shadow-[0_0_30px_rgba(255,26,117,0.5)]">
+                {isSignup ? <UserPlus size={20} className="mr-2" /> : <LogIn size={20} className="mr-2" />}
+                {submitting ? 'Please wait...' : isSignup ? 'Create Account' : 'Sign In'}
               </Button>
             </form>
+
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => setIsSignup(!isSignup)}
+                className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                {isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              </button>
+            </div>
 
             <div className="mt-10 text-center">
               <p className="text-[10px] text-gray-600 uppercase tracking-widest font-semibold">Secure access for authorized personnel only</p>
