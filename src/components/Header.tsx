@@ -6,8 +6,8 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   const { logout, userName } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
