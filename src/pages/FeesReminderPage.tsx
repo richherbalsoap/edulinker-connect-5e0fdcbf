@@ -74,9 +74,9 @@ const FeesReminderPage = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">QUICK TEMPLATES</label>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {quickTemplates.map(template => (
-                <Button key={template} type="button" variant="outline" onClick={() => setMessage(template)} className="text-xs text-center bg-black/40 border-primary/20 hover:bg-primary/10 text-foreground/80">{template}</Button>
+                <Button key={template} type="button" variant="outline" onClick={() => setMessage(template)} className="text-xs text-center bg-black/40 border-primary/20 hover:bg-primary/10 text-foreground/80 whitespace-normal h-auto py-2">{template}</Button>
               ))}
             </div>
           </div>
