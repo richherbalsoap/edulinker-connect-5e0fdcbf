@@ -58,11 +58,16 @@ const DashboardPage = () => {
     });
   }, [results, yearRange]);
 
-  // Date-filtered items for the selected calendar date
-  const selectedDateStr = selectedDate.toISOString().split('T')[0];
-  const dateHomework = filteredHomework.filter(h => h.created_at.startsWith(selectedDateStr));
-  const dateComplaints = filteredComplaints.filter(c => c.created_at.startsWith(selectedDateStr));
-  const dateResults = filteredResults.filter(r => r.created_at.startsWith(selectedDateStr));
+  // Date-filtered items for the selected calendar date (use local date comparison)
+  const matchesDate = (createdAt: string) => {
+    const d = new Date(createdAt);
+    return d.getDate() === selectedDate.getDate() &&
+      d.getMonth() === selectedDate.getMonth() &&
+      d.getFullYear() === selectedDate.getFullYear();
+  };
+  const dateHomework = filteredHomework.filter(h => matchesDate(h.created_at));
+  const dateComplaints = filteredComplaints.filter(c => matchesDate(c.created_at));
+  const dateResults = filteredResults.filter(r => matchesDate(r.created_at));
   const hasDateData = dateHomework.length > 0 || dateComplaints.length > 0 || dateResults.length > 0;
 
   const stats = [
