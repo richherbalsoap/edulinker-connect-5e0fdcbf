@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BookOpen, MessageSquare, FileText, Calendar } from 'lucide-react';
+import { BookOpen, MessageSquare, FileText, Calendar, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
 
 const getAcademicYears = () => {
-  const currentYear = new Date().getFullYear();
-  const years: string[] = [];
-  for (let y = currentYear + 1; y >= 2023; y--) {
+  const years: string[] = ['Overall'];
+  for (let y = 2050; y >= 2023; y--) {
     years.push(`${y - 1}-${y}`);
   }
   return years;
@@ -22,7 +21,7 @@ const getAcademicYearRange = (yearStr: string) => {
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { homework, complaints, results, fetchAll } = useAppStore();
+  const { homework, complaints, results, students, fetchAll } = useAppStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const academicYears = useMemo(() => getAcademicYears(), []);
   const currentMonth = new Date().getMonth();
@@ -33,22 +32,31 @@ const DashboardPage = () => {
 
   useEffect(() => { fetchAll(); }, []);
 
-  const yearRange = useMemo(() => getAcademicYearRange(selectedYear), [selectedYear]);
+  const yearRange = useMemo(() => selectedYear === 'Overall' ? null : getAcademicYearRange(selectedYear), [selectedYear]);
 
-  const filteredHomework = useMemo(() => homework.filter(h => {
-    const d = new Date(h.created_at);
-    return d >= yearRange.start && d <= yearRange.end;
-  }), [homework, yearRange]);
+  const filteredHomework = useMemo(() => {
+    if (!yearRange) return homework;
+    return homework.filter(h => {
+      const d = new Date(h.created_at);
+      return d >= yearRange.start && d <= yearRange.end;
+    });
+  }, [homework, yearRange]);
 
-  const filteredComplaints = useMemo(() => complaints.filter(c => {
-    const d = new Date(c.created_at);
-    return d >= yearRange.start && d <= yearRange.end;
-  }), [complaints, yearRange]);
+  const filteredComplaints = useMemo(() => {
+    if (!yearRange) return complaints;
+    return complaints.filter(c => {
+      const d = new Date(c.created_at);
+      return d >= yearRange.start && d <= yearRange.end;
+    });
+  }, [complaints, yearRange]);
 
-  const filteredResults = useMemo(() => results.filter(r => {
-    const d = new Date(r.created_at);
-    return d >= yearRange.start && d <= yearRange.end;
-  }), [results, yearRange]);
+  const filteredResults = useMemo(() => {
+    if (!yearRange) return results;
+    return results.filter(r => {
+      const d = new Date(r.created_at);
+      return d >= yearRange.start && d <= yearRange.end;
+    });
+  }, [results, yearRange]);
 
   // Date-filtered items for the selected calendar date
   const selectedDateStr = selectedDate.toISOString().split('T')[0];
@@ -58,9 +66,10 @@ const DashboardPage = () => {
   const hasDateData = dateHomework.length > 0 || dateComplaints.length > 0 || dateResults.length > 0;
 
   const stats = [
-    { icon: BookOpen, label: 'Homework Sender', value: filteredHomework.length, color: 'from-primary to-secondary', path: '/homework' },
-    { icon: MessageSquare, label: 'Complaint Sender', value: filteredComplaints.length, color: 'from-primary to-[hsl(43,76%,50%)]', path: '/complaints' },
-    { icon: FileText, label: 'Result Sender', value: filteredResults.length, color: 'from-[hsl(43,76%,50%)] to-primary', path: '/results' },
+    ...(selectedYear === 'Overall' ? [{ icon: Users, label: 'Total Students', value: students.length, color: 'from-primary to-secondary', path: '/students' }] : []),
+    { icon: BookOpen, label: 'Homework Sent', value: filteredHomework.length, color: 'from-primary to-secondary', path: '/homework' },
+    { icon: MessageSquare, label: 'Complaints Sent', value: filteredComplaints.length, color: 'from-primary to-[hsl(43,76%,50%)]', path: '/complaints' },
+    { icon: FileText, label: 'Results Sent', value: filteredResults.length, color: 'from-[hsl(43,76%,50%)] to-primary', path: '/results' },
   ];
 
   const today = new Date();
@@ -90,7 +99,7 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
+      <div className={`grid grid-cols-1 ${selectedYear === 'Overall' ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'} gap-4 sm:gap-6 max-w-5xl mx-auto`}>
         {stats.map((stat) => (
           <div key={stat.label} onClick={() => navigate(stat.path)} className="relative group cursor-pointer">
             <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-[0_0_30px_hsl(51,100%,50%,0.15)] hover:border-primary/40 transition-all duration-300 text-center">
