@@ -4,12 +4,14 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
+import { useAuth } from '@/context/AuthContext';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const classes = ['A', 'B', 'C', 'D', 'E'];
 
 const ComplaintSenderPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
   const allStudents = useAppStore(state => state.students);
   const addComplaint = useAppStore(state => state.addComplaint);
   const fetchStudents = useAppStore(state => state.fetchStudents);
@@ -32,7 +34,7 @@ const ComplaintSenderPage = () => {
       return;
     }
     const student = allStudents.find(s => s.id === formData.studentId);
-    await addComplaint({ student_id: formData.studentId, description: formData.description });
+    await addComplaint({ student_id: formData.studentId, description: formData.description }, schoolId!);
     toast({ title: "Complaint Registered!", description: `Your complaint regarding ${student?.name || 'student'} has been submitted.` });
     setFormData({ studentId: '', standard: '', class: '', description: '' });
   };

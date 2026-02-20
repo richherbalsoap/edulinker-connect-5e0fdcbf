@@ -19,6 +19,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          school_id: string | null
           title: string | null
           type: string | null
         }
@@ -26,6 +27,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          school_id?: string | null
           title?: string | null
           type?: string | null
         }
@@ -33,31 +35,50 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          school_id?: string | null
           title?: string | null
           type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "announcements_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       complaints: {
         Row: {
           created_at: string
           description: string
           id: string
+          school_id: string | null
           student_id: string
         }
         Insert: {
           created_at?: string
           description: string
           id?: string
+          school_id?: string | null
           student_id: string
         }
         Update: {
           created_at?: string
           description?: string
           id?: string
+          school_id?: string | null
           student_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "complaints_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "complaints_student_id_fkey"
             columns: ["student_id"]
@@ -73,6 +94,7 @@ export type Database = {
           description: string
           file_url: string | null
           id: string
+          school_id: string | null
           section: string
           standard: string
           subject: string
@@ -82,6 +104,7 @@ export type Database = {
           description: string
           file_url?: string | null
           id?: string
+          school_id?: string | null
           section: string
           standard: string
           subject: string
@@ -91,11 +114,20 @@ export type Database = {
           description?: string
           file_url?: string | null
           id?: string
+          school_id?: string | null
           section?: string
           standard?: string
           subject?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "homework_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       results: {
         Row: {
@@ -104,6 +136,7 @@ export type Database = {
           id: string
           marks_obtained: number
           percentage: number
+          school_id: string | null
           student_id: string
           subject: string
           total_marks: number
@@ -114,6 +147,7 @@ export type Database = {
           id?: string
           marks_obtained: number
           percentage?: number
+          school_id?: string | null
           student_id: string
           subject: string
           total_marks: number
@@ -124,11 +158,19 @@ export type Database = {
           id?: string
           marks_obtained?: number
           percentage?: number
+          school_id?: string | null
           student_id?: string
           subject?: string
           total_marks?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "results_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "results_student_id_fkey"
             columns: ["student_id"]
@@ -167,6 +209,7 @@ export type Database = {
           name: string
           parent_contact: string | null
           parent_name: string | null
+          school_id: string | null
           secret_id: string
           section: string
           standard: string
@@ -178,6 +221,7 @@ export type Database = {
           name: string
           parent_contact?: string | null
           parent_name?: string | null
+          school_id?: string | null
           secret_id: string
           section: string
           standard: string
@@ -189,11 +233,20 @@ export type Database = {
           name?: string
           parent_contact?: string | null
           parent_name?: string | null
+          school_id?: string | null
           secret_id?: string
           section?: string
           standard?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -229,6 +282,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_school_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

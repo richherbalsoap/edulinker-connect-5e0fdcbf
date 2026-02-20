@@ -4,11 +4,13 @@ import { Send, Upload, Trash2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
+import { useAuth } from '@/context/AuthContext';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
 const ResultSenderPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
   const addResult = useAppStore(state => state.addResult);
   const allStudents = useAppStore(state => state.students);
   const fetchStudents = useAppStore(state => state.fetchStudents);
@@ -66,7 +68,7 @@ const ResultSenderPage = () => {
         marks_obtained: parseFloat(sub.marks_obtained),
         total_marks: parseFloat(sub.total_marks),
         file_name: file ? file.name : null,
-      });
+      }, schoolId!);
     }
     const student = allStudents.find(s => s.id === studentId);
     toast({ title: 'Result Sent Successfully!', description: `Marks for ${student?.name || 'student'} have been recorded.` });
