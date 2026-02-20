@@ -10,6 +10,7 @@ interface Student {
   parent_name: string | null;
   parent_contact: string | null;
   avatar_url: string | null;
+  school_id: string | null;
   created_at: string;
 }
 
@@ -19,6 +20,7 @@ interface Homework {
   section: string;
   subject: string;
   description: string;
+  school_id: string | null;
   created_at: string;
 }
 
@@ -26,6 +28,7 @@ interface Complaint {
   id: string;
   student_id: string;
   description: string;
+  school_id: string | null;
   created_at: string;
   student?: Student;
 }
@@ -38,6 +41,7 @@ interface Result {
   total_marks: number;
   percentage: number;
   file_name: string | null;
+  school_id: string | null;
   created_at: string;
   student?: Student;
 }
@@ -47,6 +51,7 @@ interface Announcement {
   title: string | null;
   content: string | null;
   type: string | null;
+  school_id: string | null;
   created_at: string;
 }
 
@@ -65,14 +70,14 @@ interface AppStore {
   fetchAnnouncements: () => Promise<void>;
   fetchAll: () => Promise<void>;
 
-  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }) => Promise<Student | null>;
+  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }, schoolId: string) => Promise<Student | null>;
   updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
 
-  addHomework: (hw: { standard: string; section: string; subject: string; description: string }) => Promise<void>;
-  addComplaint: (complaint: { student_id: string; description: string }) => Promise<void>;
-  addResult: (result: { student_id: string; subject: string; marks_obtained: number; total_marks: number; file_name?: string | null }) => Promise<void>;
-  addAnnouncement: (announcement: { title?: string; content?: string; type?: string }) => Promise<void>;
+  addHomework: (hw: { standard: string; section: string; subject: string; description: string }, schoolId: string) => Promise<void>;
+  addComplaint: (complaint: { student_id: string; description: string }, schoolId: string) => Promise<void>;
+  addResult: (result: { student_id: string; subject: string; marks_obtained: number; total_marks: number; file_name?: string | null }, schoolId: string) => Promise<void>;
+  addAnnouncement: (announcement: { title?: string; content?: string; type?: string }, schoolId: string) => Promise<void>;
 
   getStudentsByClass: (standard?: string, section?: string) => Student[];
   getResultsByStudent: (studentId: string) => Result[];
@@ -86,6 +91,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
   announcements: [],
   loading: false,
 
+  // RLS handles school_id filtering automatically via get_user_school_id()
   fetchStudents: async () => {
     const { data } = await supabase.from('students').select('*').order('created_at', { ascending: false });
     if (data) set({ students: data as Student[] });
@@ -124,7 +130,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
     set({ loading: false });
   },
 
-  addStudent: async (student) => {
+  addStudent: async (student, schoolId) => {
     const { data, error } = await supabase.from('students').insert([{
       name: student.name,
       standard: student.standard,
@@ -132,7 +138,8 @@ const useAppStore = create<AppStore>()((set, get) => ({
       parent_name: student.parent_name || null,
       parent_contact: student.parent_contact || null,
       avatar_url: student.avatar_url || null,
-      secret_id: 'TEMP', // Will be overwritten by DB trigger
+      secret_id: 'TEMP',
+      school_id: schoolId,
     }]).select().single();
     if (data && !error) {
       set((state) => ({ students: [data as Student, ...state.students] }));
@@ -157,29 +164,29 @@ const useAppStore = create<AppStore>()((set, get) => ({
     }
   },
 
-  addHomework: async (hw) => {
-    const { data, error } = await supabase.from('homework').insert(hw).select().single();
+  addHomework: async (hw, schoolId) => {
+    const { data, error } = await supabase.from('homework').insert({ ...hw, school_id: schoolId }).select().single();
     if (data && !error) {
       set((state) => ({ homework: [data as Homework, ...state.homework] }));
     }
   },
 
-  addComplaint: async (complaint) => {
-    const { data, error } = await supabase.from('complaints').insert(complaint).select('*, student:students(*)').single();
+  addComplaint: async (complaint, schoolId) => {
+    const { data, error } = await supabase.from('complaints').insert({ ...complaint, school_id: schoolId }).select('*, student:students(*)').single();
     if (data && !error) {
       set((state) => ({ complaints: [data as unknown as Complaint, ...state.complaints] }));
     }
   },
 
-  addResult: async (result) => {
-    const { data, error } = await supabase.from('results').insert(result).select('*, student:students(*)').single();
+  addResult: async (result, schoolId) => {
+    const { data, error } = await supabase.from('results').insert({ ...result, school_id: schoolId }).select('*, student:students(*)').single();
     if (data && !error) {
       set((state) => ({ results: [data as unknown as Result, ...state.results] }));
     }
   },
 
-  addAnnouncement: async (announcement) => {
-    const { data, error } = await supabase.from('announcements').insert(announcement).select().single();
+  addAnnouncement: async (announcement, schoolId) => {
+    const { data, error } = await supabase.from('announcements').insert({ ...announcement, school_id: schoolId }).select().single();
     if (data && !error) {
       set((state) => ({ announcements: [data as Announcement, ...state.announcements] }));
     }

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Send, ChevronDown } from "lucide-react";
 import useAppStore from "@/store/appStore";
+import { useAuth } from "@/context/AuthContext";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -10,6 +11,7 @@ const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social S
 
 const HomeworkSenderPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
   const addHomework = useAppStore((state) => state.addHomework);
   const [subjects, setSubjects] = useState(initialSubjects);
   const [showCustomSubject, setShowCustomSubject] = useState(false);
@@ -28,7 +30,7 @@ const HomeworkSenderPage = () => {
       section: formData.section,
       subject: finalSubject,
       description: formData.homework,
-    });
+    }, schoolId!);
     toast({ title: "Homework Sent Successfully!", description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.` });
     setFormData({ standard: "", section: "", subject: "", homework: "" });
     setShowCustomSubject(false);

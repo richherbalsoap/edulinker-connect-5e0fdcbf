@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, User, School, Copy, AlertTriangle } from 'lucide-react';
+import { Lock, Mail, User, School, Copy, AlertTriangle, Hash } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -37,11 +37,9 @@ const SettingsPage = () => {
     fetchSchool();
   }, [schoolId]);
 
-  const copyCode = () => {
-    if (schoolData?.school_code) {
-      navigator.clipboard.writeText(schoolData.school_code);
-      toast({ title: "Copied!", description: "School code copied to clipboard." });
-    }
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied!", description: `${label} copied to clipboard.` });
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -73,11 +71,11 @@ const SettingsPage = () => {
     <div className="space-y-6 relative z-10 px-4 py-6">
       <h1 className="text-3xl font-bold text-foreground text-center">Settings</h1>
 
-      {/* School Code Card */}
+      {/* School Info Card */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><School size={20} className="text-primary" /></div>
-          <h2 className="text-xl font-semibold text-foreground">Your School Code</h2>
+          <h2 className="text-xl font-semibold text-foreground">School Information</h2>
         </div>
         {schoolLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -96,14 +94,25 @@ const SettingsPage = () => {
               <div className="px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground/70">{schoolData.name}</div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-2">School Code</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-2">Your School Code</label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 px-4 py-3 bg-black/40 border border-primary/20 rounded-lg font-mono text-lg tracking-[0.3em] text-primary select-all">{schoolData.school_code}</div>
-                <Button type="button" variant="outline" size="icon" onClick={copyCode} className="border-primary/20 hover:bg-primary/10 hover:text-primary h-12 w-12 shrink-0">
+                <Button type="button" variant="outline" size="icon" onClick={() => copyToClipboard(schoolData.school_code, 'School Code')} className="border-primary/20 hover:bg-primary/10 hover:text-primary h-12 w-12 shrink-0">
                   <Copy size={18} />
                 </Button>
               </div>
             </div>
+            {schoolId && (
+              <div>
+                <label className="block text-sm font-medium text-foreground/80 mb-2">Your School ID</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 px-4 py-3 bg-black/40 border border-primary/20 rounded-lg font-mono text-xs text-foreground/50 select-all truncate">{schoolId}</div>
+                  <Button type="button" variant="outline" size="icon" onClick={() => copyToClipboard(schoolId, 'School ID')} className="border-primary/20 hover:bg-primary/10 hover:text-primary h-12 w-12 shrink-0">
+                    <Copy size={18} />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
