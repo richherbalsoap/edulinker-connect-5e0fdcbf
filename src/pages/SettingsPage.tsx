@@ -1,15 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, User } from 'lucide-react';
+import { Lock, Mail, User, School, Copy, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const SettingsPage = () => {
   const { toast } = useToast();
-  const { userName, updateUserName } = useAuth();
+  const { userName, updateUserName, schoolId } = useAuth();
   const [passwords, setPasswords] = useState({ new: '', confirm: '' });
   const [email, setEmail] = useState('');
   const [newName, setNewName] = useState(userName);
+  const [schoolData, setSchoolData] = useState<{ name: string; school_code: string } | null>(null);
+  const [schoolLoading, setSchoolLoading] = useState(true);
+  const [schoolError, setSchoolError] = useState(false);
+
+  useEffect(() => {
+    const fetchSchool = async () => {
+      if (!schoolId) {
+        setSchoolLoading(false);
+        setSchoolError(true);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('schools')
+        .select('name, school_code')
+        .eq('id', schoolId)
+        .maybeSingle();
+      if (error || !data) {
+        setSchoolError(true);
+      } else {
+        setSchoolData(data);
+      }
+      setSchoolLoading(false);
+    };
+    fetchSchool();
+  }, [schoolId]);
+
+  const copyCode = () => {
+    if (schoolData?.school_code) {
+      navigator.clipboard.writeText(schoolData.school_code);
+      toast({ title: "Copied!", description: "School code copied to clipboard." });
+    }
+  };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +73,42 @@ const SettingsPage = () => {
     <div className="space-y-6 relative z-10 px-4 py-6">
       <h1 className="text-3xl font-bold text-foreground text-center">Settings</h1>
 
+      {/* School Code Card */}
+      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><School size={20} className="text-primary" /></div>
+          <h2 className="text-xl font-semibold text-foreground">Your School Code</h2>
+        </div>
+        {schoolLoading ? (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="w-4 h-4 border-2 border-primary/40 border-t-primary rounded-full animate-spin" />
+            Loading school info…
+          </div>
+        ) : schoolError || !schoolData ? (
+          <div className="flex items-center gap-2 text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
+            <AlertTriangle size={18} />
+            <span className="text-sm font-medium">School Code missing. Contact admin.</span>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-2">School Name</label>
+              <div className="px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground/70">{schoolData.name}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-2">School Code</label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 px-4 py-3 bg-black/40 border border-primary/20 rounded-lg font-mono text-lg tracking-[0.3em] text-primary select-all">{schoolData.school_code}</div>
+                <Button type="button" variant="outline" size="icon" onClick={copyCode} className="border-primary/20 hover:bg-primary/10 hover:text-primary h-12 w-12 shrink-0">
+                  <Copy size={18} />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Change Name */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><User size={20} className="text-primary" /></div>
@@ -51,6 +120,7 @@ const SettingsPage = () => {
         </form>
       </div>
 
+      {/* Change Password */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><Lock size={20} className="text-primary" /></div>
@@ -63,6 +133,7 @@ const SettingsPage = () => {
         </form>
       </div>
 
+      {/* Change Email */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><Mail size={20} className="text-primary" /></div>
