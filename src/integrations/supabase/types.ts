@@ -138,6 +138,27 @@ export type Database = {
           },
         ]
       }
+      schools: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          school_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          school_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          school_code?: string
+        }
+        Relationships: []
+      }
       students: {
         Row: {
           avatar_url: string | null
@@ -178,19 +199,30 @@ export type Database = {
         Row: {
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          school_id: string | null
           user_id: string
         }
         Insert: {
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          school_id?: string | null
           user_id: string
         }
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          school_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -10,6 +10,7 @@ interface AuthContextType {
   session: Session | null;
   userName: string;
   userRole: AppRole | null;
+  schoolId: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
@@ -27,14 +28,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('Admin User');
   const [userRole, setUserRole] = useState<AppRole | null>(null);
+  const [schoolId, setSchoolId] = useState<string | null>(null);
 
   const fetchUserRole = async (userId: string) => {
     const { data } = await supabase
       .from('user_roles')
-      .select('role')
+      .select('role, school_id')
       .eq('user_id', userId)
       .maybeSingle();
     setUserRole((data?.role as AppRole) ?? null);
+    setSchoolId(data?.school_id ?? null);
   };
 
   useEffect(() => {
@@ -94,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isTeacher = userRole === 'teacher';
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn: !!session, user, session, userName, userRole, loading, login, signup, logout, updateUserName, isAdmin, isTeacher }}>
+    <AuthContext.Provider value={{ isLoggedIn: !!session, user, session, userName, userRole, schoolId, loading, login, signup, logout, updateUserName, isAdmin, isTeacher }}>
       {children}
     </AuthContext.Provider>
   );
