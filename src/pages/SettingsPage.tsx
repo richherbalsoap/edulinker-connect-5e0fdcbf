@@ -26,10 +26,10 @@ const SettingsPage = () => {
     setEmail('');
   };
 
-  const handleNameSubmit = (e: React.FormEvent) => {
+  const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) { toast({ title: "Name cannot be empty", variant: "destructive" }); return; }
-    updateUserName(newName);
+    await updateUserName(newName);
     toast({ title: "Name Updated Successfully!", description: `Your display name has been changed to ${newName}.` });
   };
 

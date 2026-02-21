@@ -11,7 +11,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateUserName: (name: string) => void;
+  updateUserName: (name: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -70,9 +70,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
-  const updateUserName = (newName: string) => {
+  const updateUserName = async (newName: string) => {
     setUserName(newName);
     localStorage.setItem('schoolName', newName);
+
+    // Update auth.users metadata
+    await supabase.auth.updateUser({
+      data: { display_name: newName },
+    });
+
+    // Update schools.school_name for this user
+    if (user) {
+      await supabase
+        .from('schools')
+        .update({ school_name: newName })
+        .eq('user_id', user.id);
+    }
   };
 
   return (
