@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
+          created_by: string | null
           id: string
           school_id: string | null
           title: string | null
@@ -26,6 +27,7 @@ export type Database = {
         Insert: {
           content?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           school_id?: string | null
           title?: string | null
@@ -34,6 +36,7 @@ export type Database = {
         Update: {
           content?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           school_id?: string | null
           title?: string | null
@@ -52,6 +55,7 @@ export type Database = {
       complaints: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string
           id: string
           school_id: string | null
@@ -59,6 +63,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description: string
           id?: string
           school_id?: string | null
@@ -66,6 +71,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string
           id?: string
           school_id?: string | null
@@ -91,6 +97,7 @@ export type Database = {
       homework: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string
           file_url: string | null
           id: string
@@ -101,6 +108,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description: string
           file_url?: string | null
           id?: string
@@ -111,6 +119,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string
           file_url?: string | null
           id?: string
@@ -132,6 +141,7 @@ export type Database = {
       results: {
         Row: {
           created_at: string
+          created_by: string | null
           file_name: string | null
           id: string
           marks_obtained: number
@@ -143,6 +153,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           file_name?: string | null
           id?: string
           marks_obtained: number
@@ -154,6 +165,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           file_name?: string | null
           id?: string
           marks_obtained?: number
@@ -208,6 +220,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          created_by: string | null
           id: string
           name: string
           parent_contact: string | null
@@ -220,6 +233,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           name: string
           parent_contact?: string | null
@@ -232,6 +246,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           name?: string
           parent_contact?: string | null
