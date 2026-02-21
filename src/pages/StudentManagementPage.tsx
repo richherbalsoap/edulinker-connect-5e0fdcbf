@@ -4,7 +4,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, X, Upload, User, Phone, Key } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
-import { useAuth } from '@/context/AuthContext';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const sections = ['A', 'B', 'C', 'D', 'E'];
@@ -26,22 +25,13 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        alert('Only JPEG, PNG, and WebP images are allowed.');
-        return;
-      }
-      if (file.size > 7 * 1024 * 1024) {
-        alert('File size must be under 7MB.');
-        return;
-      }
+      if (!allowedTypes.includes(file.type)) { alert('Only JPEG, PNG, and WebP images are allowed.'); return; }
+      if (file.size > 7 * 1024 * 1024) { alert('File size must be under 7MB.'); return; }
       const ext = file.name.split('.').pop() || 'jpg';
       const filePath = `avatars/${crypto.randomUUID()}.${ext}`;
       const { supabase } = await import('@/integrations/supabase/client');
       const { error } = await supabase.storage.from('edulinker-files').upload(filePath, file, { contentType: file.type, upsert: false });
-      if (error) {
-        alert('Upload failed: ' + error.message);
-        return;
-      }
+      if (error) { alert('Upload failed: ' + error.message); return; }
       const { data: signedData } = await supabase.storage.from('edulinker-files').createSignedUrl(filePath, 60 * 60 * 24 * 365);
       setFileName(file.name);
       setFormData((prev: any) => ({ ...prev, avatar_url: signedData?.signedUrl ?? null }));
@@ -91,7 +81,6 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
 };
 
 const StudentManagementPage = () => {
-  const { schoolId } = useAuth();
   const students = useAppStore(state => state.students);
   const addStudent = useAppStore(state => state.addStudent);
   const updateStudent = useAppStore(state => state.updateStudent);
@@ -111,7 +100,7 @@ const StudentManagementPage = () => {
       await updateStudent(editingStudent.id, studentData);
       toast({ title: "Success", description: "Student details updated." });
     } else {
-      const newStudent = await addStudent(studentData, schoolId!);
+      const newStudent = await addStudent(studentData);
       if (newStudent) {
         toast({ title: "Student Added!", description: `Secret ID: ${newStudent.secret_id}` });
       }

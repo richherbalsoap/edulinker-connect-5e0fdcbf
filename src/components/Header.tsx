@@ -6,6 +6,8 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   const { logout, userName } = useAuth();
   const navigate = useNavigate();
 
+  const displayName = localStorage.getItem('schoolName') || userName;
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -31,7 +33,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
             <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
               <User size={14} className="text-primary" />
             </div>
-            <span className="text-foreground/90 text-sm font-medium hidden sm:block">{userName}</span>
+            <span className="text-foreground/90 text-sm font-medium hidden sm:block">{displayName}</span>
           </div>
 
           <button
