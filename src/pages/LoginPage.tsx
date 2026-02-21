@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { LogIn, UserPlus, CheckCircle } from 'lucide-react';
+import { LogIn, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,10 +9,8 @@ import { toast } from 'sonner';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [schoolName, setSchoolName] = useState('');
   const [isSignup, setIsSignup] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [signupCode, setSignupCode] = useState<string | null>(null);
   const { login, signup, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
@@ -34,17 +32,8 @@ const LoginPage = () => {
     setSubmitting(true);
     try {
       if (isSignup) {
-        if (!schoolName.trim()) {
-          toast.error('Please enter your school name');
-          setSubmitting(false);
-          return;
-        }
-        const code = await signup(email, password, schoolName.trim());
-        if (code) {
-          setSignupCode(code);
-        } else {
-          toast.success('Account created! Check your email to confirm your account.');
-        }
+        await signup(email, password);
+        toast.success('Account created! Check your email to confirm your account.');
       } else {
         await login(email, password);
         navigate('/dashboard');
@@ -55,39 +44,6 @@ const LoginPage = () => {
       setSubmitting(false);
     }
   };
-
-  if (signupCode) {
-    return (
-      <div className="min-h-screen bg-[#020204] flex items-center justify-center p-4 overflow-hidden relative selection:bg-[#ff1a75]/30">
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="spotlight-bg"></div>
-          <div className="absolute inset-0 tech-grid opacity-20"></div>
-        </div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative z-20 bg-[#0A0A0B]/40 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] p-10 sm:p-12 max-w-md w-full text-center ring-1 ring-white/5"
-        >
-          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={32} className="text-green-400" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">School Created!</h2>
-          <p className="text-gray-400 text-sm mb-6">Your school has been registered successfully. Check your email to confirm your account.</p>
-          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 mb-6">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Your School Code</p>
-            <p className="text-3xl font-mono font-bold tracking-[0.3em] text-[#ff1a75]">{signupCode}</p>
-          </div>
-          <p className="text-xs text-gray-600 mb-6">Save this code. It identifies your school permanently.</p>
-          <Button
-            onClick={() => { setSignupCode(null); setIsSignup(false); }}
-            className="w-full h-14 bg-[#ff1a75] text-white hover:bg-[#ff1a75]/90 font-bold rounded-2xl shadow-[0_0_20px_rgba(255,26,117,0.3)]"
-          >
-            <LogIn size={20} className="mr-2" /> Go to Sign In
-          </Button>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#020204] flex items-center justify-center p-4 overflow-hidden relative selection:bg-[#ff1a75]/30">
@@ -122,19 +78,11 @@ const LoginPage = () => {
                 EDULinker
               </motion.h1>
               <p className="text-gray-400 text-sm font-medium tracking-wide opacity-80">
-                {isSignup ? 'Create your school account' : 'Enter your credentials to access the portal'}
+                {isSignup ? 'Create your account' : 'Enter your credentials to access the portal'}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {isSignup && (
-                <div className="space-y-2">
-                  <label htmlFor="schoolName" className="block text-xs font-semibold text-gray-500 uppercase tracking-widest ml-1">School Name</label>
-                  <input id="schoolName" type="text" value={schoolName} onChange={(e) => setSchoolName(e.target.value)} required
-                    className="w-full px-5 py-4 bg-white/[0.02] border border-white/10 rounded-2xl text-white placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ff1a75]/20 focus:border-[#ff1a75]/40 transition-all duration-500 hover:bg-white/[0.04] focus:bg-white/[0.05]"
-                    placeholder="Enter your school name" />
-                </div>
-              )}
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-widest ml-1">Email Address</label>
                 <input id="email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required
@@ -149,14 +97,14 @@ const LoginPage = () => {
               </div>
               <Button type="submit" disabled={submitting} className="w-full h-14 bg-[#ff1a75] text-white hover:bg-[#ff1a75]/90 font-bold rounded-2xl transition-all duration-300 transform active:scale-[0.98] shadow-[0_0_20px_rgba(255,26,117,0.3)] hover:shadow-[0_0_30px_rgba(255,26,117,0.5)]">
                 {isSignup ? <UserPlus size={20} className="mr-2" /> : <LogIn size={20} className="mr-2" />}
-                {submitting ? 'Please wait...' : isSignup ? 'Create School Account' : 'Sign In'}
+                {submitting ? 'Please wait...' : isSignup ? 'Create Account' : 'Sign In'}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <button
                 type="button"
-                onClick={() => { setIsSignup(!isSignup); setSignupCode(null); }}
+                onClick={() => setIsSignup(!isSignup)}
                 className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
               >
                 {isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}

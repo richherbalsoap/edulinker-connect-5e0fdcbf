@@ -1,0 +1,2 @@
+
+ALTER TABLE public.schools ENABLE ROW LEVEL SECURITY;
