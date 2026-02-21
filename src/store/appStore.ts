@@ -131,6 +131,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   addStudent: async (student) => {
+    const { data: schoolData } = await supabase.rpc('get_user_school_id');
     const { data, error } = await supabase.from('students').insert([{
       name: student.name,
       standard: student.standard,
@@ -139,6 +140,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       parent_contact: student.parent_contact || null,
       avatar_url: student.avatar_url || null,
       secret_id: 'TEMP',
+      school_id: schoolData || null,
     }]).select().single();
     if (data && !error) {
       set((state) => ({ students: [data as Student, ...state.students] }));
@@ -164,28 +166,32 @@ const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   addHomework: async (hw) => {
-    const { data, error } = await supabase.from('homework').insert(hw).select().single();
+    const { data: schoolData } = await supabase.rpc('get_user_school_id');
+    const { data, error } = await supabase.from('homework').insert({ ...hw, school_id: schoolData || null }).select().single();
     if (data && !error) {
       set((state) => ({ homework: [data as Homework, ...state.homework] }));
     }
   },
 
   addComplaint: async (complaint) => {
-    const { data, error } = await supabase.from('complaints').insert(complaint).select('*, student:students(*)').single();
+    const { data: schoolData } = await supabase.rpc('get_user_school_id');
+    const { data, error } = await supabase.from('complaints').insert({ ...complaint, school_id: schoolData || null }).select('*, student:students(*)').single();
     if (data && !error) {
       set((state) => ({ complaints: [data as unknown as Complaint, ...state.complaints] }));
     }
   },
 
   addResult: async (result) => {
-    const { data, error } = await supabase.from('results').insert(result).select('*, student:students(*)').single();
+    const { data: schoolData } = await supabase.rpc('get_user_school_id');
+    const { data, error } = await supabase.from('results').insert({ ...result, school_id: schoolData || null }).select('*, student:students(*)').single();
     if (data && !error) {
       set((state) => ({ results: [data as unknown as Result, ...state.results] }));
     }
   },
 
   addAnnouncement: async (announcement) => {
-    const { data, error } = await supabase.from('announcements').insert(announcement).select().single();
+    const { data: schoolData } = await supabase.rpc('get_user_school_id');
+    const { data, error } = await supabase.from('announcements').insert({ ...announcement, school_id: schoolData || null }).select().single();
     if (data && !error) {
       set((state) => ({ announcements: [data as Announcement, ...state.announcements] }));
     }
