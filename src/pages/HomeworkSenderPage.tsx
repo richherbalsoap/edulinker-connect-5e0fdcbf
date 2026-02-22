@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronDown } from "lucide-react";
+import { Send, ChevronDown, Upload, X } from "lucide-react";
 import useAppStore from "@/store/appStore";
+import { supabase } from "@/integrations/supabase/client";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -15,6 +16,34 @@ const HomeworkSenderPage = () => {
   const [showCustomSubject, setShowCustomSubject] = useState(false);
   const [customSubject, setCustomSubject] = useState("");
   const [formData, setFormData] = useState({ standard: "", section: "", subject: "", homework: "" });
+  const [file, setFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast({ title: 'File Error', description: 'Only PDF, JPEG, PNG, and WebP files are allowed.', variant: 'destructive' });
+      return;
+    }
+    if (selectedFile.size > 7 * 1024 * 1024) {
+      toast({ title: 'File Error', description: 'File is too large. Max size: 7MB.', variant: 'destructive' });
+      return;
+    }
+    setFile(selectedFile);
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split('.').pop();
+    const filePath = `homework/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+    const { error } = await supabase.storage.from('edulinker-files').upload(filePath, file);
+    if (error) {
+      toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
+      return null;
+    }
+    return filePath;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,16 +52,24 @@ const HomeworkSenderPage = () => {
       toast({ title: "Incomplete Information", description: "Please fill out all the fields before sending.", variant: "destructive" });
       return;
     }
+    setIsSubmitting(true);
+    let fileUrl: string | null = null;
+    if (file) {
+      fileUrl = await uploadFile(file);
+    }
     await addHomework({
       standard: formData.standard,
       section: formData.section,
       subject: finalSubject,
       description: formData.homework,
+      file_url: fileUrl,
     });
     toast({ title: "Homework Sent Successfully!", description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.` });
     setFormData({ standard: "", section: "", subject: "", homework: "" });
     setShowCustomSubject(false);
     setCustomSubject("");
+    setFile(null);
+    setIsSubmitting(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -99,8 +136,28 @@ const HomeworkSenderPage = () => {
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">HOMEWORK DETAILS</label>
           <textarea value={formData.homework} onChange={(e) => handleInputChange("homework", e.target.value)} placeholder="Enter homework description..." className="w-full p-3 h-32 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y" />
         </div>
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
-          <Send size={20} className="mr-2" /> Send Homework
+
+        {/* File Upload */}
+        <div>
+          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">ATTACH FILE (OPTIONAL)</label>
+          <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">
+            <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+            <div className="flex flex-col items-center justify-center space-y-2 text-foreground/60">
+              <Upload size={32} />
+              {file ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-foreground">{file.name}</p>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-destructive hover:text-destructive/80"><X size={16} /></button>
+                </div>
+              ) : (
+                <p>Click to upload (PDF, PNG, JPG, WebP — Max 7MB)</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <Button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
+          {isSubmitting ? 'Sending...' : <><Send size={20} className="mr-2" /> Send Homework</>}
         </Button>
       </form>
     </div>
