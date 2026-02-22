@@ -4,6 +4,7 @@ import { Send, Upload, Trash2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
+import { supabase } from '@/integrations/supabase/client';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
@@ -51,23 +52,55 @@ const ResultSenderPage = () => {
     setFile(selectedFile);
   };
 
+  const uploadFile = async (studentUuid: string, file: File): Promise<string | null> => {
+    const ext = file.name.split('.').pop() || 'bin';
+    const storagePath = `results/${studentUuid}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from('edulinker-files')
+      .upload(storagePath, file, { contentType: file.type, upsert: false });
+    if (error) {
+      console.error('Upload error:', error);
+      toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
+      return null;
+    }
+    return storagePath;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validSubjects = subjects.filter(s => s.name && s.marks_obtained && s.total_marks);
-    if (!studentId || validSubjects.length === 0) {
-      toast({ title: 'Missing Information', description: 'Please select a student and add at least one subject with marks.', variant: 'destructive' });
+
+    if (!studentId) {
+      toast({ title: 'Missing Student', description: 'Please select a student.', variant: 'destructive' });
       return;
     }
+
+    const validSubjects = subjects.filter(s => s.name && s.marks_obtained && s.total_marks);
+    if (validSubjects.length === 0) {
+      toast({ title: 'Missing Marks', description: 'Add at least one subject with marks.', variant: 'destructive' });
+      return;
+    }
+
     setIsSubmitting(true);
+
+    let storagePath: string | null = null;
+    if (file) {
+      storagePath = await uploadFile(studentId, file);
+      if (!storagePath) {
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     for (const sub of validSubjects) {
       await addResult({
         student_id: studentId,
         subject: sub.name,
         marks_obtained: parseFloat(sub.marks_obtained),
         total_marks: parseFloat(sub.total_marks),
-        file_name: file ? file.name : null,
+        file_name: storagePath,
       });
     }
+
     const student = allStudents.find(s => s.id === studentId);
     toast({ title: 'Result Sent Successfully!', description: `Marks for ${student?.name || 'student'} have been recorded.` });
     setStudentId(''); setStandard(''); setSection(''); setFile(null);
@@ -127,17 +160,18 @@ const ResultSenderPage = () => {
           ))}
           <Button type="button" onClick={() => setSubjects([...subjects, { name: '', marks_obtained: '', total_marks: '' }])} className="text-primary/80 hover:text-primary bg-black/40 hover:bg-primary/10 w-full border border-primary/20">+ Add Another Subject</Button>
         </div>
-        <div className="text-center text-foreground/50 my-4 text-sm">OR</div>
+
         <div>
-          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">UPLOAD RESULT FILE</label>
+          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">UPLOAD RESULT FILE (Optional)</label>
           <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">
-            <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0" accept=".pdf,.jpg,.png" />
+            <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0" accept=".pdf,.jpg,.jpeg,.png,.webp" />
             <div className="flex flex-col items-center justify-center space-y-2 text-foreground/60">
               <Upload size={32} />
-              {file ? <p>Selected file: {file.name}</p> : <p>Click to upload (PDF, PNG, JPG)</p>}
+              {file ? <p>Selected: {file.name}</p> : <p>Click to upload (PDF, PNG, JPG, WebP — max 7MB)</p>}
             </div>
           </div>
         </div>
+
         <Button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
           {isSubmitting ? 'Submitting...' : <><Send size={20} className="mr-2" /> Send Result</>}
         </Button>
