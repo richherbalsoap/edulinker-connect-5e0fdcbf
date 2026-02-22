@@ -20,6 +20,7 @@ interface Homework {
   section: string;
   subject: string;
   description: string;
+  file_url: string | null;
   created_by: string | null;
   created_at: string;
 }
@@ -28,6 +29,7 @@ interface Complaint {
   id: string;
   student_id: string;
   description: string;
+  file_url: string | null;
   created_by: string | null;
   created_at: string;
   student?: Student;
@@ -74,8 +76,8 @@ interface AppStore {
   updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
 
-  addHomework: (hw: { standard: string; section: string; subject: string; description: string }) => Promise<void>;
-  addComplaint: (complaint: { student_id: string; description: string }) => Promise<void>;
+  addHomework: (hw: { standard: string; section: string; subject: string; description: string; file_url?: string | null }) => Promise<void>;
+  addComplaint: (complaint: { student_id: string; description: string; file_url?: string | null }) => Promise<void>;
   addResult: (result: { student_id: string; subject: string; marks_obtained: number; total_marks: number; file_name?: string | null }) => Promise<void>;
   addAnnouncement: (announcement: { title?: string; content?: string; type?: string }) => Promise<void>;
 

@@ -1,0 +1,1 @@
+ALTER TABLE public.complaints ADD COLUMN file_url text DEFAULT NULL;
