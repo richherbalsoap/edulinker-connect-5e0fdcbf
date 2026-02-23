@@ -5,11 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
 const ResultSenderPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
   const addResult = useAppStore(state => state.addResult);
   const allStudents = useAppStore(state => state.students);
   const fetchStudents = useAppStore(state => state.fetchStudents);
@@ -74,6 +76,11 @@ const ResultSenderPage = () => {
       return;
     }
 
+    if (!schoolId) {
+      toast({ title: 'School identity missing', description: 'Please logout and login again.', variant: 'destructive' });
+      return;
+    }
+
     const validSubjects = subjects.filter(s => s.name && s.marks_obtained && s.total_marks);
     if (validSubjects.length === 0) {
       toast({ title: 'Missing Marks', description: 'Add at least one subject with marks.', variant: 'destructive' });
@@ -98,6 +105,7 @@ const ResultSenderPage = () => {
         marks_obtained: parseFloat(sub.marks_obtained),
         total_marks: parseFloat(sub.total_marks),
         file_name: storagePath,
+        school_id: schoolId,
       });
     }
 

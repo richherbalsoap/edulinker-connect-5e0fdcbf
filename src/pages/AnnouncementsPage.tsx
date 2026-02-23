@@ -3,19 +3,34 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import useAppStore from '@/store/appStore';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const sections = ['A', 'B', 'C', 'D', 'E'];
 
 const AnnouncementsPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
+  const addAnnouncement = useAppStore(state => state.addAnnouncement);
   const [broadcastToAll, setBroadcastToAll] = useState(false);
   const [standard, setStandard] = useState('');
   const [section, setSection] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!schoolId) {
+      toast({ title: 'School identity missing', description: 'Please logout and login again.', variant: 'destructive' });
+      return;
+    }
+    const type = broadcastToAll ? 'all' : `${standard}-${section}`;
+    await addAnnouncement({
+      title: broadcastToAll ? 'Broadcast' : `${standard}-${section}`,
+      content: message,
+      type,
+      school_id: schoolId,
+    });
     const description = broadcastToAll ? 'Announcement has been sent to ALL Classes.' : `Announcement has been sent to Standard ${standard}, Section ${section}.`;
     toast({ title: "Announcement Sent Successfully!", description });
     setBroadcastToAll(false); setStandard(''); setSection(''); setMessage('');

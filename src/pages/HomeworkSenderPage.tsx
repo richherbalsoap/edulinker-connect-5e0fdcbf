@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Send, ChevronDown, Upload, X } from "lucide-react";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -11,6 +12,7 @@ const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social S
 
 const HomeworkSenderPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
   const addHomework = useAppStore((state) => state.addHomework);
   const [subjects, setSubjects] = useState(initialSubjects);
   const [showCustomSubject, setShowCustomSubject] = useState(false);
@@ -52,6 +54,10 @@ const HomeworkSenderPage = () => {
       toast({ title: "Incomplete Information", description: "Please fill out all the fields before sending.", variant: "destructive" });
       return;
     }
+    if (!schoolId) {
+      toast({ title: "School identity missing", description: "Please logout and login again.", variant: "destructive" });
+      return;
+    }
     setIsSubmitting(true);
     let fileUrl: string | null = null;
     if (file) {
@@ -63,6 +69,7 @@ const HomeworkSenderPage = () => {
       subject: finalSubject,
       description: formData.homework,
       file_url: fileUrl,
+      school_id: schoolId,
     });
     toast({ title: "Homework Sent Successfully!", description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.` });
     setFormData({ standard: "", section: "", subject: "", homework: "" });

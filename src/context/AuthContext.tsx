@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   userName: string;
+  schoolId: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
@@ -21,6 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('User');
+  const [schoolId, setSchoolId] = useState<string | null>(null);
 
   const deriveUserName = (email?: string | null) => {
     const stored = localStorage.getItem('schoolName');
@@ -29,12 +31,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return 'User';
   };
 
+  const fetchSchoolId = async (userId: string) => {
+    const { data } = await supabase
+      .from('schools')
+      .select('id')
+      .eq('owner_user_id', userId)
+      .single();
+    if (data) {
+      setSchoolId(data.id);
+    }
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         setUserName(deriveUserName(session.user.email));
+        fetchSchoolId(session.user.id);
+      } else {
+        setSchoolId(null);
       }
       setLoading(false);
     });
@@ -44,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       if (session?.user) {
         setUserName(deriveUserName(session.user.email));
+        fetchSchoolId(session.user.id);
       }
       setLoading(false);
     });
@@ -89,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn: !!session, user, session, userName, loading, login, signup, logout, updateUserName }}>
+    <AuthContext.Provider value={{ isLoggedIn: !!session, user, session, userName, schoolId, loading, login, signup, logout, updateUserName }}>
       {children}
     </AuthContext.Provider>
   );
