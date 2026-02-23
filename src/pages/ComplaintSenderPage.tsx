@@ -5,12 +5,14 @@ import { AlertTriangle, Upload, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const classes = ['A', 'B', 'C', 'D', 'E'];
 
 const ComplaintSenderPage = () => {
   const { toast } = useToast();
+  const { schoolId } = useAuth();
   const allStudents = useAppStore(state => state.students);
   const addComplaint = useAppStore(state => state.addComplaint);
   const fetchStudents = useAppStore(state => state.fetchStudents);
@@ -60,13 +62,17 @@ const ComplaintSenderPage = () => {
       toast({ title: "Incomplete Form", description: "Please fill out all required fields.", variant: "destructive" });
       return;
     }
+    if (!schoolId) {
+      toast({ title: "School identity missing", description: "Please logout and login again.", variant: "destructive" });
+      return;
+    }
     setIsSubmitting(true);
     let fileUrl: string | null = null;
     if (file) {
       fileUrl = await uploadFile(file);
     }
     const student = allStudents.find(s => s.id === formData.studentId);
-    await addComplaint({ student_id: formData.studentId, description: formData.description, file_url: fileUrl });
+    await addComplaint({ student_id: formData.studentId, description: formData.description, file_url: fileUrl, school_id: schoolId });
     toast({ title: "Complaint Registered!", description: `Your complaint regarding ${student?.name || 'student'} has been submitted.` });
     setFormData({ studentId: '', standard: '', class: '', description: '' });
     setFile(null);
