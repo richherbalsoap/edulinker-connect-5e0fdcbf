@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, X, Upload, User, Phone, Key } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
+import { supabase } from '@/integrations/supabase/client';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const sections = ['A', 'B', 'C', 'D', 'E'];
@@ -15,11 +16,15 @@ const getSortableClassIndex = (classVal: string) => {
 };
 
 const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState(student ? {
     name: student.name, standard: student.standard, section: student.section,
     parent_name: student.parent_name || '', parent_contact: student.parent_contact || '', avatar_url: student.avatar_url || null,
   } : { name: '', standard: '', section: '', parent_name: '', parent_contact: '', avatar_url: null });
   const [fileName, setFileName] = useState('');
+  const [keyMode, setKeyMode] = useState<'auto' | 'manual'>('auto');
+  const [manualKey, setManualKey] = useState('');
+  const [keyError, setKeyError] = useState('');
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -29,7 +34,6 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       if (file.size > 7 * 1024 * 1024) { alert('File size must be under 7MB.'); return; }
       const ext = file.name.split('.').pop() || 'jpg';
       const filePath = `avatars/${crypto.randomUUID()}.${ext}`;
-      const { supabase } = await import('@/integrations/supabase/client');
       const { error } = await supabase.storage.from('edulinker-files').upload(filePath, file, { contentType: file.type, upsert: false });
       if (error) { alert('Upload failed: ' + error.message); return; }
       const { data: signedData } = await supabase.storage.from('edulinker-files').createSignedUrl(filePath, 60 * 60 * 24 * 365);
@@ -38,11 +42,29 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     }
   };
 
+  const validateManualKey = (key: string) => {
+    if (key.length < 8 || key.length > 20) return 'Key must be 8–20 characters.';
+    if (/\s/.test(key)) return 'Key must not contain spaces.';
+    if (!/^[A-Z0-9]+$/.test(key)) return 'Only uppercase letters and numbers allowed.';
+    return '';
+  };
+
+  const handleSave = async () => {
+    if (keyMode === 'manual' && !student) {
+      const err = validateManualKey(manualKey);
+      if (err) { setKeyError(err); return; }
+      // Check uniqueness
+      const { data: existing } = await supabase.from('students').select('id').eq('secret_id', manualKey).maybeSingle();
+      if (existing) { setKeyError('This key is already in use. Choose a different one.'); return; }
+    }
+    onSave(formData, keyMode === 'manual' && !student ? manualKey : null);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center p-4" onClick={onClose}>
-      <div className="bg-black/90 backdrop-blur-2xl rounded-2xl p-6 sm:p-8 w-full max-w-md border border-primary/30 relative" onClick={e => e.stopPropagation()}>
+      <div className="bg-black/90 backdrop-blur-2xl rounded-2xl p-6 sm:p-8 w-full max-w-md border border-primary/30 relative max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <h2 className="text-2xl font-bold text-primary mb-6">{student ? 'Edit Student' : 'Add Student'}</h2>
         <Button onClick={onClose} className="absolute top-4 right-4 bg-transparent hover:bg-primary/10 p-2 h-auto rounded-full"><X className="text-foreground/70" size={20} /></Button>
         <div className="space-y-5">
@@ -73,7 +95,34 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
           </div>
           <input type="text" placeholder="Parent's Name" value={formData.parent_name} onChange={e => setFormData({ ...formData, parent_name: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
           <input type="text" placeholder="Parent's Contact" value={formData.parent_contact} onChange={e => setFormData({ ...formData, parent_contact: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
-          <Button onClick={() => onSave(formData)} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">Save Changes</Button>
+
+          {/* Secret Key Mode — only for new students */}
+          {!student && (
+            <div className="space-y-3 border border-primary/20 rounded-lg p-4 bg-black/20">
+              <label className="block text-xs font-bold tracking-wider text-primary/60">SECRET KEY</label>
+              <div className="flex gap-2">
+                <Button type="button" onClick={() => { setKeyMode('auto'); setKeyError(''); }} className={`flex-1 text-sm py-2 rounded-lg font-bold ${keyMode === 'auto' ? 'bg-primary text-primary-foreground' : 'bg-black/40 text-foreground/60 border border-primary/20'}`}>Auto-Generate</Button>
+                <Button type="button" onClick={() => { setKeyMode('manual'); setKeyError(''); }} className={`flex-1 text-sm py-2 rounded-lg font-bold ${keyMode === 'manual' ? 'bg-primary text-primary-foreground' : 'bg-black/40 text-foreground/60 border border-primary/20'}`}>Manual Entry</Button>
+              </div>
+              {keyMode === 'auto' && <p className="text-xs text-foreground/50">A unique key will be auto-generated for this student.</p>}
+              {keyMode === 'manual' && (
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Enter key (8-20 chars, A-Z, 0-9)"
+                    value={manualKey}
+                    onChange={e => { setManualKey(e.target.value.toUpperCase().replace(/\s/g, '')); setKeyError(''); }}
+                    maxLength={20}
+                    className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40 font-mono tracking-wider"
+                  />
+                  {keyError && <p className="text-xs text-destructive mt-1">{keyError}</p>}
+                  <p className="text-xs text-foreground/40 mt-1">Uppercase + numbers, no spaces. Students can re-use this key if they transfer schools.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">Save Changes</Button>
         </div>
       </div>
     </div>
@@ -95,12 +144,12 @@ const StudentManagementPage = () => {
 
   useEffect(() => { fetchStudents(); }, []);
 
-  const handleSaveStudent = async (studentData: any) => {
+  const handleSaveStudent = async (studentData: any, manualKey: string | null) => {
     if (editingStudent) {
       await updateStudent(editingStudent.id, studentData);
       toast({ title: "Success", description: "Student details updated." });
     } else {
-      const newStudent = await addStudent(studentData);
+      const newStudent = await addStudent(studentData, manualKey);
       if (newStudent) {
         toast({ title: "Student Added!", description: `Secret ID: ${newStudent.secret_id}` });
       }

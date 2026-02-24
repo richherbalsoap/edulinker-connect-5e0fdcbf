@@ -72,7 +72,7 @@ interface AppStore {
   fetchAnnouncements: () => Promise<void>;
   fetchAll: () => Promise<void>;
 
-  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }) => Promise<Student | null>;
+  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }, manualKey?: string | null) => Promise<Student | null>;
   updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
 
@@ -132,7 +132,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
     set({ loading: false });
   },
 
-  addStudent: async (student) => {
+  addStudent: async (student, manualKey) => {
     const { data: schoolData } = await supabase.rpc('get_user_school_id');
     const { data, error } = await supabase.from('students').insert([{
       name: student.name,
@@ -141,7 +141,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       parent_name: student.parent_name || null,
       parent_contact: student.parent_contact || null,
       avatar_url: student.avatar_url || null,
-      secret_id: 'TEMP',
+      secret_id: manualKey || 'TEMP',
       school_id: schoolData || null,
     }]).select().single();
     if (data && !error) {
