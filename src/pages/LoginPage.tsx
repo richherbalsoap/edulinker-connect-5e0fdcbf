@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { LogIn, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -18,13 +17,6 @@ const LoginPage = () => {
   useEffect(() => {
     if (isLoggedIn) navigate('/dashboard', { replace: true });
   }, [isLoggedIn, navigate]);
-
-  // Sign out properly to clear any stale session on mount
-  useEffect(() => {
-    if (!isLoggedIn) {
-      supabase.auth.signOut().catch(() => {});
-    }
-  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -47,14 +39,7 @@ const LoginPage = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      const msg = error?.message || '';
-      if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-        toast.error('Network error — please check your internet connection and try again.');
-      } else if (msg.includes('Invalid login credentials')) {
-        toast.error('Invalid email or password. Please try again or create a new account.');
-      } else {
-        toast.error(msg || 'Authentication failed');
-      }
+      toast.error(error.message || 'Authentication failed');
     } finally {
       setSubmitting(false);
     }
