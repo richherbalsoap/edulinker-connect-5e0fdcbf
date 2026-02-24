@@ -155,10 +155,10 @@ const PromotionPanelPage = () => {
           </div>
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SECTION (Optional)</label>
-            <Select value={bulkSection} onValueChange={setBulkSection}>
+            <Select value={bulkSection || "ALL"} onValueChange={v => setBulkSection(v === "ALL" ? "" : v)}>
               <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground"><SelectValue placeholder="All Sections" /></SelectTrigger>
               <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                <SelectItem value="" className="text-foreground focus:bg-primary/10 focus:text-primary">All Sections</SelectItem>
+                <SelectItem value="ALL" className="text-foreground focus:bg-primary/10 focus:text-primary">All Sections</SelectItem>
                 {['A', 'B', 'C', 'D', 'E'].map(s => <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">{s}</SelectItem>)}
               </SelectContent>
             </Select>
