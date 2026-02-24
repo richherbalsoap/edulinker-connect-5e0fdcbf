@@ -25,19 +25,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [schoolId, setSchoolId] = useState<string | null>(null);
 
   const deriveUserName = (email?: string | null) => {
-    const stored = localStorage.getItem('schoolName');
-    if (stored) return stored;
+    try {
+      const stored = localStorage.getItem('schoolName');
+      if (stored) return stored;
+    } catch {}
     if (email) return email.split('@')[0];
     return 'User';
   };
 
   const fetchSchoolId = async (userId: string) => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('schools')
         .select('id')
         .eq('owner_user_id', userId)
         .maybeSingle();
+      if (error) {
+        console.warn('fetchSchoolId query error:', error.message);
+        setSchoolId(null);
+        return;
+      }
       setSchoolId(data?.id ?? null);
     } catch (e) {
       console.warn('fetchSchoolId failed:', e);
@@ -45,31 +52,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleSession = (session: Session | null) => {
-    setSession(session);
-    setUser(session?.user ?? null);
-    if (session?.user) {
-      setUserName(deriveUserName(session.user.email));
-      fetchSchoolId(session.user.id);
+  const handleSession = (s: Session | null) => {
+    setSession(s);
+    const u = s?.user ?? null;
+    setUser(u);
+    if (u) {
+      setUserName(deriveUserName(u.email));
+      fetchSchoolId(u.id);
     } else {
+      setUserName('User');
       setSchoolId(null);
     }
   };
 
   useEffect(() => {
+    // Safety net for unhandled promise rejections
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      console.warn('Unhandled rejection caught:', event.reason);
+      event.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', handleRejection);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       handleSession(session);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSession(session);
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        handleSession(session);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.warn('getSession failed:', err);
+        setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -97,13 +119,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('signOut error:', e);
+    }
   };
 
   const updateUserName = async (newName: string) => {
     setUserName(newName);
-    localStorage.setItem('schoolName', newName);
+    try { localStorage.setItem('schoolName', newName); } catch {}
 
     try {
       await supabase.auth.updateUser({ data: { display_name: newName } });
