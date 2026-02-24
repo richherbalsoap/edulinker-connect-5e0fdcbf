@@ -32,36 +32,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchSchoolId = async (userId: string) => {
-    const { data } = await supabase
-      .from('schools')
-      .select('id')
-      .eq('owner_user_id', userId)
-      .single();
-    if (data) {
-      setSchoolId(data.id);
+    try {
+      const { data } = await supabase
+        .from('schools')
+        .select('id')
+        .eq('owner_user_id', userId)
+        .maybeSingle();
+      setSchoolId(data?.id ?? null);
+    } catch (e) {
+      console.warn('fetchSchoolId failed:', e);
+      setSchoolId(null);
+    }
+  };
+
+  const handleSession = (session: Session | null) => {
+    setSession(session);
+    setUser(session?.user ?? null);
+    if (session?.user) {
+      setUserName(deriveUserName(session.user.email));
+      fetchSchoolId(session.user.id);
+    } else {
+      setSchoolId(null);
     }
   };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setUserName(deriveUserName(session.user.email));
-        fetchSchoolId(session.user.id);
-      } else {
-        setSchoolId(null);
-      }
+      handleSession(session);
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setUserName(deriveUserName(session.user.email));
-        fetchSchoolId(session.user.id);
-      }
+      handleSession(session);
+      setLoading(false);
+    }).catch(() => {
       setLoading(false);
     });
 
@@ -81,14 +85,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (error) throw error;
 
-    // Reset school for this new user to prevent stale data
     if (data.session) {
       try {
         await supabase.functions.invoke('reset-school-on-signup', {
           headers: { Authorization: `Bearer ${data.session.access_token}` },
         });
       } catch (e) {
-        console.error('reset-school-on-signup failed:', e);
+        console.warn('reset-school-on-signup failed:', e);
       }
     }
   };
@@ -102,17 +105,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserName(newName);
     localStorage.setItem('schoolName', newName);
 
-    // Update auth.users metadata
-    await supabase.auth.updateUser({
-      data: { display_name: newName },
-    });
+    try {
+      await supabase.auth.updateUser({ data: { display_name: newName } });
+    } catch (e) {
+      console.warn('updateUser metadata failed:', e);
+    }
 
-    // Update schools.school_name for this user
     if (user) {
-      await supabase
-        .from('schools')
-        .update({ school_name: newName })
-        .eq('user_id', user.id);
+      try {
+        await supabase
+          .from('schools')
+          .update({ school_name: newName })
+          .eq('owner_user_id', user.id);
+      } catch (e) {
+        console.warn('update school_name failed:', e);
+      }
     }
   };
 
