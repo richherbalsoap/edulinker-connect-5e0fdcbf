@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social Studies", "Computer Science"];
 
 const ResultSenderPage = () => {
   const { toast } = useToast();
@@ -23,6 +24,11 @@ const ResultSenderPage = () => {
   const [subjects, setSubjects] = useState([{ name: '', marks_obtained: '', total_marks: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Subject dropdown state (same pattern as HomeworkSender)
+  const [availableSubjects, setAvailableSubjects] = useState(initialSubjects);
+  const [showCustomSubject, setShowCustomSubject] = useState<number | null>(null);
+  const [customSubject, setCustomSubject] = useState('');
+
   useEffect(() => { fetchStudents(); }, []);
 
   const filteredStudents = useMemo(() => {
@@ -33,7 +39,30 @@ const ResultSenderPage = () => {
     });
   }, [allStudents, standard, section]);
 
-  const handleSubjectChange = (index: number, field: string, value: string) => {
+  const handleSubjectSelect = (index: number, value: string) => {
+    if (value === 'ADD_NEW') {
+      setShowCustomSubject(index);
+      setCustomSubject('');
+      return;
+    }
+    const newSubjects = [...subjects];
+    newSubjects[index] = { ...newSubjects[index], name: value };
+    setSubjects(newSubjects);
+  };
+
+  const handleAddCustomSubject = (index: number) => {
+    if (customSubject.trim()) {
+      setAvailableSubjects(prev => [...prev, customSubject.trim()]);
+      const newSubjects = [...subjects];
+      newSubjects[index] = { ...newSubjects[index], name: customSubject.trim() };
+      setSubjects(newSubjects);
+      setShowCustomSubject(null);
+      setCustomSubject('');
+      toast({ title: "Subject Added", description: `${customSubject.trim()} has been added.` });
+    }
+  };
+
+  const handleMarksChange = (index: number, field: string, value: string) => {
     const newSubjects = [...subjects];
     (newSubjects[index] as any)[field] = value;
     setSubjects(newSubjects);
@@ -72,7 +101,7 @@ const ResultSenderPage = () => {
     e.preventDefault();
 
     if (!studentId) {
-      toast({ title: 'Missing Student', description: 'Please select a student.', variant: 'destructive' });
+      toast({ title: 'Missing Student', description: 'Please select a student before uploading.', variant: 'destructive' });
       return;
     }
 
@@ -85,6 +114,14 @@ const ResultSenderPage = () => {
     if (validSubjects.length === 0) {
       toast({ title: 'Missing Marks', description: 'Add at least one subject with marks.', variant: 'destructive' });
       return;
+    }
+
+    // Validation: marks_obtained cannot exceed total_marks
+    for (const sub of validSubjects) {
+      if (parseFloat(sub.marks_obtained) > parseFloat(sub.total_marks)) {
+        toast({ title: 'Invalid Marks', description: `Exam Marks cannot be greater than total exam marks (${sub.name}).`, variant: 'destructive' });
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -159,11 +196,35 @@ const ResultSenderPage = () => {
         <div className="space-y-3">
           <label className="block text-xs font-bold tracking-wider text-primary/60">SUBJECTS & MARKS</label>
           {subjects.map((subject, index) => (
-            <div key={index} className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <input type="text" value={subject.name} onChange={e => handleSubjectChange(index, 'name', e.target.value)} placeholder="Subject" className="flex-1 min-w-0 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-              <input type="number" value={subject.marks_obtained} onChange={e => handleSubjectChange(index, 'marks_obtained', e.target.value)} placeholder="Obtained" className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-              <input type="number" value={subject.total_marks} onChange={e => handleSubjectChange(index, 'total_marks', e.target.value)} placeholder="Total" className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-              <Button type="button" onClick={() => setSubjects(subjects.filter((_, i) => i !== index))} variant="destructive" className="p-3 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30 flex-shrink-0"><Trash2 size={16} /></Button>
+            <div key={index} className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                {/* Subject dropdown */}
+                {showCustomSubject === index ? (
+                  <div className="flex-1 flex gap-2 min-w-0">
+                    <input type="text" value={customSubject} onChange={e => setCustomSubject(e.target.value)} placeholder="Enter subject name..." className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" autoFocus />
+                    <Button type="button" onClick={() => handleAddCustomSubject(index)} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">Add</Button>
+                    <Button type="button" onClick={() => setShowCustomSubject(null)} variant="ghost" className="text-foreground/60">Cancel</Button>
+                  </div>
+                ) : (
+                  <div className="flex-1 min-w-0 relative">
+                    <select value={subject.name} onChange={e => handleSubjectSelect(index, e.target.value)} className="w-full appearance-none p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+                      <option value="" disabled className="bg-black text-white">Select Subject</option>
+                      {availableSubjects.map(s => <option key={s} value={s} className="bg-black text-white">{s}</option>)}
+                      <option value="ADD_NEW" className="bg-black text-primary font-bold">+ Add Subject Name</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 pointer-events-none" />
+                  </div>
+                )}
+                <input type="number" value={subject.marks_obtained} onChange={e => handleMarksChange(index, 'marks_obtained', e.target.value)} placeholder="Marks" title="Marks obtained (e.g. 78)" className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                <input type="number" value={subject.total_marks} onChange={e => handleMarksChange(index, 'total_marks', e.target.value)} placeholder="Total" title="Total exam marks (e.g. 100)" className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                <Button type="button" onClick={() => setSubjects(subjects.filter((_, i) => i !== index))} variant="destructive" className="p-3 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30 flex-shrink-0"><Trash2 size={16} /></Button>
+              </div>
+              {showCustomSubject !== index && (
+                <div className="flex gap-4 text-xs text-foreground/40 pl-1">
+                  <span>Marks (e.g. 78)</span>
+                  <span>Total (e.g. 100)</span>
+                </div>
+              )}
             </div>
           ))}
           <Button type="button" onClick={() => setSubjects([...subjects, { name: '', marks_obtained: '', total_marks: '' }])} className="text-primary/80 hover:text-primary bg-black/40 hover:bg-primary/10 w-full border border-primary/20">+ Add Another Subject</Button>
