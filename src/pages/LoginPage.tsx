@@ -18,6 +18,19 @@ const LoginPage = () => {
     if (isLoggedIn) navigate('/dashboard', { replace: true });
   }, [isLoggedIn, navigate]);
 
+  // Clear any stale auth data that might cause fetch issues
+  useEffect(() => {
+    if (!isLoggedIn) {
+      // Remove stale Supabase auth tokens from localStorage
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+  }, [isLoggedIn]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
@@ -39,7 +52,14 @@ const LoginPage = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Authentication failed');
+      const msg = error?.message || '';
+      if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+        toast.error('Network error — please check your internet connection and try again.');
+      } else if (msg.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password. Please try again or create a new account.');
+      } else {
+        toast.error(msg || 'Authentication failed');
+      }
     } finally {
       setSubmitting(false);
     }
