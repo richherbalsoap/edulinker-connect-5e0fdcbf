@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { LogIn, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -18,18 +19,12 @@ const LoginPage = () => {
     if (isLoggedIn) navigate('/dashboard', { replace: true });
   }, [isLoggedIn, navigate]);
 
-  // Clear any stale auth data that might cause fetch issues
+  // Sign out properly to clear any stale session on mount
   useEffect(() => {
     if (!isLoggedIn) {
-      // Remove stale Supabase auth tokens from localStorage
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
-          localStorage.removeItem(key);
-        }
-      });
+      supabase.auth.signOut().catch(() => {});
     }
-  }, [isLoggedIn]);
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
