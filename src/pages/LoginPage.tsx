@@ -39,7 +39,16 @@ const LoginPage = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Authentication failed');
+      const msg = error?.message || '';
+      if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror')) {
+        toast.error('Network error — please check your connection and try again.');
+      } else if (msg.toLowerCase().includes('invalid login credentials')) {
+        toast.error('Invalid email or password. Please try again.');
+      } else if (msg.toLowerCase().includes('email not confirmed')) {
+        toast.error('Please check your email to confirm your account first.');
+      } else {
+        toast.error('Authentication failed. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
