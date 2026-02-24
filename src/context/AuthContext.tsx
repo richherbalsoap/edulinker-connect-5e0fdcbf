@@ -74,12 +74,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: window.location.origin },
     });
     if (error) throw error;
+
+    // Reset school for this new user to prevent stale data
+    if (data.session) {
+      try {
+        await supabase.functions.invoke('reset-school-on-signup', {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+        });
+      } catch (e) {
+        console.error('reset-school-on-signup failed:', e);
+      }
+    }
   };
 
   const logout = async () => {

@@ -53,9 +53,12 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     if (keyMode === 'manual' && !student) {
       const err = validateManualKey(manualKey);
       if (err) { setKeyError(err); return; }
-      // Check uniqueness
+      // Check uniqueness in active students
       const { data: existing } = await supabase.from('students').select('id').eq('secret_id', manualKey).maybeSingle();
       if (existing) { setKeyError('This key is already in use. Choose a different one.'); return; }
+      // Check uniqueness in archived keys
+      const { data: archived } = await supabase.from('student_keys_archive').select('id').eq('secret_id', manualKey).maybeSingle();
+      if (archived) { setKeyError('This key was previously used and is permanently reserved.'); return; }
     }
     onSave(formData, keyMode === 'manual' && !student ? manualKey : null);
   };
