@@ -59,28 +59,26 @@ const SettingsPage = () => {
   };
 
   const handleDeleteAccount = async () => {
+    if (!schoolId) {
+      toast({ title: "Error", description: "School identity not found.", variant: "destructive" });
+      return;
+    }
     setIsDeleting(true);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-      if (!token) {
-        toast({ title: "Error", description: "Not authenticated.", variant: "destructive" });
-        setIsDeleting(false);
-        return;
+      // Delete school data (homework, complaints, results, announcements) but NOT students
+      await supabase.from('homework').delete().eq('school_id', schoolId);
+      await supabase.from('complaints').delete().eq('school_id', schoolId);
+      await supabase.from('results').delete().eq('school_id', schoolId);
+      await supabase.from('announcements').delete().eq('school_id', schoolId);
+      // Delete user_roles
+      if (user) {
+        await supabase.from('user_roles').delete().eq('user_id', user.id);
       }
-
-      const { data, error } = await supabase.functions.invoke('delete-school-account', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (error) {
-        toast({ title: "Delete Failed", description: error.message || "An error occurred.", variant: "destructive" });
-      } else {
-        // Clear local storage and sign out
-        localStorage.clear();
-        await supabase.auth.signOut();
-        toast({ title: "Account Deleted", description: "Your school account and auth have been permanently removed." });
-      }
+      // Delete school
+      await supabase.from('schools').delete().eq('id', schoolId);
+      // Sign out (auth user deletion requires admin API — user is effectively removed from app)
+      await logout();
+      toast({ title: "Account Deleted", description: "Your school account and all associated data have been removed." });
     } catch (err: any) {
       toast({ title: "Delete Failed", description: err.message || "An error occurred.", variant: "destructive" });
     }

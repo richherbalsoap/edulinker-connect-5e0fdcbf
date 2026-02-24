@@ -2,6 +2,3 @@ project_id = "sdvxekymbfyrznhuvvtj"
 
 [functions.reset-school-on-signup]
 verify_jwt = false
-
-[functions.delete-school-account]
-verify_jwt = false
