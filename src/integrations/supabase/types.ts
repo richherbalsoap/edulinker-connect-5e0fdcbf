@@ -222,6 +222,30 @@ export type Database = {
         }
         Relationships: []
       }
+      student_keys_archive: {
+        Row: {
+          archived_reason: string | null
+          created_at: string
+          id: string
+          original_student_id: string
+          secret_id: string
+        }
+        Insert: {
+          archived_reason?: string | null
+          created_at?: string
+          id?: string
+          original_student_id: string
+          secret_id: string
+        }
+        Update: {
+          archived_reason?: string | null
+          created_at?: string
+          id?: string
+          original_student_id?: string
+          secret_id?: string
+        }
+        Relationships: []
+      }
       students: {
         Row: {
           avatar_url: string | null
