@@ -66,29 +66,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Safety net for unhandled promise rejections
     const handleRejection = (event: PromiseRejectionEvent) => {
       console.warn('Unhandled rejection caught:', event.reason);
       event.preventDefault();
     };
     window.addEventListener('unhandledrejection', handleRejection);
 
+    // Safety timeout — if auth never resolves, stop loading after 5s
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      clearTimeout(timeout);
       handleSession(session);
       setLoading(false);
     });
 
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
+        clearTimeout(timeout);
         handleSession(session);
         setLoading(false);
       })
       .catch((err) => {
         console.warn('getSession failed:', err);
+        clearTimeout(timeout);
         setLoading(false);
       });
 
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
       window.removeEventListener('unhandledrejection', handleRejection);
     };
