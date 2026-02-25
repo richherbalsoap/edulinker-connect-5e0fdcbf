@@ -72,27 +72,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     window.addEventListener('unhandledrejection', handleRejection);
 
-    // Safety timeout — if auth never resolves, stop loading after 5s
+    // Safety timeout — if auth never resolves, stop loading after 3s
     const timeout = setTimeout(() => {
+      console.warn('Auth timeout — clearing stale session and forcing load');
+      // Clear any stale tokens that might be causing fetch failures
+      try {
+        const storageKey = `sb-sdvxekymbfyrznhuvvtj-auth-token`;
+        localStorage.removeItem(storageKey);
+      } catch {}
       setLoading(false);
-    }, 5000);
+    }, 3000);
+
+    let resolved = false;
+    const resolve = (s: Session | null) => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timeout);
+      handleSession(s);
+      setLoading(false);
+    };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      clearTimeout(timeout);
-      handleSession(session);
-      setLoading(false);
+      resolve(session);
     });
 
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
-        clearTimeout(timeout);
-        handleSession(session);
-        setLoading(false);
+        resolve(session);
       })
       .catch((err) => {
-        console.warn('getSession failed:', err);
-        clearTimeout(timeout);
-        setLoading(false);
+        console.warn('getSession failed, clearing stale session:', err);
+        // Clear stale tokens on fetch failure
+        try {
+          const storageKey = `sb-sdvxekymbfyrznhuvvtj-auth-token`;
+          localStorage.removeItem(storageKey);
+        } catch {}
+        resolve(null);
       });
 
     return () => {
