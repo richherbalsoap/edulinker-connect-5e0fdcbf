@@ -5,14 +5,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
+import { useSchoolId } from '@/hooks/useSchoolId';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social Studies", "Computer Science"];
 
 const ResultSenderPage = () => {
   const { toast } = useToast();
-  const { schoolId } = useAuth();
+  const schoolId = useSchoolId();
   const addResult = useAppStore(state => state.addResult);
   const allStudents = useAppStore(state => state.students);
   const fetchStudents = useAppStore(state => state.fetchStudents);

@@ -1,17 +1,7 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { LogOut, User, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
-  const { logout, userName } = useAuth();
-  const navigate = useNavigate();
-
-  const displayName = localStorage.getItem('schoolName') || userName;
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const displayName = localStorage.getItem('schoolName') || 'My School';
 
   return (
     <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-primary/20">
@@ -28,20 +18,8 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           </h2>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-primary/20">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-              <User size={14} className="text-primary" />
-            </div>
-            <span className="text-foreground/90 text-sm font-medium hidden sm:block">{displayName}</span>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors duration-200"
-          >
-            <LogOut size={18} />
-          </button>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-primary/20">
+          <span className="text-foreground/90 text-sm font-medium">{displayName}</span>
         </div>
       </div>
     </header>

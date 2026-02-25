@@ -5,7 +5,6 @@ import {
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
   ChevronDown, GraduationCap
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
 
 interface NavItemType {
   path: string;
@@ -71,7 +70,7 @@ const CollapsibleSection = ({ title, icon: Icon, items, onClick }: {
 };
 
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
-  const { userName } = useAuth();
+  const schoolName = localStorage.getItem('schoolName') || 'My School';
 
   return (
     <>
@@ -91,7 +90,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
             </div>
             <div>
               <h1 className="text-lg font-bold text-primary">EDULinker</h1>
-              <p className="text-xs text-foreground/40">{userName}</p>
+              <p className="text-xs text-foreground/40">{schoolName}</p>
             </div>
           </div>
           <button onClick={toggleSidebar} className="p-1.5 rounded-lg text-foreground/50 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-colors duration-200">

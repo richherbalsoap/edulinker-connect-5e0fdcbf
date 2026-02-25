@@ -3,15 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
 import useAppStore from '@/store/appStore';
+import { useSchoolId } from '@/hooks/useSchoolId';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const sections = ['A', 'B', 'C', 'D', 'E'];
 
 const AnnouncementsPage = () => {
   const { toast } = useToast();
-  const { schoolId } = useAuth();
+  const schoolId = useSchoolId();
   const addAnnouncement = useAppStore(state => state.addAnnouncement);
   const [broadcastToAll, setBroadcastToAll] = useState(false);
   const [standard, setStandard] = useState('');
