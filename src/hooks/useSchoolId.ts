@@ -7,8 +7,8 @@ export const useSchoolId = () => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const { data } = await supabase.from('schools').select('id').limit(1).maybeSingle();
-        setSchoolId(data?.id ?? null);
+        const { data } = await (supabase as any).from('schools').select('id').limit(1).maybeSingle();
+        setSchoolId((data as any)?.id ?? null);
       } catch {
         setSchoolId(null);
       }
