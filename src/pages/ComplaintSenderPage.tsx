@@ -46,8 +46,10 @@ const ComplaintSenderPage = () => {
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) return null;
     const ext = file.name.split('.').pop();
-    const filePath = `complaints/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+    const filePath = `${currentUser.id}/complaints/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
     const { error } = await supabase.storage.from('edulinker-files').upload(filePath, file);
     if (error) {
       toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' });
