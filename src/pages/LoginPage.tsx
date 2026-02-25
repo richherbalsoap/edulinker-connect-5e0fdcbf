@@ -21,13 +21,23 @@ const LoginPage = () => {
   const handleMagicLink = async () => {
     if (!email) return toast.error("Please enter your email");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Magic link sent! Check your email.");
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) {
+        console.error("Magic link error:", error);
+        toast.error(error.message);
+      } else {
+        toast.success("Magic link sent! Check your email.");
+      }
+    } catch (err: any) {
+      console.error("Magic link exception:", err);
+      toast.error(err?.message || "Failed to send magic link");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordLogin = async () => {
