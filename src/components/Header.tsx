@@ -1,7 +1,9 @@
-import { Menu } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
-  const displayName = localStorage.getItem('schoolName') || 'My School';
+  const { user, signOut } = useAuth();
+  const displayName = user?.user_metadata?.full_name || user?.email || 'My School';
 
   return (
     <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-primary/20">
@@ -18,8 +20,17 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-primary/20">
-          <span className="text-foreground/90 text-sm font-medium">{displayName}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-primary/20">
+            <span className="text-foreground/90 text-sm font-medium">{displayName}</span>
+          </div>
+          <button
+            onClick={signOut}
+            className="p-2 rounded-lg border border-primary/20 bg-black/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-colors duration-200"
+            title="Logout"
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </header>
