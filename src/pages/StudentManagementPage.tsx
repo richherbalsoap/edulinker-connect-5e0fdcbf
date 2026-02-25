@@ -32,8 +32,10 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) { alert('Only JPEG, PNG, and WebP images are allowed.'); return; }
       if (file.size > 7 * 1024 * 1024) { alert('File size must be under 7MB.'); return; }
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) { alert('Not authenticated'); return; }
       const ext = file.name.split('.').pop() || 'jpg';
-      const filePath = `avatars/${crypto.randomUUID()}.${ext}`;
+      const filePath = `${currentUser.id}/avatars/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('edulinker-files').upload(filePath, file, { contentType: file.type, upsert: false });
       if (error) { alert('Upload failed: ' + error.message); return; }
       const { data: signedData } = await supabase.storage.from('edulinker-files').createSignedUrl(filePath, 60 * 60 * 24 * 365);
