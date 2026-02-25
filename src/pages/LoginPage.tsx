@@ -15,6 +15,22 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Clear any stale auth tokens on login page load to prevent "failed to fetch" loops
+    try {
+      const storageKey = `sb-sdvxekymbfyrznhuvvtj-auth-token`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          // If token has no valid access_token, clear it
+          if (!parsed?.access_token) {
+            localStorage.removeItem(storageKey);
+          }
+        } catch {
+          localStorage.removeItem(storageKey);
+        }
+      }
+    } catch {}
     if (isLoggedIn) navigate('/dashboard', { replace: true });
   }, [isLoggedIn, navigate]);
 

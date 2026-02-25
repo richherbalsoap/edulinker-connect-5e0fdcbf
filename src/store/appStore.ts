@@ -95,40 +95,52 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   // RLS handles created_by filtering automatically
   fetchStudents: async () => {
-    const { data } = await supabase.from('students').select('*').order('created_at', { ascending: false });
-    if (data) set({ students: data as Student[] });
+    try {
+      const { data } = await supabase.from('students').select('*').order('created_at', { ascending: false });
+      if (data) set({ students: data as Student[] });
+    } catch (e) { console.warn('fetchStudents failed:', e); }
   },
 
   fetchHomework: async () => {
-    const { data } = await supabase.from('homework').select('*').order('created_at', { ascending: false });
-    if (data) set({ homework: data as Homework[] });
+    try {
+      const { data } = await supabase.from('homework').select('*').order('created_at', { ascending: false });
+      if (data) set({ homework: data as Homework[] });
+    } catch (e) { console.warn('fetchHomework failed:', e); }
   },
 
   fetchComplaints: async () => {
-    const { data } = await supabase.from('complaints').select('*, student:students(*)').order('created_at', { ascending: false });
-    if (data) set({ complaints: data as unknown as Complaint[] });
+    try {
+      const { data } = await supabase.from('complaints').select('*, student:students(*)').order('created_at', { ascending: false });
+      if (data) set({ complaints: data as unknown as Complaint[] });
+    } catch (e) { console.warn('fetchComplaints failed:', e); }
   },
 
   fetchResults: async () => {
-    const { data } = await supabase.from('results').select('*, student:students(*)').order('created_at', { ascending: false });
-    if (data) set({ results: data as unknown as Result[] });
+    try {
+      const { data } = await supabase.from('results').select('*, student:students(*)').order('created_at', { ascending: false });
+      if (data) set({ results: data as unknown as Result[] });
+    } catch (e) { console.warn('fetchResults failed:', e); }
   },
 
   fetchAnnouncements: async () => {
-    const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-    if (data) set({ announcements: data as Announcement[] });
+    try {
+      const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+      if (data) set({ announcements: data as Announcement[] });
+    } catch (e) { console.warn('fetchAnnouncements failed:', e); }
   },
 
   fetchAll: async () => {
     set({ loading: true });
     const store = get();
-    await Promise.all([
-      store.fetchStudents(),
-      store.fetchHomework(),
-      store.fetchComplaints(),
-      store.fetchResults(),
-      store.fetchAnnouncements(),
-    ]);
+    try {
+      await Promise.all([
+        store.fetchStudents(),
+        store.fetchHomework(),
+        store.fetchComplaints(),
+        store.fetchResults(),
+        store.fetchAnnouncements(),
+      ]);
+    } catch (e) { console.warn('fetchAll failed:', e); }
     set({ loading: false });
   },
 
