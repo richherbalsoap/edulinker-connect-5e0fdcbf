@@ -4,7 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Send, ChevronDown, Upload, X } from "lucide-react";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useSchoolId } from '@/hooks/useSchoolId';
+
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -12,7 +13,7 @@ const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social S
 
 const HomeworkSenderPage = () => {
   const { toast } = useToast();
-  const { schoolId } = useAuth();
+  const schoolId = useSchoolId();
   const addHomework = useAppStore((state) => state.addHomework);
   const [subjects, setSubjects] = useState(initialSubjects);
   const [showCustomSubject, setShowCustomSubject] = useState(false);
