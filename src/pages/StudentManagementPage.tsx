@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import useAppStore from '@/store/appStore';
 import { supabase } from '@/integrations/supabase/client';
 
+const db = supabase as any;
+
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const sections = ['A', 'B', 'C', 'D', 'E'];
 
@@ -56,10 +58,10 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       const err = validateManualKey(manualKey);
       if (err) { setKeyError(err); return; }
       // Check uniqueness in active students
-      const { data: existing } = await supabase.from('students').select('id').eq('secret_id', manualKey).maybeSingle();
+      const { data: existing } = await db.from('students').select('id').eq('secret_id', manualKey).maybeSingle();
       if (existing) { setKeyError('This key is already in use. Choose a different one.'); return; }
       // Check uniqueness in archived keys
-      const { data: archived } = await supabase.from('student_keys_archive').select('id').eq('secret_id', manualKey).maybeSingle();
+      const { data: archived } = await db.from('student_keys_archive').select('id').eq('secret_id', manualKey).maybeSingle();
       if (archived) { setKeyError('This key was previously used and is permanently reserved.'); return; }
     }
     onSave(formData, keyMode === 'manual' && !student ? manualKey : null);
