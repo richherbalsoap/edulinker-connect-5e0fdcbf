@@ -1,11 +1,11 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, MessageSquare, FileText,
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
-  ChevronDown, GraduationCap
+  ChevronDown, GraduationCap, LogOut
 } from 'lucide-react';
-
+import { useAuth } from '@/context/AuthContext';
 interface NavItemType {
   path: string;
   icon: React.ElementType;
@@ -71,6 +71,14 @@ const CollapsibleSection = ({ title, icon: Icon, items, onClick }: {
 
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const schoolName = localStorage.getItem('schoolName') || 'My School';
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    toggleSidebar();
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <>
@@ -107,6 +115,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           <ul className="space-y-1 pt-3 border-t border-primary/10">
             <NavItem item={{ path: '/settings', icon: Settings, label: 'Settings' }} onClick={toggleSidebar} />
           </ul>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-colors duration-200 mt-2"
+          >
+            <LogOut size={20} />
+            <span className="font-medium text-sm">Logout</span>
+          </button>
         </nav>
       </aside>
     </>
