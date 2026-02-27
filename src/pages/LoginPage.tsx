@@ -18,13 +18,18 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: 'Login Failed', description: 'Invalid email or password', variant: 'destructive' });
-    } else {
-      navigate('/dashboard');
+      toast({ title: 'Login Failed', description: 'Invalid email or password.', variant: 'destructive' });
+      return;
     }
+    if (!data.user?.email_confirmed_at) {
+      await supabase.auth.signOut();
+      toast({ title: 'Email Not Verified', description: 'Please verify your email before logging in.', variant: 'destructive', duration: 8000 });
+      return;
+    }
+    navigate('/dashboard');
   };
 
   return (
