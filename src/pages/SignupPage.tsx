@@ -31,7 +31,7 @@ const SignupPage = () => {
     if (error) {
       toast({ title: 'Signup Failed', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Account Created!', description: 'Please check your email inbox (and spam folder) for the verification link before logging in.', duration: 10000 });
+      toast({ title: 'Account Created!', description: 'Check your email to verify your account before logging in.', duration: 10000 });
       navigate('/login');
     }
   };
