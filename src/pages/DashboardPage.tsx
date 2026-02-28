@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { BookOpen, MessageSquare, FileText, Calendar, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
+import { useSchoolId } from '@/hooks/useSchoolId';
 
 const getAcademicYears = () => {
   const years: string[] = ['Overall'];
@@ -21,6 +22,7 @@ const getAcademicYearRange = (yearStr: string) => {
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const schoolId = useSchoolId();
   const { homework, complaints, results, students, fetchAll } = useAppStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const academicYears = useMemo(() => getAcademicYears(), []);
@@ -30,7 +32,9 @@ const DashboardPage = () => {
     : `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    if (schoolId) fetchAll(schoolId);
+  }, [schoolId]);
 
   const yearRange = useMemo(() => selectedYear === 'Overall' ? null : getAcademicYearRange(selectedYear), [selectedYear]);
 

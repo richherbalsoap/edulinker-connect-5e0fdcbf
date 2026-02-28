@@ -14,6 +14,7 @@ const ResultSenderPage = () => {
   const { toast } = useToast();
   const schoolId = useSchoolId();
   const addResult = useAppStore(state => state.addResult);
+  const fetchResults = useAppStore(state => state.fetchResults);
   const allStudents = useAppStore(state => state.students);
   const fetchStudents = useAppStore(state => state.fetchStudents);
 
@@ -24,12 +25,13 @@ const ResultSenderPage = () => {
   const [subjects, setSubjects] = useState([{ name: '', marks_obtained: '', total_marks: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Subject dropdown state (same pattern as HomeworkSender)
   const [availableSubjects, setAvailableSubjects] = useState(initialSubjects);
   const [showCustomSubject, setShowCustomSubject] = useState<number | null>(null);
   const [customSubject, setCustomSubject] = useState('');
 
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => {
+    if (schoolId) fetchStudents(schoolId);
+  }, [schoolId]);
 
   const filteredStudents = useMemo(() => {
     return allStudents.filter(s => {
@@ -116,10 +118,9 @@ const ResultSenderPage = () => {
       return;
     }
 
-    // Validation: marks_obtained cannot exceed total_marks
     for (const sub of validSubjects) {
       if (parseFloat(sub.marks_obtained) > parseFloat(sub.total_marks)) {
-        toast({ title: 'Invalid Marks', description: `Exam Marks cannot be greater than total exam marks (${sub.name}).`, variant: 'destructive' });
+        toast({ title: 'Invalid Marks', description: `Marks obtained cannot be greater than total marks (${sub.name}).`, variant: 'destructive' });
         return;
       }
     }
@@ -145,6 +146,9 @@ const ResultSenderPage = () => {
         school_id: schoolId,
       });
     }
+
+    // Re-fetch results after insert
+    await fetchResults(schoolId);
 
     const student = allStudents.find(s => s.id === studentId);
     toast({ title: 'Result Sent Successfully!', description: `Marks for ${student?.name || 'student'} have been recorded.` });
@@ -198,7 +202,6 @@ const ResultSenderPage = () => {
           {subjects.map((subject, index) => (
             <div key={index} className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                {/* Subject dropdown */}
                 {showCustomSubject === index ? (
                   <div className="flex-1 flex gap-2 min-w-0">
                     <input type="text" value={customSubject} onChange={e => setCustomSubject(e.target.value)} placeholder="Enter subject name..." className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" autoFocus />

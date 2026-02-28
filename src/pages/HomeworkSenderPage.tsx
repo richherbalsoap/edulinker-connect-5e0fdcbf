@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Send, ChevronDown, Upload, X } from "lucide-react";
@@ -15,6 +15,7 @@ const HomeworkSenderPage = () => {
   const { toast } = useToast();
   const schoolId = useSchoolId();
   const addHomework = useAppStore((state) => state.addHomework);
+  const fetchHomework = useAppStore((state) => state.fetchHomework);
   const [subjects, setSubjects] = useState(initialSubjects);
   const [showCustomSubject, setShowCustomSubject] = useState(false);
   const [customSubject, setCustomSubject] = useState("");
@@ -74,6 +75,8 @@ const HomeworkSenderPage = () => {
       file_url: fileUrl,
       school_id: schoolId,
     });
+    // Re-fetch homework list after insert
+    await fetchHomework(schoolId);
     toast({ title: "Homework Sent Successfully!", description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.` });
     setFormData({ standard: "", section: "", subject: "", homework: "" });
     setShowCustomSubject(false);
@@ -147,7 +150,6 @@ const HomeworkSenderPage = () => {
           <textarea value={formData.homework} onChange={(e) => handleInputChange("homework", e.target.value)} placeholder="Enter homework description..." className="w-full p-3 h-32 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y" />
         </div>
 
-        {/* File Upload */}
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">ATTACH FILE (OPTIONAL)</label>
           <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">

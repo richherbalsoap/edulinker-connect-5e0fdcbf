@@ -1,9 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '@/integrations/supabase/client';
 
-// Cast to any to bypass empty database types
-const db = supabase as any;
-
 interface Student {
   id: string;
   secret_id: string;
@@ -15,6 +12,7 @@ interface Student {
   avatar_url: string | null;
   created_by: string | null;
   created_at: string;
+  school_id: string | null;
 }
 
 interface Homework {
@@ -26,6 +24,7 @@ interface Homework {
   file_url: string | null;
   created_by: string | null;
   created_at: string;
+  school_id: string | null;
 }
 
 interface Complaint {
@@ -35,6 +34,7 @@ interface Complaint {
   file_url: string | null;
   created_by: string | null;
   created_at: string;
+  school_id: string | null;
   student?: Student;
 }
 
@@ -48,6 +48,7 @@ interface Result {
   file_name: string | null;
   created_by: string | null;
   created_at: string;
+  school_id: string | null;
   student?: Student;
 }
 
@@ -58,6 +59,7 @@ interface Announcement {
   type: string | null;
   created_by: string | null;
   created_at: string;
+  school_id: string | null;
 }
 
 interface AppStore {
@@ -67,13 +69,13 @@ interface AppStore {
   results: Result[];
   announcements: Announcement[];
   loading: boolean;
-  fetchStudents: () => Promise<void>;
-  fetchHomework: () => Promise<void>;
-  fetchComplaints: () => Promise<void>;
-  fetchResults: () => Promise<void>;
-  fetchAnnouncements: () => Promise<void>;
-  fetchAll: () => Promise<void>;
-  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }, manualKey?: string | null) => Promise<Student | null>;
+  fetchStudents: (schoolId?: string) => Promise<void>;
+  fetchHomework: (schoolId?: string) => Promise<void>;
+  fetchComplaints: (schoolId?: string) => Promise<void>;
+  fetchResults: (schoolId?: string) => Promise<void>;
+  fetchAnnouncements: (schoolId?: string) => Promise<void>;
+  fetchAll: (schoolId?: string) => Promise<void>;
+  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }, manualKey?: string | null, schoolId?: string | null) => Promise<Student | null>;
   updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
   addHomework: (hw: { standard: string; section: string; subject: string; description: string; file_url?: string | null; school_id: string }) => Promise<void>;
@@ -92,59 +94,68 @@ const useAppStore = create<AppStore>()((set, get) => ({
   announcements: [],
   loading: false,
 
-  fetchStudents: async () => {
+  fetchStudents: async (schoolId) => {
     try {
-      const { data } = await db.from('students').select('*').order('created_at', { ascending: false });
-      if (data) set({ students: data as Student[] });
+      let query = supabase.from('students').select('*').order('created_at', { ascending: false });
+      if (schoolId) query = query.eq('school_id', schoolId);
+      const { data } = await query;
+      if (data) set({ students: data as unknown as Student[] });
     } catch (e) { console.warn('fetchStudents failed:', e); }
   },
 
-  fetchHomework: async () => {
+  fetchHomework: async (schoolId) => {
     try {
-      const { data } = await db.from('homework').select('*').order('created_at', { ascending: false });
-      if (data) set({ homework: data as Homework[] });
+      let query = supabase.from('homework').select('*').order('created_at', { ascending: false });
+      if (schoolId) query = query.eq('school_id', schoolId);
+      const { data } = await query;
+      if (data) set({ homework: data as unknown as Homework[] });
     } catch (e) { console.warn('fetchHomework failed:', e); }
   },
 
-  fetchComplaints: async () => {
+  fetchComplaints: async (schoolId) => {
     try {
-      const { data } = await db.from('complaints').select('*, student:students(*)').order('created_at', { ascending: false });
+      let query = supabase.from('complaints').select('*, student:students(*)').order('created_at', { ascending: false });
+      if (schoolId) query = query.eq('school_id', schoolId);
+      const { data } = await query;
       if (data) set({ complaints: data as unknown as Complaint[] });
     } catch (e) { console.warn('fetchComplaints failed:', e); }
   },
 
-  fetchResults: async () => {
+  fetchResults: async (schoolId) => {
     try {
-      const { data } = await db.from('results').select('*, student:students(*)').order('created_at', { ascending: false });
+      let query = supabase.from('results').select('*, student:students(*)').order('created_at', { ascending: false });
+      if (schoolId) query = query.eq('school_id', schoolId);
+      const { data } = await query;
       if (data) set({ results: data as unknown as Result[] });
     } catch (e) { console.warn('fetchResults failed:', e); }
   },
 
-  fetchAnnouncements: async () => {
+  fetchAnnouncements: async (schoolId) => {
     try {
-      const { data } = await db.from('announcements').select('*').order('created_at', { ascending: false });
-      if (data) set({ announcements: data as Announcement[] });
+      let query = supabase.from('announcements').select('*').order('created_at', { ascending: false });
+      if (schoolId) query = query.eq('school_id', schoolId);
+      const { data } = await query;
+      if (data) set({ announcements: data as unknown as Announcement[] });
     } catch (e) { console.warn('fetchAnnouncements failed:', e); }
   },
 
-  fetchAll: async () => {
+  fetchAll: async (schoolId) => {
     set({ loading: true });
     const store = get();
     try {
       await Promise.all([
-        store.fetchStudents(),
-        store.fetchHomework(),
-        store.fetchComplaints(),
-        store.fetchResults(),
-        store.fetchAnnouncements(),
+        store.fetchStudents(schoolId),
+        store.fetchHomework(schoolId),
+        store.fetchComplaints(schoolId),
+        store.fetchResults(schoolId),
+        store.fetchAnnouncements(schoolId),
       ]);
     } catch (e) { console.warn('fetchAll failed:', e); }
     set({ loading: false });
   },
 
-  addStudent: async (student, manualKey) => {
-    const { data: schoolData } = await db.rpc('get_user_school_id');
-    const { data, error } = await db.from('students').insert([{
+  addStudent: async (student, manualKey, schoolId) => {
+    const { data, error } = await supabase.from('students').insert([{
       name: student.name,
       standard: student.standard,
       section: student.section,
@@ -152,17 +163,17 @@ const useAppStore = create<AppStore>()((set, get) => ({
       parent_contact: student.parent_contact || null,
       avatar_url: student.avatar_url || null,
       secret_id: manualKey || 'TEMP',
-      school_id: schoolData || null,
+      school_id: schoolId || null,
     }]).select().single();
     if (data && !error) {
-      set((state) => ({ students: [data as Student, ...state.students] }));
-      return data as Student;
+      set((state) => ({ students: [data as unknown as Student, ...state.students] }));
+      return data as unknown as Student;
     }
     return null;
   },
 
   updateStudent: async (id, updatedData) => {
-    const { error } = await db.from('students').update(updatedData).eq('id', id);
+    const { error } = await supabase.from('students').update(updatedData as any).eq('id', id);
     if (!error) {
       set((state) => ({
         students: state.students.map(s => s.id === id ? { ...s, ...updatedData } : s)
@@ -171,37 +182,61 @@ const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   deleteStudent: async (id) => {
-    const { error } = await db.from('students').delete().eq('id', id);
+    const { error } = await supabase.from('students').delete().eq('id', id);
     if (!error) {
       set((state) => ({ students: state.students.filter(s => s.id !== id) }));
     }
   },
 
   addHomework: async (hw) => {
-    const { data, error } = await db.from('homework').insert({ ...hw }).select().single();
+    const { data, error } = await supabase.from('homework').insert({
+      standard: hw.standard,
+      section: hw.section,
+      subject: hw.subject,
+      description: hw.description,
+      file_url: hw.file_url || null,
+      school_id: hw.school_id,
+    }).select().single();
     if (data && !error) {
-      set((state) => ({ homework: [data as Homework, ...state.homework] }));
+      set((state) => ({ homework: [data as unknown as Homework, ...state.homework] }));
     }
   },
 
   addComplaint: async (complaint) => {
-    const { data, error } = await db.from('complaints').insert({ ...complaint }).select('*, student:students(*)').single();
+    const { data, error } = await supabase.from('complaints').insert({
+      student_id: complaint.student_id,
+      description: complaint.description,
+      file_url: complaint.file_url || null,
+      school_id: complaint.school_id,
+    }).select('*, student:students(*)').single();
     if (data && !error) {
       set((state) => ({ complaints: [data as unknown as Complaint, ...state.complaints] }));
     }
   },
 
   addResult: async (result) => {
-    const { data, error } = await db.from('results').insert({ ...result }).select('*, student:students(*)').single();
+    const { data, error } = await supabase.from('results').insert({
+      student_id: result.student_id,
+      subject: result.subject,
+      marks_obtained: result.marks_obtained,
+      total_marks: result.total_marks,
+      file_name: result.file_name || null,
+      school_id: result.school_id,
+    }).select('*, student:students(*)').single();
     if (data && !error) {
       set((state) => ({ results: [data as unknown as Result, ...state.results] }));
     }
   },
 
   addAnnouncement: async (announcement) => {
-    const { data, error } = await db.from('announcements').insert({ ...announcement }).select().single();
+    const { data, error } = await supabase.from('announcements').insert({
+      title: announcement.title || null,
+      content: announcement.content || null,
+      type: announcement.type || null,
+      school_id: announcement.school_id,
+    }).select().single();
     if (data && !error) {
-      set((state) => ({ announcements: [data as Announcement, ...state.announcements] }));
+      set((state) => ({ announcements: [data as unknown as Announcement, ...state.announcements] }));
     }
   },
 
