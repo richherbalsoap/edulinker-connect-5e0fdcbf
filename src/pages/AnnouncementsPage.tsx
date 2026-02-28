@@ -13,6 +13,7 @@ const AnnouncementsPage = () => {
   const { toast } = useToast();
   const schoolId = useSchoolId();
   const addAnnouncement = useAppStore(state => state.addAnnouncement);
+  const fetchAnnouncements = useAppStore(state => state.fetchAnnouncements);
   const [broadcastToAll, setBroadcastToAll] = useState(false);
   const [standard, setStandard] = useState('');
   const [section, setSection] = useState('');
@@ -31,6 +32,7 @@ const AnnouncementsPage = () => {
       type,
       school_id: schoolId,
     });
+    await fetchAnnouncements(schoolId);
     const description = broadcastToAll ? 'Announcement has been sent to ALL Classes.' : `Announcement has been sent to Standard ${standard}, Section ${section}.`;
     toast({ title: "Announcement Sent Successfully!", description });
     setBroadcastToAll(false); setStandard(''); setSection(''); setMessage('');

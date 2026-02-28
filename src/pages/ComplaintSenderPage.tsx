@@ -16,11 +16,14 @@ const ComplaintSenderPage = () => {
   const allStudents = useAppStore(state => state.students);
   const addComplaint = useAppStore(state => state.addComplaint);
   const fetchStudents = useAppStore(state => state.fetchStudents);
+  const fetchComplaints = useAppStore(state => state.fetchComplaints);
   const [formData, setFormData] = useState({ studentId: '', standard: '', class: '', description: '' });
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => {
+    if (schoolId) fetchStudents(schoolId);
+  }, [schoolId]);
 
   const filteredStudents = useMemo(() => {
     return allStudents.filter(s => {
@@ -75,6 +78,7 @@ const ComplaintSenderPage = () => {
     }
     const student = allStudents.find(s => s.id === formData.studentId);
     await addComplaint({ student_id: formData.studentId, description: formData.description, file_url: fileUrl, school_id: schoolId });
+    await fetchComplaints(schoolId);
     toast({ title: "Complaint Registered!", description: `Your complaint regarding ${student?.name || 'student'} has been submitted.` });
     setFormData({ studentId: '', standard: '', class: '', description: '' });
     setFile(null);
@@ -125,7 +129,6 @@ const ComplaintSenderPage = () => {
               className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none" placeholder="Describe the issue clearly..." />
           </div>
 
-          {/* File Upload */}
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">ATTACH FILE (OPTIONAL)</label>
             <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">

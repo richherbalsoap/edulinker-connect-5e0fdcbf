@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-const db = supabase as any;
-
 export const useSchoolId = () => {
   const [schoolId, setSchoolId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchSchoolId = async () => {
       try {
-        const { data } = await db.from('schools').select('id').limit(1).maybeSingle();
+        const { data } = await supabase
+          .from('schools')
+          .select('id')
+          .limit(1)
+          .maybeSingle();
         setSchoolId(data?.id ?? null);
       } catch {
         setSchoolId(null);
       }
     };
-    fetch();
+    fetchSchoolId();
   }, []);
 
   return schoolId;

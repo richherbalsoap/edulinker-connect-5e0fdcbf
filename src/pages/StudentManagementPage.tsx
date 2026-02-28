@@ -5,8 +5,7 @@ import { Plus, Edit, Trash2, X, Upload, User, Phone, Key } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 import { supabase } from '@/integrations/supabase/client';
-
-const db = supabase as any;
+import { useSchoolId } from '@/hooks/useSchoolId';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const sections = ['A', 'B', 'C', 'D', 'E'];
@@ -57,11 +56,9 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     if (keyMode === 'manual' && !student) {
       const err = validateManualKey(manualKey);
       if (err) { setKeyError(err); return; }
-      // Check uniqueness in active students
-      const { data: existing } = await db.from('students').select('id').eq('secret_id', manualKey).maybeSingle();
+      const { data: existing } = await supabase.from('students').select('id').eq('secret_id', manualKey).maybeSingle();
       if (existing) { setKeyError('This key is already in use. Choose a different one.'); return; }
-      // Check uniqueness in archived keys
-      const { data: archived } = await db.from('student_keys_archive').select('id').eq('secret_id', manualKey).maybeSingle();
+      const { data: archived } = await supabase.from('student_keys_archive').select('id').eq('secret_id', manualKey).maybeSingle();
       if (archived) { setKeyError('This key was previously used and is permanently reserved.'); return; }
     }
     onSave(formData, keyMode === 'manual' && !student ? manualKey : null);
@@ -103,7 +100,6 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
           <input type="text" placeholder="Parent's Name" value={formData.parent_name} onChange={e => setFormData({ ...formData, parent_name: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
           <input type="text" placeholder="Parent's Contact" value={formData.parent_contact} onChange={e => setFormData({ ...formData, parent_contact: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
 
-          {/* Secret Key Mode — only for new students */}
           {!student && (
             <div className="space-y-3 border border-primary/20 rounded-lg p-4 bg-black/20">
               <label className="block text-xs font-bold tracking-wider text-primary/60">SECRET KEY</label>
@@ -137,6 +133,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
 };
 
 const StudentManagementPage = () => {
+  const schoolId = useSchoolId();
   const students = useAppStore(state => state.students);
   const addStudent = useAppStore(state => state.addStudent);
   const updateStudent = useAppStore(state => state.updateStudent);
@@ -149,14 +146,16 @@ const StudentManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => {
+    if (schoolId) fetchStudents(schoolId);
+  }, [schoolId]);
 
   const handleSaveStudent = async (studentData: any, manualKey: string | null) => {
     if (editingStudent) {
       await updateStudent(editingStudent.id, studentData);
       toast({ title: "Success", description: "Student details updated." });
     } else {
-      const newStudent = await addStudent(studentData, manualKey);
+      const newStudent = await addStudent(studentData, manualKey, schoolId);
       if (newStudent) {
         toast({ title: "Student Added!", description: `Secret ID: ${newStudent.secret_id}` });
       }

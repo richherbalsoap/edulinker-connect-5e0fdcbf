@@ -4,6 +4,7 @@ import { CheckCircle, Repeat, Trash2, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
+import { useSchoolId } from '@/hooks/useSchoolId';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
@@ -20,6 +21,7 @@ const getNextStandard = (currentStandard: string) => {
 
 const PromotionPanelPage = () => {
   const { toast } = useToast();
+  const schoolId = useSchoolId();
   const students = useAppStore(state => state.students);
   const updateStudent = useAppStore(state => state.updateStudent);
   const deleteStudentFromStore = useAppStore(state => state.deleteStudent);
@@ -27,13 +29,13 @@ const PromotionPanelPage = () => {
   const [selectedClass, setSelectedClass] = useState('All Classes');
   const [selectedSection, setSelectedSection] = useState('All Sections');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Bulk promotion state
   const [bulkFromClass, setBulkFromClass] = useState('');
   const [bulkSection, setBulkSection] = useState('');
   const [isBulkPromoting, setIsBulkPromoting] = useState(false);
 
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => {
+    if (schoolId) fetchStudents(schoolId);
+  }, [schoolId]);
 
   const handleAction = async (id: string, action: string) => {
     const student = students.find(s => s.id === id);
@@ -93,6 +95,8 @@ const PromotionPanelPage = () => {
         graduated++;
       }
     }
+    // Re-fetch students after bulk promotion
+    if (schoolId) await fetchStudents(schoolId);
     toast({
       title: 'Bulk Promotion Complete!',
       description: nextClass
@@ -131,7 +135,6 @@ const PromotionPanelPage = () => {
         <p className="text-foreground/70">Manage student promotions for the new academic year</p>
       </div>
 
-      {/* Bulk Promotion */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-4xl mx-auto space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><Users size={20} className="text-primary" /></div>
@@ -169,7 +172,6 @@ const PromotionPanelPage = () => {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-4xl mx-auto space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
