@@ -14,22 +14,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Load Unicorn Studio script
-    const script = document.createElement('script');
-    script.src = 'https://cdn.unicorn.studio/v1.4.29/dist/unicornStudio.umd.js';
-    script.async = true;
-    script.onload = () => {
-      if (!(window as any).UnicornStudio?.isInitialized) {
-        (window as any).UnicornStudio.init();
-        (window as any).UnicornStudio.isInitialized = true;
-      }
-    };
-    document.head.appendChild(script);
-    return () => {
-      script.remove();
-    };
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,11 +34,6 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
-      {/* Unicorn Studio animated background */}
-      <div
-        data-us-project="YOUR_PROJECT_ID"
-        style={{ position: 'fixed', inset: 0, zIndex: 0 }}
-      />
       {/* Fallback golden background */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div className="absolute inset-0 golden-grid-bg opacity-15" />
