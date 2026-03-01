@@ -7,6 +7,7 @@ interface Student {
   name: string;
   standard: string;
   section: string;
+  roll_no: number | null;
   parent_name: string | null;
   parent_contact: string | null;
   avatar_url: string | null;
@@ -75,7 +76,7 @@ interface AppStore {
   fetchResults: (schoolId?: string) => Promise<void>;
   fetchAnnouncements: (schoolId?: string) => Promise<void>;
   fetchAll: (schoolId?: string) => Promise<void>;
-  addStudent: (student: { name: string; standard: string; section: string; parent_name?: string; parent_contact?: string; avatar_url?: string | null }, manualKey?: string | null, schoolId?: string | null) => Promise<Student | null>;
+  addStudent: (student: { name: string; standard: string; section: string; roll_no?: number | null; parent_name?: string; parent_contact?: string; avatar_url?: string | null }, manualKey?: string | null, schoolId?: string | null) => Promise<Student | null>;
   updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
   addHomework: (hw: { standard: string; section: string; subject: string; description: string; file_url?: string | null; school_id: string }) => Promise<void>;
@@ -159,12 +160,13 @@ const useAppStore = create<AppStore>()((set, get) => ({
       name: student.name,
       standard: student.standard,
       section: student.section,
+      roll_no: student.roll_no || null,
       parent_name: student.parent_name || null,
       parent_contact: student.parent_contact || null,
       avatar_url: student.avatar_url || null,
       secret_id: manualKey || 'TEMP',
       school_id: schoolId || null,
-    }]).select().single();
+    } as any]).select().single();
     if (data && !error) {
       set((state) => ({ students: [data as unknown as Student, ...state.students] }));
       return data as unknown as Student;

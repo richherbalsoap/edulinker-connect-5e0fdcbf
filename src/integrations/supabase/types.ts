@@ -255,6 +255,7 @@ export type Database = {
           name: string
           parent_contact: string | null
           parent_name: string | null
+          roll_no: number | null
           school_id: string | null
           secret_id: string
           section: string
@@ -268,6 +269,7 @@ export type Database = {
           name: string
           parent_contact?: string | null
           parent_name?: string | null
+          roll_no?: number | null
           school_id?: string | null
           secret_id: string
           section: string
@@ -281,6 +283,7 @@ export type Database = {
           name?: string
           parent_contact?: string | null
           parent_name?: string | null
+          roll_no?: number | null
           school_id?: string | null
           secret_id?: string
           section?: string

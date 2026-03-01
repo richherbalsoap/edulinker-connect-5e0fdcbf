@@ -20,8 +20,9 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState(student ? {
     name: student.name, standard: student.standard, section: student.section,
+    roll_no: student.roll_no?.toString() || '',
     parent_name: student.parent_name || '', parent_contact: student.parent_contact || '', avatar_url: student.avatar_url || null,
-  } : { name: '', standard: '', section: '', parent_name: '', parent_contact: '', avatar_url: null });
+  } : { name: '', standard: '', section: '', roll_no: '', parent_name: '', parent_contact: '', avatar_url: null });
   const [fileName, setFileName] = useState('');
   const [keyMode, setKeyMode] = useState<'auto' | 'manual'>('auto');
   const [manualKey, setManualKey] = useState('');
@@ -53,6 +54,11 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   };
 
   const handleSave = async () => {
+    const rollNum = parseInt(formData.roll_no, 10);
+    if (!rollNum || rollNum <= 0) {
+      toast({ title: "Error", description: "Roll number must be a positive number.", variant: "destructive" });
+      return;
+    }
     if (keyMode === 'manual' && !student) {
       const err = validateManualKey(manualKey);
       if (err) { setKeyError(err); return; }
@@ -61,7 +67,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       const { data: archived } = await supabase.from('student_keys_archive').select('id').eq('secret_id', manualKey).maybeSingle();
       if (archived) { setKeyError('This key was previously used and is permanently reserved.'); return; }
     }
-    onSave(formData, keyMode === 'manual' && !student ? manualKey : null);
+    onSave({ ...formData, roll_no: rollNum }, keyMode === 'manual' && !student ? manualKey : null);
   };
 
   if (!isOpen) return null;
@@ -96,6 +102,9 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
                 {sections.map(s => <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">{s}</SelectItem>)}
               </SelectContent>
             </Select>
+           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input type="number" placeholder="Roll No." min="1" value={formData.roll_no} onChange={e => setFormData({ ...formData, roll_no: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
           </div>
           <input type="text" placeholder="Parent's Name" value={formData.parent_name} onChange={e => setFormData({ ...formData, parent_name: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
           <input type="text" placeholder="Parent's Contact" value={formData.parent_contact} onChange={e => setFormData({ ...formData, parent_contact: e.target.value })} className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40" />
@@ -151,8 +160,22 @@ const StudentManagementPage = () => {
   }, [schoolId]);
 
   const handleSaveStudent = async (studentData: any, manualKey: string | null) => {
+    // Validate roll_no uniqueness within same school + class + section
+    const rollNo = studentData.roll_no;
+    const duplicate = students.find(s =>
+      s.school_id === schoolId &&
+      s.standard === studentData.standard &&
+      s.section === studentData.section &&
+      (s as any).roll_no === rollNo &&
+      (!editingStudent || s.id !== editingStudent.id)
+    );
+    if (duplicate) {
+      toast({ title: "Duplicate Roll Number", description: `Roll no. ${rollNo} already exists in Class ${studentData.standard} Section ${studentData.section}.`, variant: "destructive" });
+      return;
+    }
+
     if (editingStudent) {
-      await updateStudent(editingStudent.id, studentData);
+      await updateStudent(editingStudent.id, { ...studentData, roll_no: rollNo } as any);
       toast({ title: "Success", description: "Student details updated." });
     } else {
       const newStudent = await addStudent(studentData, manualKey, schoolId);
@@ -238,6 +261,7 @@ const StudentManagementPage = () => {
                         <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">{student.name}</h3>
                         <div className="flex gap-2 text-xs mt-1 flex-wrap">
                           <span className="bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">Section {student.section}</span>
+                          {(student as any).roll_no && <span className="bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">Roll No. {(student as any).roll_no}</span>}
                         </div>
                       </div>
                     </div>
