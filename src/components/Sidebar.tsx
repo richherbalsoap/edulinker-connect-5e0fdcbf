@@ -76,8 +76,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
 
   const handleLogout = async () => {
     toggleSidebar();
+    localStorage.clear();
     await signOut();
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   return (

@@ -8,8 +8,9 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+    localStorage.clear();
     await signOut();
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   return (
