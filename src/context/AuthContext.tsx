@@ -53,30 +53,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
+    // Safety timeout - never stay loading forever
+    const timeout = setTimeout(() => {
+      if (mounted) {
+        console.warn("Auth initialization timed out, forcing load");
+        setLoading(false);
+      }
+    }, 5000);
+
     // First restore session from storage
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await ensureSchoolExists(session.user.id);
+        try {
+          await ensureSchoolExists(session.user.id);
+        } catch (e) {
+          console.error("ensureSchoolExists failed:", e);
+        }
       }
-      setLoading(false);
+      if (mounted) {
+        setLoading(false);
+        clearTimeout(timeout);
+      }
+    }).catch((err) => {
+      console.error("getSession failed:", err);
+      if (mounted) {
+        setLoading(false);
+        clearTimeout(timeout);
+      }
     });
 
     // Then listen for subsequent auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await ensureSchoolExists(session.user.id);
+        ensureSchoolExists(session.user.id).catch(console.error);
       } else {
         setSchoolId(null);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
