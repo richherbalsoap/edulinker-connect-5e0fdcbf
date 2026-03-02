@@ -53,23 +53,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // First restore session from storage
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await ensureSchoolExists(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    // Then listen for subsequent auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       if (session?.user) {
         await ensureSchoolExists(session.user.id);
-      }
-    });
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (session?.user) {
-        await ensureSchoolExists(session.user.id);
+      } else {
+        setSchoolId(null);
       }
     });
 
