@@ -76,29 +76,38 @@ const HomeworkSenderPage = () => {
       return;
     }
     setIsSubmitting(true);
-    let fileUrl: string | null = null;
-    if (file) {
-      fileUrl = await uploadFile(file);
+    try {
+      let fileUrl: string | null = null;
+      if (file) {
+        fileUrl = await uploadFile(file);
+      }
+      await addHomework({
+        standard: formData.standard,
+        section: formData.section,
+        subject: finalSubject,
+        description: formData.homework,
+        file_url: fileUrl,
+        school_id: schoolId,
+      });
+      await fetchHomework(schoolId);
+      toast({
+        title: "Homework Sent Successfully!",
+        description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.`,
+      });
+      setFormData({ standard: "", section: "", subject: "", homework: "" });
+      setShowCustomSubject(false);
+      setCustomSubject("");
+      setFile(null);
+    } catch (error: any) {
+      console.error("Homework send error:", error);
+      toast({
+        title: "Homework Send Failed",
+        description: error?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    await addHomework({
-      standard: formData.standard,
-      section: formData.section,
-      subject: finalSubject,
-      description: formData.homework,
-      file_url: fileUrl,
-      school_id: schoolId,
-    });
-    // Re-fetch homework list after insert
-    await fetchHomework(schoolId);
-    toast({
-      title: "Homework Sent Successfully!",
-      description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.`,
-    });
-    setFormData({ standard: "", section: "", subject: "", homework: "" });
-    setShowCustomSubject(false);
-    setCustomSubject("");
-    setFile(null);
-    setIsSubmitting(false);
   };
 
   const handleInputChange = (field: string, value: string) => {

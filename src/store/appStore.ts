@@ -271,7 +271,11 @@ const useAppStore = create<AppStore>()((set, get) => ({
       })
       .select()
       .single();
-    if (data && !error) {
+    if (error) {
+      console.error("addHomework error:", error);
+      throw error;
+    }
+    if (data) {
       set((state) => ({ homework: [data as unknown as Homework, ...state.homework] }));
     }
   },
