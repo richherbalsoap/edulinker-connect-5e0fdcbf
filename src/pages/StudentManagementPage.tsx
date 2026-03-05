@@ -515,6 +515,7 @@ const StudentManagementPage = () => {
         )}
       </div>
       <StudentModal
+        key={editingStudent?.id || "new"}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
