@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, X, Upload, User, Phone, Key } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, User, Phone, Key, FileUp } from "lucide-react";
+import ImportStudentsModal from "@/components/ImportStudentsModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -285,6 +286,7 @@ const StudentManagementPage = () => {
   const deleteStudentFromStore = useAppStore((state) => state.deleteStudent);
   const fetchStudents = useAppStore((state) => state.fetchStudents);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [selectedClass, setSelectedClass] = useState("All Classes");
   const [selectedSection, setSelectedSection] = useState("All Sections");
@@ -361,15 +363,24 @@ const StudentManagementPage = () => {
       <div className="space-y-6 relative z-10 px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-bold text-foreground">Manage Student Records</h1>
-          <Button
-            onClick={() => {
-              setEditingStudent(null);
-              setIsModalOpen(true);
-            }}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
-          >
-            <Plus size={20} className="mr-2" /> Add Student
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setIsImportModalOpen(true)}
+              variant="outline"
+              className="bg-black/40 hover:bg-primary/10 border-primary/20 text-foreground font-bold"
+            >
+              <FileUp size={20} className="mr-2" /> Import Students
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingStudent(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
+            >
+              <Plus size={20} className="mr-2" /> Add Student
+            </Button>
+          </div>
         </div>
 
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 w-full mx-auto space-y-4">
@@ -511,6 +522,14 @@ const StudentManagementPage = () => {
         }}
         onSave={handleSaveStudent}
         student={editingStudent}
+      />
+      <ImportStudentsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        schoolId={schoolId}
+        onImportComplete={() => {
+          if (schoolId) fetchStudents(schoolId);
+        }}
       />
     </>
   );
