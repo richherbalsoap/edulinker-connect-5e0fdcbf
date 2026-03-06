@@ -317,9 +317,9 @@ const ResultSenderPage = () => {
                 type="number"
                 value={subject.total_marks}
                 onChange={(e) => handleMarksChange(index, "total_marks", e.target.value)}
-                placeholder="Total"
+
                 title="Total exam marks (e.g. 100)"
-                className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="Total subject mark" />
               
                 <Button
                 type="button"
