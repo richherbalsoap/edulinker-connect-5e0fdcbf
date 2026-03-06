@@ -33,7 +33,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
+    <main className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
       {/* Fallback golden background */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div className="absolute inset-0 golden-grid-bg opacity-15" />
@@ -85,7 +85,7 @@ const LoginPage = () => {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 };
 
