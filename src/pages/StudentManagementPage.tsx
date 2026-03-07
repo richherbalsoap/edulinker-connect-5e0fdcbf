@@ -293,8 +293,28 @@ const StudentManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
+  const [feeReminders, setFeeReminders] = useState<Record<string, { message: string; created_at: string }[]>>({});
+
   useEffect(() => {
-    if (schoolId) fetchStudents(schoolId);
+    if (schoolId) {
+      fetchStudents(schoolId);
+      // Fetch fee reminders for all students
+      supabase
+        .from('fees_reminders')
+        .select('student_id, message, created_at')
+        .eq('school_id', schoolId)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => {
+          if (data) {
+            const grouped: Record<string, { message: string; created_at: string }[]> = {};
+            (data as any[]).forEach(r => {
+              if (!grouped[r.student_id]) grouped[r.student_id] = [];
+              grouped[r.student_id].push({ message: r.message, created_at: r.created_at });
+            });
+            setFeeReminders(grouped);
+          }
+        });
+    }
   }, [schoolId]);
 
   const handleSaveStudent = async (studentData: any, manualKey: string | null) => {
