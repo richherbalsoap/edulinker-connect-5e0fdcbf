@@ -500,6 +500,23 @@ const StudentManagementPage = () => {
                         <span className="truncate">{student.parent_contact || "--"}</span>
                       </div>
                     </div>
+                    {/* Fee Reminders for this student */}
+                    {feeReminders[student.id] && feeReminders[student.id].length > 0 && (
+                      <div className="bg-primary/5 border border-primary/15 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2 text-primary/70 text-xs font-bold">
+                          <DollarSign size={14} /> FEE REMINDERS ({feeReminders[student.id].length})
+                        </div>
+                        {feeReminders[student.id].slice(0, 2).map((rem, idx) => (
+                          <div key={idx} className="text-xs text-foreground/60">
+                            <p className="truncate">{rem.message}</p>
+                            <p className="text-foreground/30">{new Date(rem.created_at).toLocaleDateString()}</p>
+                          </div>
+                        ))}
+                        {feeReminders[student.id].length > 2 && (
+                          <p className="text-xs text-primary/50">+{feeReminders[student.id].length - 2} more</p>
+                        )}
+                      </div>
+                    )}
                     <div className="flex gap-3 mt-4">
                       <Button
                         onClick={() => {
