@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, X, Upload, User, Phone, Key, FileUp } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, User, Phone, Key, FileUp, DollarSign } from "lucide-react";
 import ImportStudentsModal from "@/components/ImportStudentsModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
