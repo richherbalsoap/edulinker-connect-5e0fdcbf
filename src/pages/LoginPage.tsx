@@ -55,17 +55,18 @@ const LoginPage = () => {
         />
       </div>
 
-      {/* 3D Spline Background - non-interactive */}
+      {/* 3D Spline Background - fixed at bottom */}
       <div className="fixed inset-0 w-full h-full z-[1] pointer-events-none overflow-hidden">
-        <iframe
-          src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
-          frameBorder="0"
-          width="100%"
-          height="100%"
-          className="block w-full h-full object-cover pointer-events-none"
-          title="3D Background"
-          style={{ minHeight: "100dvh" }}
-        />
+        <div className="absolute bottom-0 left-0 w-full h-[60%]">
+          <iframe
+            src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
+            frameBorder="0"
+            width="100%"
+            height="100%"
+            className="block w-full h-full pointer-events-none"
+            title="3D Background"
+          />
+        </div>
       </div>
 
       {/* Glassmorphism login card */}
