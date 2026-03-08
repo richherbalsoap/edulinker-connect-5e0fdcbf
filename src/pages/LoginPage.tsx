@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { GraduationCap, LogIn } from "lucide-react";
-import ParticleBackground from "@/components/ParticleBackground";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +14,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,24 +39,26 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-black relative overflow-hidden p-4 touch-none">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-black relative overflow-hidden p-4">
       {/* Center bottom primary glow */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[120vw] h-[60vh] bg-blue-600/20 rounded-t-[100%] blur-[100px] animate-pulse" />
         <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-indigo-600/20 via-blue-900/5 to-transparent blur-2xl" />
       </div>
 
-      {/* 3D Spline Background */}
-      <div className="fixed inset-0 w-full h-[100dvh] z-[1] overflow-hidden pointer-events-none">
-        <div className="relative w-full h-full pointer-events-auto">
-          <iframe
-            src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
-            frameBorder="0"
-            title="3D Background"
-            className="absolute w-[120vw] h-[130dvh] left-[-10vw] bottom-[-30dvh] md:bottom-[-25dvh] outline-none border-none block"
-          />
+      {/* 3D Spline Background - only on desktop */}
+      {!isMobile && (
+        <div className="fixed inset-0 w-full h-[100dvh] z-[1] overflow-hidden pointer-events-none">
+          <div className="relative w-full h-full pointer-events-auto">
+            <iframe
+              src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
+              frameBorder="0"
+              title="3D Background"
+              className="absolute w-[120vw] h-[130dvh] left-[-10vw] bottom-[-30dvh] md:bottom-[-25dvh] outline-none border-none block"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Glassmorphism login card */}
       <Card className="w-full max-w-md relative z-10 border border-[hsl(230,80%,50%,0.3)] bg-card/30 backdrop-blur-2xl shadow-[0_8px_32px_hsl(230,100%,50%,0.2),inset_0_1px_0_hsl(0,0%,100%,0.1)]">
