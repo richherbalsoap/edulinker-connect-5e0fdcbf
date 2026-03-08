@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { TrendingUp, Users, BookOpen, Award, Filter } from "lucide-react";
 import useAppStore from "@/store/appStore";
+import { useSchoolId } from "@/hooks/useSchoolId";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const classes = ["A", "B", "C", "D", "E"];
@@ -28,6 +29,7 @@ const AnalyticsPage = () => {
   const results = useAppStore((state) => state.results);
   const students = useAppStore((state) => state.students);
   const fetchAll = useAppStore((state) => state.fetchAll);
+  const schoolId = useSchoolId();
 
   const [filterStandard, setFilterStandard] = useState("");
   const [filterClass, setFilterClass] = useState("");
@@ -35,8 +37,8 @@ const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState("all");
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (schoolId) fetchAll(schoolId);
+  }, [schoolId]);
 
   // Reset student when standard/class changes
   useEffect(() => {
@@ -70,12 +72,12 @@ const AnalyticsPage = () => {
   }, [results, filterStandard, filterClass, filterStudentId, timeRange]);
 
   const subjectPerformance = useMemo(() => {
-    const subjectMap: Record<string, { total: number; count: number }> = {};
+    const subjectMap: Record<string, { totalObtained: number; totalMarks: number; count: number }> = {};
     filteredResults.forEach((result) => {
       const name = result.subject;
-      const marks = result.percentage || 0;
-      if (!subjectMap[name]) subjectMap[name] = { total: 0, count: 0 };
-      subjectMap[name].total += marks;
+      if (!subjectMap[name]) subjectMap[name] = { totalObtained: 0, totalMarks: 0, count: 0 };
+      subjectMap[name].totalObtained += result.marks_obtained;
+      subjectMap[name].totalMarks += result.total_marks;
       subjectMap[name].count += 1;
     });
     const colors = [
@@ -90,26 +92,30 @@ const AnalyticsPage = () => {
     ];
     return Object.entries(subjectMap).map(([subject, data], index) => ({
       subject,
-      avgScore: Math.round(data.total / data.count),
+      avgScore: data.totalMarks > 0 ? Math.round((data.totalObtained / data.totalMarks) * 100) : 0,
+      totalObtained: data.totalObtained,
+      totalMarks: data.totalMarks,
+      count: data.count,
       color: colors[index % colors.length],
     }));
   }, [filteredResults]);
 
   const classPerformance = useMemo(() => {
-    const classMap: Record<string, { totalPercentage: number; count: number; students: Set<string> }> = {};
+    const classMap: Record<string, { totalObtained: number; totalMarks: number; count: number; students: Set<string> }> = {};
     filteredResults.forEach((result) => {
       const student = result.student;
       if (!student) return;
       const key = `${student.standard}-${student.section}`;
-      if (!classMap[key]) classMap[key] = { totalPercentage: 0, count: 0, students: new Set() };
-      classMap[key].totalPercentage += result.percentage || 0;
+      if (!classMap[key]) classMap[key] = { totalObtained: 0, totalMarks: 0, count: 0, students: new Set() };
+      classMap[key].totalObtained += result.marks_obtained;
+      classMap[key].totalMarks += result.total_marks;
       classMap[key].count += 1;
       classMap[key].students.add(student.name);
     });
     return Object.entries(classMap)
       .map(([cls, data]) => ({
         class: cls,
-        avgScore: data.count > 0 ? Math.round(data.totalPercentage / data.count) : 0,
+        avgScore: data.totalMarks > 0 ? Math.round((data.totalObtained / data.totalMarks) * 100) : 0,
         students: data.students.size,
       }))
       .sort((a, b) => b.avgScore - a.avgScore);
@@ -117,8 +123,9 @@ const AnalyticsPage = () => {
 
   const overallAvg = useMemo(() => {
     if (filteredResults.length === 0) return 0;
-    const total = filteredResults.reduce((sum, r) => sum + (r.percentage || 0), 0);
-    return Math.round(total / filteredResults.length);
+    const totalObtained = filteredResults.reduce((sum, r) => sum + r.marks_obtained, 0);
+    const totalMarks = filteredResults.reduce((sum, r) => sum + r.total_marks, 0);
+    return totalMarks > 0 ? Math.round((totalObtained / totalMarks) * 100) : 0;
   }, [filteredResults]);
 
   const topClass = useMemo(
