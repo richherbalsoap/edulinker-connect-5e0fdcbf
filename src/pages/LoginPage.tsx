@@ -68,12 +68,12 @@ const LoginPage = () => {
       </div>
 
       {/* Glassmorphism login card */}
-      <Card className="w-full max-w-md relative z-10 border border-primary/20 bg-card/30 backdrop-blur-2xl shadow-[0_8px_32px_hsl(217,100%,50%,0.15),inset_0_1px_0_hsl(0,0%,100%,0.1)]">
+      <Card className="w-full max-w-md relative z-10 border border-[hsl(230,80%,50%,0.3)] bg-card/30 backdrop-blur-2xl shadow-[0_8px_32px_hsl(230,100%,50%,0.2),inset_0_1px_0_hsl(0,0%,100%,0.1)]">
         <CardHeader className="text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 backdrop-blur-md border border-primary/30 flex items-center justify-center shadow-[0_0_20px_hsl(217,100%,50%,0.2)]">
-            <GraduationCap size={32} className="text-primary" />
+          <div className="mx-auto w-14 h-14 rounded-xl bg-[hsl(230,80%,50%,0.15)] backdrop-blur-md border border-[hsl(230,80%,50%,0.4)] flex items-center justify-center shadow-[0_0_20px_hsl(230,100%,50%,0.3)]">
+            <GraduationCap size={32} className="text-[hsl(230,80%,60%)]" />
           </div>
-          <CardTitle className="text-2xl text-primary drop-shadow-[0_0_10px_hsl(217,100%,50%,0.3)]">
+          <CardTitle className="text-2xl text-[hsl(230,80%,60%)] drop-shadow-[0_0_10px_hsl(230,100%,50%,0.4)]">
             EDULinker
           </CardTitle>
           <CardDescription className="text-muted-foreground">Sign in to your account</CardDescription>
@@ -86,7 +86,7 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-background/20 backdrop-blur-md border-primary/20 focus:border-primary/50 transition-colors"
+              className="bg-background/20 backdrop-blur-md border-[hsl(230,80%,50%,0.25)] focus:border-[hsl(230,80%,50%,0.6)] transition-colors"
             />
             <Input
               type="password"
@@ -94,20 +94,20 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-background/20 backdrop-blur-md border-primary/20 focus:border-primary/50 transition-colors"
+              className="bg-background/20 backdrop-blur-md border-[hsl(230,80%,50%,0.25)] focus:border-[hsl(230,80%,50%,0.6)] transition-colors"
             />
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_25px_hsl(217,100%,50%,0.35)] transition-shadow hover:shadow-[0_0_35px_hsl(217,100%,50%,0.5)]"
+              className="w-full bg-[hsl(230,80%,55%)] text-white hover:bg-[hsl(230,80%,60%)] font-bold shadow-[0_0_25px_hsl(230,100%,50%,0.4)] transition-shadow hover:shadow-[0_0_35px_hsl(230,100%,50%,0.6)]"
             >
               <LogIn size={18} className="mr-2" /> {loading ? "Signing in..." : "Login"}
             </Button>
             <div className="flex justify-between text-sm">
-              <Link to="/signup" className="text-primary/80 hover:text-primary transition-colors">
+              <Link to="/signup" className="text-[hsl(230,80%,60%)] hover:text-[hsl(230,80%,70%)] transition-colors">
                 Create Account
               </Link>
-              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/forgot-password" className="text-muted-foreground hover:text-[hsl(230,80%,60%)] transition-colors">
                 Forgot Password?
               </Link>
             </div>
