@@ -55,6 +55,19 @@ const LoginPage = () => {
         />
       </div>
 
+      {/* Interactive 3D Spline Background */}
+      <div className="fixed inset-0 w-full h-full z-[1] pointer-events-none">
+        <iframe
+          src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+          className="block w-full h-full object-cover"
+          title="3D Background"
+          style={{ pointerEvents: "auto", minHeight: "100dvh" }}
+        />
+      </div>
+
       {/* Glassmorphism login card */}
       <Card className="w-full max-w-md relative z-10 border border-[hsl(230,80%,50%,0.3)] bg-card/30 backdrop-blur-2xl shadow-[0_8px_32px_hsl(230,100%,50%,0.2),inset_0_1px_0_hsl(0,0%,100%,0.1)]">
         <CardHeader className="text-center space-y-3">
