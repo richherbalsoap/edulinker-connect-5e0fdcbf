@@ -311,6 +311,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
         subject: result.subject,
         marks_obtained: result.marks_obtained,
         total_marks: result.total_marks,
+        percentage: result.total_marks > 0 ? Math.round((result.marks_obtained / result.total_marks) * 100) : 0,
         file_name: result.file_name || null,
         school_id: result.school_id,
         created_by: user?.id || null,
