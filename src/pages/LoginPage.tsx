@@ -55,16 +55,16 @@ const LoginPage = () => {
         />
       </div>
 
-      {/* Interactive 3D Spline Background */}
-      <div className="fixed inset-0 w-full h-full z-[1] pointer-events-none">
+      {/* 3D Spline Background - non-interactive */}
+      <div className="fixed inset-0 w-full h-full z-[1] pointer-events-none overflow-hidden">
         <iframe
           src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
           frameBorder="0"
           width="100%"
           height="100%"
-          className="block w-full h-full object-cover"
+          className="block w-full h-full object-cover pointer-events-none"
           title="3D Background"
-          style={{ pointerEvents: "auto", minHeight: "100dvh" }}
+          style={{ minHeight: "100dvh" }}
         />
       </div>
 
