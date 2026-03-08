@@ -256,7 +256,7 @@ const ResultSenderPage = () => {
           <label className="block text-xs font-bold tracking-wider text-primary/60">SUBJECTS & MARKS</label>
           {subjects.map((subject, index) =>
           <div key={index} className="space-y-2">
-              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex items-center gap-2 flex-wrap">
                 {showCustomSubject === index ?
               <div className="flex-1 flex gap-2 min-w-0">
                     <input
@@ -311,7 +311,7 @@ const ResultSenderPage = () => {
                 onChange={(e) => handleMarksChange(index, "marks_obtained", e.target.value)}
 
                 title="Marks obtained (e.g. 78)"
-                className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="Marks you get" />
+                className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm" placeholder="Marks" />
               
                 <input
                 type="number"
@@ -319,7 +319,7 @@ const ResultSenderPage = () => {
                 onChange={(e) => handleMarksChange(index, "total_marks", e.target.value)}
 
                 title="Total exam marks (e.g. 100)"
-                className="w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="Total subject mark" />
+                className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm" placeholder="Total" />
               
                 <Button
                 type="button"
