@@ -50,7 +50,7 @@ const LoginPage = () => {
           frameBorder="0"
           width="100%"
           height="100%"
-          style={{ display: 'block', filter: 'hue-rotate(200deg) saturate(1.5)' }}
+          style={{ display: 'block', filter: 'hue-rotate(170deg) saturate(2) brightness(1.1)' }}
           title="3D Background"
         />
       </div>
