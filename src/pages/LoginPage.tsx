@@ -36,11 +36,11 @@ const LoginPage = () => {
       {/* Animated Gradient Glow Blobs */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute -top-[10%] -left-[20%] md:top-0 md:left-1/4 w-72 h-72 md:w-96 md:h-96 rounded-full blur-3xl animate-pulse"
-        style={{ background: 'hsla(220, 90%, 56%, 0.2)' }} />
+          style={{ background: 'hsla(220, 90%, 56%, 0.2)' }} />
         <div className="absolute -bottom-[10%] -right-[20%] md:bottom-0 md:right-1/4 w-72 h-72 md:w-96 md:h-96 rounded-full blur-3xl animate-pulse"
-        style={{ background: 'hsla(250, 80%, 60%, 0.2)', animationDelay: '1s' }} />
+          style={{ background: 'hsla(250, 80%, 60%, 0.2)', animationDelay: '1s' }} />
         <div className="absolute inset-0"
-        style={{ background: 'radial-gradient(circle at 50% 50%, hsla(220, 90%, 56%, 0.05), transparent 50%)' }} />
+          style={{ background: 'radial-gradient(circle at 50% 50%, hsla(220, 90%, 56%, 0.05), transparent 50%)' }} />
       </div>
 
       {/* Spline 3D Interactive Background */}
@@ -51,8 +51,8 @@ const LoginPage = () => {
           width="100%"
           height="100%"
           style={{ display: 'block' }}
-          title="3D Background" />
-        
+          title="3D Background"
+        />
       </div>
 
       {/* Login Card */}
@@ -68,26 +68,26 @@ const LoginPage = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="email" placeholder="Email" value={email}
-              onChange={(e) => setEmail(e.target.value)} required
-              className="bg-background/20 backdrop-blur-md border-[hsla(220,90%,56%,0.2)] focus:border-[hsla(220,90%,56%,0.5)] transition-colors" />
-            
+              onChange={e => setEmail(e.target.value)} required
+              className="bg-background/20 backdrop-blur-md border-[hsla(220,90%,56%,0.2)] focus:border-[hsla(220,90%,56%,0.5)] transition-colors"
+            />
             <Input
               type="password" placeholder="Password" value={password}
-              onChange={(e) => setPassword(e.target.value)} required
-              className="bg-background/20 backdrop-blur-md border-[hsla(220,90%,56%,0.2)] focus:border-[hsla(220,90%,56%,0.5)] transition-colors" />
-            
+              onChange={e => setPassword(e.target.value)} required
+              className="bg-background/20 backdrop-blur-md border-[hsla(220,90%,56%,0.2)] focus:border-[hsla(220,90%,56%,0.5)] transition-colors"
+            />
             <Button type="submit" disabled={loading} className="w-full bg-[hsl(220,90%,56%)] text-white hover:bg-[hsl(220,90%,50%)] font-bold shadow-[0_0_25px_hsla(220,90%,56%,0.35)] transition-shadow hover:shadow-[0_0_35px_hsla(220,90%,56%,0.5)]">
               <LogIn size={18} className="mr-2" /> {loading ? 'Signing in...' : 'Login'}
             </Button>
             <div className="flex justify-between text-sm">
-              <Link to="/signup" className="transition-colors text-[#e6e9f0] bg-primary-foreground font-mono font-light border-0 opacity-100">Create Account</Link>
+              <Link to="/signup" className="text-[hsl(220,90%,65%)]/80 hover:text-[hsl(220,90%,65%)] transition-colors">Create Account</Link>
               <Link to="/forgot-password" className="text-muted-foreground hover:text-[hsl(220,90%,65%)] transition-colors">Forgot Password?</Link>
             </div>
           </form>
         </CardContent>
       </Card>
-    </div>);
-
+    </div>
+  );
 };
 
 export default LoginPage;
