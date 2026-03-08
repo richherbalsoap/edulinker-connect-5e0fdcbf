@@ -205,14 +205,14 @@ const PromotionPanelPage = () => {
             <label className="block text-xs font-bold tracking-wider text-primary/70 mb-2">CLASS</label>
             <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
               <option value="All Classes">All Classes</option>
-              {availableClasses.map(c => <option key={c} value={c}>{c}</option>)}
+              {standards.map(s => <option key={s} value={`Class ${s}`}>Class {s}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SECTION</label>
+            <label className="block text-xs font-bold tracking-wider text-primary/70 mb-2">SECTION</label>
             <select value={selectedSection} onChange={e => setSelectedSection(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
               <option value="All Sections">All Sections</option>
-              {availableSections.map(s => <option key={s} value={s}>{s}</option>)}
+              {sections.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
