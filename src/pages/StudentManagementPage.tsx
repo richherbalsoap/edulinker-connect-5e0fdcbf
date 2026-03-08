@@ -387,7 +387,7 @@ const StudentManagementPage = () => {
             <Button
               onClick={() => setIsImportModalOpen(true)}
               variant="outline"
-              className="bg-black/40 hover:bg-primary/10 border-primary/20 text-foreground font-bold text-xs sm:text-sm"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)] text-xs sm:text-sm"
             >
               <FileUp size={16} className="mr-1 sm:mr-2" /> Import
             </Button>
