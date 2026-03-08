@@ -35,7 +35,24 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
-      <ParticleBackground />
+      {/* Animated Gradient Glow Blobs */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute -top-[10%] -left-[20%] md:top-0 md:left-1/4 w-72 h-72 md:w-96 md:h-96 rounded-full blur-3xl animate-pulse" style={{ background: 'hsl(var(--primary) / 0.2)' }} />
+        <div className="absolute -bottom-[10%] -right-[20%] md:bottom-0 md:right-1/4 w-72 h-72 md:w-96 md:h-96 rounded-full blur-3xl animate-pulse [animation-delay:1s]" style={{ background: 'hsl(var(--secondary) / 0.2)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.05), transparent 50%)' }} />
+      </div>
+
+      {/* Interactive 3D Spline Background */}
+      <div className="fixed inset-0 w-full h-[100dvh] z-[1]">
+        <iframe
+          src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+          style={{ display: 'block' }}
+          title="3D Background"
+        />
+      </div>
 
       {/* Glassmorphism login card */}
       <Card className="w-full max-w-md relative z-10 border border-primary/20 bg-card/30 backdrop-blur-2xl shadow-[0_8px_32px_hsl(51,100%,50%,0.15),inset_0_1px_0_hsl(0,0%,100%,0.1)]">
