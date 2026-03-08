@@ -38,34 +38,23 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-background relative overflow-hidden p-4">
-      {/* Animated Gradient Glow Blobs - Blue theme */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div
-          className="absolute top-[10%] left-[10%] w-72 h-72 md:w-[500px] md:h-[500px] rounded-full blur-[120px] animate-pulse"
-          style={{ background: "hsl(230 80% 50% / 0.15)" }}
-        />
-        <div
-          className="absolute bottom-[5%] right-[5%] w-80 h-80 md:w-[600px] md:h-[600px] rounded-full blur-[120px] animate-pulse [animation-delay:1s]"
-          style={{ background: "hsl(260 80% 50% / 0.12)" }}
-        />
-        <div
-          className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-[150px]"
-          style={{ background: "hsl(230 100% 50% / 0.06)" }}
-        />
+    <div className="min-h-[100dvh] flex items-center justify-center bg-black relative overflow-hidden p-4 touch-none">
+      {/* Center bottom primary glow */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[120vw] h-[60vh] bg-blue-600/20 rounded-t-[100%] blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-indigo-600/20 via-blue-900/5 to-transparent blur-2xl" />
       </div>
 
-      {/* 3D Spline Background - non-interactive */}
-      <div className="fixed inset-0 w-full h-full z-[1] pointer-events-none overflow-hidden">
-        <iframe
-          src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
-          frameBorder="0"
-          width="100%"
-          height="100%"
-          className="block w-full h-full object-cover pointer-events-none"
-          title="3D Background"
-          style={{ minHeight: "100dvh" }}
-        />
+      {/* 3D Spline Background */}
+      <div className="fixed inset-0 w-full h-[100dvh] z-[1] overflow-hidden pointer-events-none">
+        <div className="relative w-full h-full pointer-events-auto">
+          <iframe
+            src="https://my.spline.design/aidatamodelinteraction-mdTL3FktFVHgDvFr5TKtnYDV/"
+            frameBorder="0"
+            title="3D Background"
+            className="absolute w-[120vw] h-[130dvh] left-[-10vw] bottom-[-30dvh] md:bottom-[-25dvh] outline-none border-none block"
+          />
+        </div>
       </div>
 
       {/* Glassmorphism login card */}
