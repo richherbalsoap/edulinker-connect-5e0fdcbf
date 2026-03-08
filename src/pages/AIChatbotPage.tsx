@@ -71,7 +71,7 @@ const AIChatbotPage = () => {
   return (
     <div className="space-y-6 relative z-10 px-4 py-6">
       <h1 className="text-3xl font-bold text-foreground text-center">AI Insight Chatbot</h1>
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl overflow-hidden flex flex-col max-w-4xl mx-auto" style={{ height: 'calc(100vh - 250px)', minHeight: '500px' }}>
+      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl overflow-hidden flex flex-col max-w-4xl mx-auto" style={{ height: 'calc(100dvh - 250px)', minHeight: '400px' }}>
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
           {messages.map(message => (
             <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>

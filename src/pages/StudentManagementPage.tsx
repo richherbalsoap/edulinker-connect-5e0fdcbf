@@ -383,22 +383,22 @@ const StudentManagementPage = () => {
       <div className="space-y-6 relative z-10 px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-bold text-foreground">Manage Student Records</h1>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
             <Button
               onClick={() => setIsImportModalOpen(true)}
               variant="outline"
-              className="bg-black/40 hover:bg-primary/10 border-primary/20 text-foreground font-bold"
+              className="bg-black/40 hover:bg-primary/10 border-primary/20 text-foreground font-bold text-xs sm:text-sm"
             >
-              <FileUp size={20} className="mr-2" /> Import Students
+              <FileUp size={16} className="mr-1 sm:mr-2" /> Import
             </Button>
             <Button
               onClick={() => {
                 setEditingStudent(null);
                 setIsModalOpen(true);
               }}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)] text-xs sm:text-sm"
             >
-              <Plus size={20} className="mr-2" /> Add Student
+              <Plus size={16} className="mr-1 sm:mr-2" /> Add Student
             </Button>
           </div>
         </div>
