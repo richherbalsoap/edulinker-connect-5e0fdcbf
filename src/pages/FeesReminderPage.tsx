@@ -13,13 +13,14 @@ interface FeeReminder {
   id: string;
   student_id: string;
   title: string | null;
-  message: string;
   amount: number | null;
   school_id: string | null;
   created_by: string | null;
   created_at: string;
   student?: { id: string; name: string; standard: string; section: string };
 }
+
+const quickAmounts = [500, 1000, 2000, 5000];
 
 const FeesReminderPage = () => {
   const { toast } = useToast();
@@ -31,7 +32,6 @@ const FeesReminderPage = () => {
   const [studentId, setStudentId] = useState("");
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState("");
   const [reminders, setReminders] = useState<FeeReminder[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -57,19 +57,12 @@ const FeesReminderPage = () => {
     fetchReminders();
   }, [schoolId]);
 
-  const quickTemplates = [
-    `Fees due on ${new Date(new Date().setDate(new Date().getDate() + 10)).toLocaleDateString()}`,
-    "Please submit fees for this month",
-    "Fees pending. Please clear immediately.",
-    "Fees received. Thank you!",
-  ];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!standard || !selectedClass || !studentId || !title || !message) {
+    if (!standard || !selectedClass || !studentId || !title || !amount) {
       toast({
         title: "Incomplete Information",
-        description: "Please select standard, class, student, enter a title and message.",
+        description: "Please select standard, class, student, enter a title and amount.",
         variant: "destructive",
       });
       return;
@@ -78,8 +71,8 @@ const FeesReminderPage = () => {
     const { error } = await supabase.from("fees_reminders").insert({
       student_id: studentId,
       title,
-      message,
-      amount: amount ? parseFloat(amount) : 0,
+      message: title, // message column bhi same fill karo (DB requirement)
+      amount: parseFloat(amount),
       school_id: schoolId,
     });
     setLoading(false);
@@ -87,14 +80,13 @@ const FeesReminderPage = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Fees Reminder Sent!", description: `Reminder has been sent to the parent of ${student}.` });
+    toast({ title: "Fees Reminder Sent!", description: `Reminder sent to parent of ${student}.` });
     setStandard("");
     setSelectedClass("");
     setStudent("");
     setStudentId("");
     setTitle("");
     setAmount("");
-    setMessage("");
     fetchReminders();
   };
 
@@ -109,6 +101,7 @@ const FeesReminderPage = () => {
       <h1 className="text-3xl font-bold text-foreground text-center">Fees Reminder</h1>
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Standard + Class */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">STANDARD *</label>
@@ -152,6 +145,7 @@ const FeesReminderPage = () => {
             </div>
           </div>
 
+          {/* Student */}
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">SELECT STUDENT *</label>
             {filteredStudents.length > 0 ? (
@@ -177,59 +171,45 @@ const FeesReminderPage = () => {
             )}
           </div>
 
-          {/* NEW: Title + Amount fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-primary/60 mb-2">TITLE *</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                placeholder="e.g. Monthly Fees"
-                className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-primary/60 mb-2">AMOUNT (₹)</label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min="0"
-                placeholder="e.g. 5000"
-                className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-            </div>
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-primary/60 mb-2">TITLE *</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              placeholder="e.g. Monthly Fees"
+              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
           </div>
 
+          {/* Amount + Quick Amount Buttons */}
           <div>
-            <label className="block text-sm font-medium text-primary/60 mb-2">QUICK TEMPLATES</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              {quickTemplates.map((template) => (
+            <label className="block text-sm font-medium text-primary/60 mb-2">AMOUNT (₹) *</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              min="1"
+              placeholder="Enter amount or pick below..."
+              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 mb-3"
+            />
+            {/* Quick Amount Shortcuts */}
+            <div className="flex flex-wrap gap-2">
+              {quickAmounts.map((amt) => (
                 <Button
-                  key={template}
+                  key={amt}
                   type="button"
                   variant="outline"
-                  onClick={() => setMessage(template)}
-                  className="text-xs text-center bg-black/40 border-primary/20 hover:bg-primary/10 text-foreground/80 whitespace-normal h-auto py-2"
+                  onClick={() => setAmount(String(amt))}
+                  className={`text-sm border-primary/20 hover:bg-primary/10 text-foreground/80 px-4 py-2 ${amount === String(amt) ? "bg-primary/20 border-primary" : "bg-black/40"}`}
                 >
-                  {template}
+                  ₹{amt.toLocaleString()}
                 </Button>
               ))}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-primary/60 mb-2">MESSAGE *</label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              required
-              rows={5}
-              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-              placeholder="Type your message..."
-            />
           </div>
 
           <Button
@@ -260,14 +240,11 @@ const FeesReminderPage = () => {
                         Class {r.student.standard} - {r.student.section}
                       </span>
                     )}
-                    {r.amount && r.amount > 0 && (
-                      <span className="text-xs bg-green-900/30 text-green-400 px-2 py-0.5 rounded border border-green-500/20">
-                        ₹{r.amount}
-                      </span>
-                    )}
                   </div>
-                  {r.title && <p className="text-foreground font-semibold text-sm">{r.title}</p>}
-                  <p className="text-foreground/70 text-sm">{r.message}</p>
+                  <p className="text-foreground font-semibold text-sm">{r.title || "—"}</p>
+                  {r.amount && r.amount > 0 && (
+                    <p className="text-green-400 font-bold text-base mt-1">₹{r.amount.toLocaleString()}</p>
+                  )}
                   <p className="text-foreground/40 text-xs mt-1">{new Date(r.created_at).toLocaleString()}</p>
                 </div>
                 <Button
