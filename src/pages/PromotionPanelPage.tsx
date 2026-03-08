@@ -161,14 +161,14 @@ const PromotionPanelPage = () => {
   return (
     <div className="space-y-4 px-4 pb-10 relative z-10 py-6">
       <div className="text-center pt-4">
-        <h1 className="text-3xl font-bold text-foreground">Promotion Panel</h1>
-        <p className="text-foreground/70">Manage student promotions for the new academic year</p>
+        <h1 className="text-3xl font-bold text-foreground drop-shadow-[0_0_10px_hsl(51,100%,50%,0.3)]">Promotion Panel</h1>
+        <p className="text-foreground/80">Manage student promotions for the new academic year</p>
       </div>
 
       {/* Bulk Promotion */}
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+      <div className="bg-black/20 backdrop-blur-md border border-primary/30 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto space-y-4 shadow-[0_0_30px_hsl(51,100%,50%,0.08)]">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><Users size={20} className="text-primary" /></div>
+          <div className="w-10 h-10 rounded-lg bg-primary/30 flex items-center justify-center shadow-[0_0_12px_hsl(51,100%,50%,0.3)]"><Users size={20} className="text-primary" /></div>
           <h2 className="text-lg font-semibold text-foreground">Bulk Promotion</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -199,10 +199,10 @@ const PromotionPanelPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+      <div className="bg-black/20 backdrop-blur-md border border-primary/30 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto space-y-4 shadow-[0_0_30px_hsl(51,100%,50%,0.08)]">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">CLASS</label>
+            <label className="block text-xs font-bold tracking-wider text-primary/70 mb-2">CLASS</label>
             <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
               <option value="All Classes">All Classes</option>
               {availableClasses.map(c => <option key={c} value={c}>{c}</option>)}
@@ -227,17 +227,17 @@ const PromotionPanelPage = () => {
         {Object.keys(groupedStudents).length > 0 ? (
           Object.keys(groupedStudents).map(classGroup => (
             <div key={classGroup}>
-              <h2 className="text-foreground text-xl font-bold mb-3 px-2">{classGroup}</h2>
+              <h2 className="text-foreground text-xl font-bold mb-3 px-2 drop-shadow-[0_0_8px_hsl(51,100%,50%,0.25)]">{classGroup}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groupedStudents[classGroup].map((student: any) => {
                   const nextClass = getNextStandard(student.standard);
                   const prevClass = getPreviousStandard(student.standard);
                   return (
-                    <div key={student.id} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 space-y-3 hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300">
+                    <div key={student.id} className="bg-black/20 backdrop-blur-md border border-primary/25 rounded-2xl p-4 space-y-3 shadow-[0_0_15px_hsl(51,100%,50%,0.06)] hover:border-primary/50 hover:shadow-[0_0_25px_hsl(51,100%,50%,0.2)] transition-all duration-300">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-bold text-lg text-foreground">{student.name}</h3>
-                          <p className="text-xs text-foreground/50">Section {student.section} • Roll {student.roll_no || '—'}</p>
+                          <h3 className="font-bold text-lg text-foreground drop-shadow-[0_0_6px_hsl(51,100%,50%,0.2)]">{student.name}</h3>
+                          <p className="text-xs text-foreground/60">Section {student.section} • Roll {student.roll_no || '—'}</p>
                         </div>
                       </div>
 
@@ -254,7 +254,7 @@ const PromotionPanelPage = () => {
                       ) : null}
 
                       <div className="space-y-2">
-                        <Button onClick={() => handleAction(student.id, 'promote')} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-2 rounded-lg border border-green-400/30 text-sm">
+                        <Button onClick={() => handleAction(student.id, 'promote')} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-2 rounded-lg border border-green-400/30 text-sm shadow-[0_0_10px_hsl(120,60%,50%,0.1)]">
                           <CheckCircle size={16} className="mr-2" />{nextClass ? `Promote to Class ${nextClass}` : 'Graduate'}
                         </Button>
                         <div className="grid grid-cols-3 gap-2">
