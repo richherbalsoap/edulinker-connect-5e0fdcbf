@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Repeat, Trash2, Users } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Trash2, Users, Edit2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useAppStore from '@/store/appStore';
 import { useSchoolId } from '@/hooks/useSchoolId';
 
 const standards = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+const sections = ['A', 'B', 'C', 'D', 'E'];
 
 const getSortableClassIndex = (classVal: string) => {
   const standard = classVal.replace('Class ', '');
@@ -16,6 +17,12 @@ const getSortableClassIndex = (classVal: string) => {
 const getNextStandard = (currentStandard: string) => {
   const currentIndex = standards.indexOf(currentStandard);
   if (currentIndex > -1 && currentIndex < standards.length - 1) return standards[currentIndex + 1];
+  return null;
+};
+
+const getPreviousStandard = (currentStandard: string) => {
+  const currentIndex = standards.indexOf(currentStandard);
+  if (currentIndex > 0) return standards[currentIndex - 1];
   return null;
 };
 
@@ -33,6 +40,10 @@ const PromotionPanelPage = () => {
   const [bulkSection, setBulkSection] = useState('');
   const [isBulkPromoting, setIsBulkPromoting] = useState(false);
 
+  // Section change modal state
+  const [changingSectionFor, setChangingSectionFor] = useState<string | null>(null);
+  const [newSection, setNewSection] = useState('');
+
   useEffect(() => {
     if (schoolId) fetchStudents(schoolId);
   }, [schoolId]);
@@ -47,11 +58,23 @@ const PromotionPanelPage = () => {
         if (nextClass) {
           await updateStudent(id, { standard: nextClass });
           title = "Student Promoted!";
-          description = `${student.name} has been promoted to Class ${nextClass}.`;
+          description = `${student.name} promoted to Class ${nextClass}.`;
         } else {
           await deleteStudentFromStore(id);
           title = "Student Graduated!";
           description = `${student.name} has graduated.`;
+        }
+        break;
+      }
+      case 'back': {
+        const prevClass = getPreviousStandard(student.standard);
+        if (prevClass) {
+          await updateStudent(id, { standard: prevClass });
+          title = "Student Demoted";
+          description = `${student.name} moved back to Class ${prevClass}.`;
+        } else {
+          toast({ title: 'Cannot go back', description: `${student.name} is already in the lowest class.`, variant: 'destructive' });
+          return;
         }
         break;
       }
@@ -60,13 +83,21 @@ const PromotionPanelPage = () => {
         title = "Student Deleted";
         description = `${student.name} has been removed.`;
         break;
-      case 'repeat':
-        title = "Student to Repeat";
-        description = `${student.name} will repeat Class ${student.standard}.`;
-        break;
       default: return;
     }
+    if (schoolId) await fetchStudents(schoolId);
     toast({ title, description, variant: action === 'delete' ? 'destructive' : 'default' });
+  };
+
+  const handleSectionChange = async (studentId: string) => {
+    if (!newSection) return;
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    await updateStudent(studentId, { section: newSection });
+    if (schoolId) await fetchStudents(schoolId);
+    toast({ title: 'Section Changed', description: `${student.name} moved to Section ${newSection}.` });
+    setChangingSectionFor(null);
+    setNewSection('');
   };
 
   const handleBulkPromote = async () => {
@@ -95,7 +126,6 @@ const PromotionPanelPage = () => {
         graduated++;
       }
     }
-    // Re-fetch students after bulk promotion
     if (schoolId) await fetchStudents(schoolId);
     toast({
       title: 'Bulk Promotion Complete!',
@@ -135,7 +165,8 @@ const PromotionPanelPage = () => {
         <p className="text-foreground/70">Manage student promotions for the new academic year</p>
       </div>
 
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-4xl mx-auto space-y-4">
+      {/* Bulk Promotion */}
+      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center"><Users size={20} className="text-primary" /></div>
           <h2 className="text-lg font-semibold text-foreground">Bulk Promotion</h2>
@@ -143,12 +174,10 @@ const PromotionPanelPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">FROM CLASS</label>
-            <Select value={bulkFromClass} onValueChange={setBulkFromClass}>
-              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground"><SelectValue placeholder="Select class" /></SelectTrigger>
-              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                {standards.map(s => <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">Class {s}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <select value={bulkFromClass} onChange={e => setBulkFromClass(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              <option value="">Select class</option>
+              {standards.map(s => <option key={s} value={s}>Class {s}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">TO CLASS</label>
@@ -158,13 +187,10 @@ const PromotionPanelPage = () => {
           </div>
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SECTION (Optional)</label>
-            <Select value={bulkSection || "ALL"} onValueChange={v => setBulkSection(v === "ALL" ? "" : v)}>
-              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground"><SelectValue placeholder="All Sections" /></SelectTrigger>
-              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                <SelectItem value="ALL" className="text-foreground focus:bg-primary/10 focus:text-primary">All Sections</SelectItem>
-                {['A', 'B', 'C', 'D', 'E'].map(s => <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <select value={bulkSection} onChange={e => setBulkSection(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              <option value="">All Sections</option>
+              {sections.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
         </div>
         <Button onClick={handleBulkPromote} disabled={isBulkPromoting || !bulkFromClass} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-3 rounded-lg border border-green-400/30">
@@ -172,27 +198,22 @@ const PromotionPanelPage = () => {
         </Button>
       </div>
 
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-4xl mx-auto space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Filters */}
+      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">CLASS</label>
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground"><SelectValue placeholder="All Classes" /></SelectTrigger>
-              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                <SelectItem value="All Classes" className="text-foreground focus:bg-primary/10 focus:text-primary">All Classes</SelectItem>
-                {availableClasses.map(c => <SelectItem key={c} value={c} className="text-foreground focus:bg-primary/10 focus:text-primary">{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              <option value="All Classes">All Classes</option>
+              {availableClasses.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SECTION</label>
-            <Select value={selectedSection} onValueChange={setSelectedSection}>
-              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground"><SelectValue placeholder="All Sections" /></SelectTrigger>
-              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                <SelectItem value="All Sections" className="text-foreground focus:bg-primary/10 focus:text-primary">All Sections</SelectItem>
-                {availableSections.map(s => <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <select value={selectedSection} onChange={e => setSelectedSection(e.target.value)} className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              <option value="All Sections">All Sections</option>
+              {availableSections.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STUDENT NAME</label>
@@ -201,6 +222,7 @@ const PromotionPanelPage = () => {
         </div>
       </div>
 
+      {/* Student Cards */}
       <div className="space-y-8 max-w-4xl mx-auto">
         {Object.keys(groupedStudents).length > 0 ? (
           Object.keys(groupedStudents).map(classGroup => (
@@ -209,18 +231,42 @@ const PromotionPanelPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {groupedStudents[classGroup].map((student: any) => {
                   const nextClass = getNextStandard(student.standard);
+                  const prevClass = getPreviousStandard(student.standard);
                   return (
-                    <div key={student.id} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 space-y-4 hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300">
+                    <div key={student.id} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 space-y-3 hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300">
                       <div className="flex justify-between items-start">
-                        <div><h3 className="font-bold text-xl text-foreground">{student.name}</h3><p className="text-xs text-foreground/50">Section {student.section}</p></div>
+                        <div>
+                          <h3 className="font-bold text-lg text-foreground">{student.name}</h3>
+                          <p className="text-xs text-foreground/50">Section {student.section} • Roll {student.roll_no || '—'}</p>
+                        </div>
                       </div>
+
+                      {/* Section change inline */}
+                      {changingSectionFor === student.id ? (
+                        <div className="flex items-center gap-2">
+                          <select value={newSection} onChange={e => setNewSection(e.target.value)} className="flex-1 px-3 py-2 bg-black/40 border-primary/20 border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40">
+                            <option value="">Select Section</option>
+                            {sections.filter(s => s !== student.section).map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          <Button onClick={() => handleSectionChange(student.id)} disabled={!newSection} className="bg-primary/20 hover:bg-primary/30 text-primary font-bold text-xs px-3 py-2 border border-primary/30">Save</Button>
+                          <Button onClick={() => { setChangingSectionFor(null); setNewSection(''); }} className="bg-black/40 hover:bg-black/60 text-foreground/60 text-xs px-3 py-2 border border-primary/10">Cancel</Button>
+                        </div>
+                      ) : null}
+
                       <div className="space-y-2">
                         <Button onClick={() => handleAction(student.id, 'promote')} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-2 rounded-lg border border-green-400/30 text-sm">
                           <CheckCircle size={16} className="mr-2" />{nextClass ? `Promote to Class ${nextClass}` : 'Graduate'}
                         </Button>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button onClick={() => handleAction(student.id, 'repeat')} className="w-full bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 font-bold py-2 rounded-lg border border-yellow-400/30 text-sm"><Repeat size={16} className="mr-2" />Repeat</Button>
-                          <Button onClick={() => handleAction(student.id, 'delete')} className="w-full bg-red-400/20 hover:bg-red-400/30 text-red-300 font-bold py-2 rounded-lg border border-red-400/30 text-sm"><Trash2 size={16} className="mr-2" />Delete</Button>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button onClick={() => handleAction(student.id, 'back')} disabled={!prevClass} className="w-full bg-blue-400/20 hover:bg-blue-400/30 text-blue-300 font-bold py-2 rounded-lg border border-blue-400/30 text-sm disabled:opacity-40">
+                            <ArrowLeft size={16} className="mr-1" />Back
+                          </Button>
+                          <Button onClick={() => { setChangingSectionFor(student.id); setNewSection(''); }} className="w-full bg-purple-400/20 hover:bg-purple-400/30 text-purple-300 font-bold py-2 rounded-lg border border-purple-400/30 text-sm">
+                            <Edit2 size={16} className="mr-1" />Section
+                          </Button>
+                          <Button onClick={() => handleAction(student.id, 'delete')} className="w-full bg-red-400/20 hover:bg-red-400/30 text-red-300 font-bold py-2 rounded-lg border border-red-400/30 text-sm">
+                            <Trash2 size={16} className="mr-1" />Delete
+                          </Button>
                         </div>
                       </div>
                     </div>
