@@ -99,28 +99,34 @@ export type Database = {
       }
       fees_reminders: {
         Row: {
+          amount: number | null
           created_at: string
           created_by: string | null
           id: string
           message: string
           school_id: string | null
           student_id: string
+          title: string | null
         }
         Insert: {
+          amount?: number | null
           created_at?: string
           created_by?: string | null
           id?: string
           message: string
           school_id?: string | null
           student_id: string
+          title?: string | null
         }
         Update: {
+          amount?: number | null
           created_at?: string
           created_by?: string | null
           id?: string
           message?: string
           school_id?: string | null
           student_id?: string
+          title?: string | null
         }
         Relationships: [
           {
