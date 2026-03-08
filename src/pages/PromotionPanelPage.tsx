@@ -193,7 +193,7 @@ const PromotionPanelPage = () => {
             </select>
           </div>
         </div>
-        <Button onClick={handleBulkPromote} disabled={isBulkPromoting || !bulkFromClass} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-3 rounded-lg border border-green-400/30">
+        <Button onClick={handleBulkPromote} disabled={isBulkPromoting || !bulkFromClass} className="w-full bg-black/60 hover:bg-black/80 text-foreground font-bold py-3 rounded-lg border border-primary/40 shadow-[0_0_12px_hsl(51,100%,50%,0.1)]">
           <CheckCircle size={18} className="mr-2" />{isBulkPromoting ? 'Promoting...' : 'Promote All'}
         </Button>
       </div>
@@ -254,17 +254,17 @@ const PromotionPanelPage = () => {
                       ) : null}
 
                       <div className="space-y-2">
-                        <Button onClick={() => handleAction(student.id, 'promote')} className="w-full bg-green-400/20 hover:bg-green-400/30 text-green-300 font-bold py-2 rounded-lg border border-green-400/30 text-sm shadow-[0_0_10px_hsl(120,60%,50%,0.1)]">
+                        <Button onClick={() => handleAction(student.id, 'promote')} className="w-full bg-black/60 hover:bg-black/80 text-foreground font-bold py-2 rounded-lg border border-primary/40 text-sm shadow-[0_0_10px_hsl(51,100%,50%,0.1)] hover:shadow-[0_0_15px_hsl(51,100%,50%,0.2)]">
                           <CheckCircle size={16} className="mr-2" />{nextClass ? `Promote to Class ${nextClass}` : 'Graduate'}
                         </Button>
                         <div className="grid grid-cols-3 gap-2">
-                          <Button onClick={() => handleAction(student.id, 'back')} disabled={!prevClass} className="w-full bg-blue-400/20 hover:bg-blue-400/30 text-blue-300 font-bold py-2 rounded-lg border border-blue-400/30 text-sm disabled:opacity-40">
+                          <Button onClick={() => handleAction(student.id, 'back')} disabled={!prevClass} className="w-full bg-black/60 hover:bg-black/80 text-foreground font-bold py-2 rounded-lg border border-primary/40 text-sm disabled:opacity-40 shadow-[0_0_8px_hsl(51,100%,50%,0.08)]">
                             <ArrowLeft size={16} className="mr-1" />Back
                           </Button>
-                          <Button onClick={() => { setChangingSectionFor(student.id); setNewSection(''); }} className="w-full bg-purple-400/20 hover:bg-purple-400/30 text-purple-300 font-bold py-2 rounded-lg border border-purple-400/30 text-sm">
+                          <Button onClick={() => { setChangingSectionFor(student.id); setNewSection(''); }} className="w-full bg-black/60 hover:bg-black/80 text-foreground font-bold py-2 rounded-lg border border-primary/40 text-sm shadow-[0_0_8px_hsl(51,100%,50%,0.08)]">
                             <Edit2 size={16} className="mr-1" />Section
                           </Button>
-                          <Button onClick={() => handleAction(student.id, 'delete')} className="w-full bg-red-400/20 hover:bg-red-400/30 text-red-300 font-bold py-2 rounded-lg border border-red-400/30 text-sm">
+                          <Button onClick={() => handleAction(student.id, 'delete')} className="w-full bg-destructive hover:bg-destructive/80 text-destructive-foreground font-bold py-2 rounded-lg border border-red-500/50 text-sm shadow-[0_0_10px_hsl(0,84%,60%,0.2)]">
                             <Trash2 size={16} className="mr-1" />Delete
                           </Button>
                         </div>
