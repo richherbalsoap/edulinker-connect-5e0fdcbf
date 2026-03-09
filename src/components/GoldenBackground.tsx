@@ -1,235 +1,361 @@
-import { useEffect, useRef } from "react";
+import { create } from "zustand";
+import { supabase } from "@/integrations/supabase/client";
 
-const GoldenBackground = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-
-    let W = window.innerWidth;
-    let H = window.innerHeight;
-
-    const isMobile = W < 768;
-
-    canvas.width = W;
-    canvas.height = H;
-
-    const resize = () => {
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = W;
-      canvas.height = H;
-    };
-
-    window.addEventListener("resize", resize);
-
-    const COLORS = ["255,215,0", "255,193,7", "255,236,100", "218,165,32", "255,248,180"];
-
-    type Particle = {
-      x: number;
-      y: number;
-      r: number;
-      vx: number;
-      vy: number;
-      alpha: number;
-      alphaDir: number;
-      color: string;
-    };
-
-    // 🔥 reduced particles
-    const particles: Particle[] = Array.from({ length: isMobile ? 25 : 40 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 2 + 0.4,
-      vx: (Math.random() - 0.5) * 0.25,
-      vy: -(Math.random() * 0.3 + 0.05),
-      alpha: Math.random(),
-      alphaDir: Math.random() > 0.5 ? 1 : -1,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-
-        p.alpha += 0.003 * p.alphaDir;
-
-        if (p.alpha >= 1) p.alphaDir = -1;
-        if (p.alpha <= 0) p.alphaDir = 1;
-
-        if (p.y < -10) {
-          p.y = H + 10;
-          p.x = Math.random() * W;
-        }
-
-        if (p.x < -10) p.x = W + 10;
-        if (p.x > W + 10) p.x = -10;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-
-        ctx.fillStyle = `rgba(${p.color},${p.alpha * 0.75})`;
-
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = "rgba(255,215,0,0.4)";
-
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-      }
-
-      animId = requestAnimationFrame(draw);
-    };
-
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  // CSS
-  useEffect(() => {
-    const id = "gp-styles-v3";
-
-    if (document.getElementById(id)) return;
-
-    const s = document.createElement("style");
-
-    s.id = id;
-
-    s.textContent = `
-
-.gp-grid{
-background-image:
-linear-gradient(hsl(51 100% 50% / 0.05) 1px, transparent 1px),
-linear-gradient(90deg, hsl(51 100% 50% / 0.05) 1px, transparent 1px);
-background-size:64px 64px;
+interface Student {
+  id: string;
+  secret_id: string;
+  name: string;
+  standard: string;
+  section: string;
+  roll_no: number | null;
+  parent_name: string | null;
+  parent_contact: string | null;
+  avatar_url: string | null;
+  created_by: string | null;
+  created_at: string;
+  school_id: string | null;
 }
 
-.gp-scanlines{
-background:repeating-linear-gradient(
-0deg,
-transparent,
-transparent 3px,
-hsl(51 100% 50% / 0.012) 3px,
-hsl(51 100% 50% / 0.012) 4px
-);
+interface Homework {
+  id: string;
+  standard: string;
+  section: string;
+  subject: string;
+  description: string;
+  file_url: string | null;
+  created_by: string | null;
+  created_at: string;
+  school_id: string | null;
 }
 
-@keyframes gp-aurora{
-0%,100%{transform:translateX(-50%) scaleY(1);opacity:.12}
-50%{transform:translateX(-50%) scaleY(1.2);opacity:.2}
+interface Complaint {
+  id: string;
+  student_id: string;
+  description: string;
+  file_url: string | null;
+  created_by: string | null;
+  created_at: string;
+  school_id: string | null;
+  student?: Student;
 }
 
-.gp-aurora{
-position:absolute;
-top:0;
-left:50%;
-width:85vw;
-height:300px;
-background:linear-gradient(
-180deg,
-hsl(51 100% 55%/.18) 0%,
-hsl(45 100% 50%/.08) 45%,
-transparent 100%
-);
-filter:blur(20px);
-border-radius:0 0 50% 50%;
-animation:gp-aurora 8s ease-in-out infinite;
+interface Result {
+  id: string;
+  student_id: string;
+  subject: string;
+  marks_obtained: number;
+  total_marks: number;
+  percentage: number;
+  file_name: string | null;
+  created_by: string | null;
+  created_at: string;
+  school_id: string | null;
+  student?: Student;
 }
 
-@keyframes gp-pulse{
-0%,100%{opacity:.25}
-50%{opacity:.45}
+interface Announcement {
+  id: string;
+  title: string | null;
+  content: string | null;
+  type: string | null;
+  created_by: string | null;
+  created_at: string;
+  school_id: string | null;
 }
 
-.gp-orb{
-position:absolute;
-border-radius:50%;
-background:radial-gradient(circle,hsl(51 100% 60%/.35) 0%,transparent 70%);
-filter:blur(2px);
-animation:gp-pulse 6s ease-in-out infinite;
+interface AppStore {
+  students: Student[];
+  homework: Homework[];
+  complaints: Complaint[];
+  results: Result[];
+  announcements: Announcement[];
+  loading: boolean;
+  fetchStudents: (schoolId?: string) => Promise<void>;
+  fetchHomework: (schoolId?: string) => Promise<void>;
+  fetchComplaints: (schoolId?: string) => Promise<void>;
+  fetchResults: (schoolId?: string) => Promise<void>;
+  fetchAnnouncements: (schoolId?: string) => Promise<void>;
+  fetchAll: (schoolId?: string) => Promise<void>;
+  addStudent: (
+    student: {
+      name: string;
+      standard: string;
+      section: string;
+      roll_no?: number | null;
+      parent_name?: string;
+      parent_contact?: string;
+      avatar_url?: string | null;
+    },
+    manualKey?: string | null,
+    schoolId?: string | null,
+  ) => Promise<Student | null>;
+  updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
+  deleteStudent: (id: string) => Promise<void>;
+  addHomework: (hw: {
+    standard: string;
+    section: string;
+    subject: string;
+    description: string;
+    file_url?: string | null;
+    school_id: string;
+  }) => Promise<void>;
+  addComplaint: (complaint: {
+    student_id: string;
+    description: string;
+    file_url?: string | null;
+    school_id: string;
+  }) => Promise<void>;
+  addResult: (result: {
+    student_id: string;
+    subject: string;
+    marks_obtained: number;
+    total_marks: number;
+    file_name?: string | null;
+    school_id: string;
+  }) => Promise<void>;
+  addAnnouncement: (announcement: {
+    title?: string;
+    content?: string;
+    type?: string;
+    school_id: string;
+  }) => Promise<void>;
+  getStudentsByClass: (standard?: string, section?: string) => Student[];
+  getResultsByStudent: (studentId: string) => Result[];
 }
 
-@keyframes gp-fall{
-0%{transform:translateY(-120px);opacity:0}
-10%{opacity:1}
-90%{opacity:.6}
-100%{transform:translateY(106vh);opacity:0}
-}
+const useAppStore = create<AppStore>()((set, get) => ({
+  students: [],
+  homework: [],
+  complaints: [],
+  results: [],
+  announcements: [],
+  loading: false,
 
-.gp-streak{
-position:absolute;
-top:0;
-width:1.5px;
-border-radius:999px;
-background:linear-gradient(
-to bottom,
-transparent,
-hsl(51 100% 70%/.9),
-transparent
-);
-animation:gp-fall linear infinite;
-}
+  fetchStudents: async (schoolId) => {
+    try {
+      let query = supabase.from("students").select("*").order("created_at", { ascending: false });
+      if (schoolId) query = query.eq("school_id", schoolId);
+      const { data } = await query;
+      if (data) set({ students: data as unknown as Student[] });
+    } catch (e) {
+      console.warn("fetchStudents failed:", e);
+    }
+  },
 
-.gp-vignette{
-background:radial-gradient(
-ellipse at center,
-transparent 40%,
-hsl(35 60% 4%/.6) 100%
-);
-}
+  fetchHomework: async (schoolId) => {
+    try {
+      let query = supabase.from("homework").select("*").order("created_at", { ascending: false });
+      if (schoolId) query = query.eq("school_id", schoolId);
+      const { data } = await query;
+      if (data) set({ homework: data as unknown as Homework[] });
+    } catch (e) {
+      console.warn("fetchHomework failed:", e);
+    }
+  },
 
-`;
+  fetchComplaints: async (schoolId) => {
+    try {
+      let query = supabase
+        .from("complaints")
+        .select("*, student:students(*)")
+        .order("created_at", { ascending: false });
+      if (schoolId) query = query.eq("school_id", schoolId);
+      const { data } = await query;
+      if (data) set({ complaints: data as unknown as Complaint[] });
+    } catch (e) {
+      console.warn("fetchComplaints failed:", e);
+    }
+  },
 
-    document.head.appendChild(s);
-  }, []);
+  fetchResults: async (schoolId) => {
+    try {
+      let query = supabase.from("results").select("*, student:students(*)").order("created_at", { ascending: false });
+      if (schoolId) query = query.eq("school_id", schoolId);
+      const { data } = await query;
+      if (data) set({ results: data as unknown as Result[] });
+    } catch (e) {
+      console.warn("fetchResults failed:", e);
+    }
+  },
 
-  const streaks = [5, 14, 22, 32, 42, 52, 63, 73, 82, 91];
+  fetchAnnouncements: async (schoolId) => {
+    try {
+      let query = supabase.from("announcements").select("*").order("created_at", { ascending: false });
+      if (schoolId) query = query.eq("school_id", schoolId);
+      const { data } = await query;
+      if (data) set({ announcements: data as unknown as Announcement[] });
+    } catch (e) {
+      console.warn("fetchAnnouncements failed:", e);
+    }
+  },
 
-  return (
-    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-      <div className="absolute inset-0 gp-vignette" />
+  fetchAll: async (schoolId) => {
+    set({ loading: true });
+    const store = get();
+    try {
+      await Promise.all([
+        store.fetchStudents(schoolId),
+        store.fetchHomework(schoolId),
+        store.fetchComplaints(schoolId),
+        store.fetchResults(schoolId),
+        store.fetchAnnouncements(schoolId),
+      ]);
+    } catch (e) {
+      console.warn("fetchAll failed:", e);
+    }
+    set({ loading: false });
+  },
 
-      <div className="absolute inset-0 gp-grid" />
+  addStudent: async (student, manualKey, schoolId) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("students")
+      .insert([
+        {
+          name: student.name,
+          standard: student.standard,
+          section: student.section,
+          roll_no: student.roll_no || null,
+          parent_name: student.parent_name || null,
+          parent_contact: student.parent_contact || null,
+          avatar_url: student.avatar_url || null,
+          secret_id: manualKey || "TEMP",
+          school_id: schoolId || null,
+          created_by: user?.id || null,
+        } as any,
+      ])
+      .select()
+      .single();
+    if (data && !error) {
+      set((state) => ({ students: [data as unknown as Student, ...state.students] }));
+      return data as unknown as Student;
+    }
+    return null;
+  },
 
-      <div className="absolute inset-0 gp-scanlines" />
+  updateStudent: async (id, updatedData) => {
+    const { error } = await supabase
+      .from("students")
+      .update(updatedData as any)
+      .eq("id", id);
+    if (!error) {
+      set((state) => ({
+        students: state.students.map((s) => (s.id === id ? { ...s, ...updatedData } : s)),
+      }));
+    }
+  },
 
-      <div className="gp-aurora" />
+  deleteStudent: async (id) => {
+    const { error } = await supabase.from("students").delete().eq("id", id);
+    if (!error) {
+      set((state) => ({ students: state.students.filter((s) => s.id !== id) }));
+    }
+  },
 
-      <div className="gp-orb" style={{ left: "15%", top: "30%", width: "420px", height: "420px" }} />
-      <div className="gp-orb" style={{ left: "78%", top: "50%", width: "300px", height: "300px" }} />
-      <div className="gp-orb" style={{ left: "50%", top: "85%", width: "480px", height: "480px" }} />
+  addHomework: async (hw) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("homework")
+      .insert({
+        standard: hw.standard,
+        section: hw.section,
+        subject: hw.subject,
+        description: hw.description,
+        file_url: hw.file_url || null,
+        school_id: hw.school_id,
+        created_by: user?.id || null,
+      })
+      .select()
+      .single();
+    if (error) {
+      console.error("addHomework error:", error);
+      throw error;
+    }
+    if (data) {
+      set((state) => ({ homework: [data as unknown as Homework, ...state.homework] }));
+    }
+  },
 
-      <div className="absolute inset-0 overflow-hidden">
-        {streaks.map((left, i) => (
-          <div
-            key={i}
-            className="gp-streak"
-            style={{
-              left: `${left}%`,
-              animationDuration: `${3 + (i % 4) * 1.2}s`,
-              animationDelay: `${i * 0.5}s`,
-              height: `${60 + (i % 4) * 30}px`,
-            }}
-          />
-        ))}
-      </div>
+  addComplaint: async (complaint) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("complaints")
+      .insert({
+        student_id: complaint.student_id,
+        description: complaint.description,
+        file_url: complaint.file_url || null,
+        school_id: complaint.school_id,
+        created_by: user?.id || null,
+      })
+      .select("*, student:students(*)")
+      .single();
+    if (data && !error) {
+      set((state) => ({ complaints: [data as unknown as Complaint, ...state.complaints] }));
+    }
+  },
 
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ mixBlendMode: "screen" }} />
-    </div>
-  );
-};
+  addResult: async (result) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("results")
+      .insert({
+        student_id: result.student_id,
+        subject: result.subject,
+        marks_obtained: result.marks_obtained,
+        total_marks: result.total_marks,
+        percentage: result.total_marks > 0 ? Math.round((result.marks_obtained / result.total_marks) * 100) : 0,
+        file_name: result.file_name || null,
+        school_id: result.school_id,
+        created_by: user?.id || null,
+      })
+      .select("*, student:students(*)")
+      .single();
+    if (data && !error) {
+      set((state) => ({ results: [data as unknown as Result, ...state.results] }));
+    }
+  },
 
-export default GoldenBackground;
+  addAnnouncement: async (announcement) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("announcements")
+      .insert({
+        title: announcement.title || null,
+        content: announcement.content || null,
+        type: announcement.type || null,
+        school_id: announcement.school_id,
+        created_by: user?.id || null,
+      })
+      .select()
+      .single();
+    if (data && !error) {
+      set((state) => ({ announcements: [data as unknown as Announcement, ...state.announcements] }));
+    }
+  },
+
+  getStudentsByClass: (standard, section) => {
+    const state = get();
+    return state.students.filter((s) => {
+      if (standard && section) return s.standard === standard && s.section === section;
+      if (standard) return s.standard === standard;
+      return true;
+    });
+  },
+
+  getResultsByStudent: (studentId) => {
+    const state = get();
+    return state.results.filter((r) => r.student_id === studentId);
+  },
+}));
+
+export default useAppStore;
