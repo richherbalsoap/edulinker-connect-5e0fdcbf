@@ -5,8 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { GraduationCap, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import GoldenBackground from '@/components/GoldenBackground';
+import edulinkerLogo from '@/assets/edulinker-logo.png';
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
