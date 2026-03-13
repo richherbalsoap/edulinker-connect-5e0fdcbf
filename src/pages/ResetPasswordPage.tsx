@@ -38,9 +38,7 @@ const ResetPasswordPage = () => {
       <GoldenBackground />
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-primary/20 relative z-10">
         <CardHeader className="text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <GraduationCap size={32} className="text-primary" />
-          </div>
+          <img src={edulinkerLogo} alt="EDULinker Logo" className="mx-auto w-20 h-20 rounded-xl object-contain" />
           <CardTitle className="text-2xl text-primary">Reset Password</CardTitle>
           <CardDescription className="text-muted-foreground">Enter your new password</CardDescription>
         </CardHeader>
