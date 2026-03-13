@@ -23,6 +23,7 @@ import AIChatbotPage from "@/pages/AIChatbotPage";
 import PromotionPanelPage from "@/pages/PromotionPanelPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
+import InstallPage from "@/pages/InstallPage";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="promotion" element={<PromotionPanelPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
+            <Route path="install" element={<InstallPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
