@@ -23,6 +23,7 @@ import AIChatbotPage from "@/pages/AIChatbotPage";
 import PromotionPanelPage from "@/pages/PromotionPanelPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
+import InstallPage from "@/pages/InstallPage";
 
 const queryClient = new QueryClient();
 
