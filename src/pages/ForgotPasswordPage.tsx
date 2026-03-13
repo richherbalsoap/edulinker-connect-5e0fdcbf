@@ -18,7 +18,7 @@ const ForgotPasswordPage = () => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}/settings`,
     });
     setLoading(false);
     if (error) {
