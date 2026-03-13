@@ -95,9 +95,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
       `}>
         <div className="p-5 border-b border-primary/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
-              <GraduationCap size={22} className="text-primary" />
-            </div>
+            <img src={edulinkerLogo} alt="EDULinker" className="w-9 h-9 rounded-lg object-contain" />
             <div>
               <h1 className="text-lg font-bold text-primary">EDULinker</h1>
               <p className="text-xs text-foreground/40">{schoolName}</p>
