@@ -5,8 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { GraduationCap, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import GoldenBackground from '@/components/GoldenBackground';
+import edulinkerLogo from '@/assets/edulinker-logo.png';
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -41,9 +42,7 @@ const SignupPage = () => {
       <GoldenBackground />
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-primary/20 relative z-10">
         <CardHeader className="text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <GraduationCap size={32} className="text-primary" />
-          </div>
+          <img src={edulinkerLogo} alt="EDULinker Logo" className="mx-auto w-20 h-20 rounded-xl object-contain" />
           <CardTitle className="text-2xl text-primary">Create Account</CardTitle>
           <CardDescription className="text-muted-foreground">Sign up for EDULinker</CardDescription>
         </CardHeader>
