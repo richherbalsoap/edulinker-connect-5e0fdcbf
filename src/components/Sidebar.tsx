@@ -3,9 +3,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, MessageSquare, FileText,
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
-  ChevronDown, GraduationCap, LogOut
+  ChevronDown, LogOut
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import edulinkerLogo from '@/assets/edulinker-logo.png';
 interface NavItemType {
   path: string;
   icon: React.ElementType;
