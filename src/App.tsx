@@ -54,6 +54,7 @@ const App = () => (
               <Route path="promotion" element={<PromotionPanelPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
+            <Route path="install" element={<InstallPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
