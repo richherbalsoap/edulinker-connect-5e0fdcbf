@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, X, Upload, User, Phone, Key, FileUp, DollarSign } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, User, Phone, Key, FileUp, DollarSign, ShieldAlert } from "lucide-react";
 import ImportStudentsModal from "@/components/ImportStudentsModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
@@ -300,14 +300,14 @@ const StudentManagementPage = () => {
       fetchStudents(schoolId);
       // Fetch fee reminders for all students
       supabase
-        .from('fees_reminders')
-        .select('student_id, message, created_at')
-        .eq('school_id', schoolId)
-        .order('created_at', { ascending: false })
+        .from("fees_reminders")
+        .select("student_id, message, created_at")
+        .eq("school_id", schoolId)
+        .order("created_at", { ascending: false })
         .then(({ data }) => {
           if (data) {
             const grouped: Record<string, { message: string; created_at: string }[]> = {};
-            (data as any[]).forEach(r => {
+            (data as any[]).forEach((r) => {
               if (!grouped[r.student_id]) grouped[r.student_id] = [];
               grouped[r.student_id].push({ message: r.message, created_at: r.created_at });
             });
@@ -514,6 +514,30 @@ const StudentManagementPage = () => {
                         ))}
                         {feeReminders[student.id].length > 2 && (
                           <p className="text-xs text-primary/50">+{feeReminders[student.id].length - 2} more</p>
+                        )}
+                      </div>
+                    )}
+                    {/* Failed Login Attempts — same style as fee card */}
+                    {(student as any).failed_attempts >= 1 && (
+                      <div className="bg-destructive/5 border border-destructive/15 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2 text-destructive/70 text-xs font-bold">
+                          <ShieldAlert size={14} /> LOGIN ATTEMPTS ({(student as any).failed_attempts}/5)
+                        </div>
+                        {(student as any).failed_attempts >= 5 ? (
+                          <>
+                            <p className="text-xs text-destructive/80 font-semibold">
+                              Account locked — student cannot login.
+                            </p>
+                            <p className="text-xs text-foreground/40">
+                              Reset failed attempts from Supabase or ask admin to update.
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-xs text-foreground/60">
+                            Student has {(student as any).failed_attempts} failed login attempt
+                            {(student as any).failed_attempts > 1 ? "s" : ""}. {5 - (student as any).failed_attempts}{" "}
+                            remaining before lockout.
+                          </p>
                         )}
                       </div>
                     )}
