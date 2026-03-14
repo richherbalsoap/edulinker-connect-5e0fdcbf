@@ -21,6 +21,7 @@ const ResultSenderPage = () => {
   const [studentId, setStudentId] = useState("");
   const [standard, setStandard] = useState("");
   const [section, setSection] = useState("");
+  const [examName, setExamName] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [subjects, setSubjects] = useState([{ name: "", marks_obtained: "", total_marks: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,7 +79,7 @@ const ResultSenderPage = () => {
       toast({
         title: "File Error",
         description: "Only PDF, JPEG, PNG, and WebP files are allowed.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -92,9 +93,9 @@ const ResultSenderPage = () => {
   const uploadFile = async (studentUuid: string, file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop() || "bin";
     const storagePath = `results/${studentUuid}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.
-    from("edulinker-files").
-    upload(storagePath, file, { contentType: file.type, upsert: false });
+    const { error } = await supabase.storage
+      .from("edulinker-files")
+      .upload(storagePath, file, { contentType: file.type, upsert: false });
     if (error) {
       console.error("Upload error:", error);
       toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
@@ -110,7 +111,7 @@ const ResultSenderPage = () => {
       toast({
         title: "Missing Student",
         description: "Please select a student before uploading.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -119,7 +120,7 @@ const ResultSenderPage = () => {
       toast({
         title: "School identity missing",
         description: "Please logout and login again.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -135,7 +136,7 @@ const ResultSenderPage = () => {
         toast({
           title: "Invalid Marks",
           description: `Marks obtained cannot be greater than total marks (${sub.name}).`,
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -156,10 +157,11 @@ const ResultSenderPage = () => {
       await addResult({
         student_id: studentId,
         subject: sub.name,
+        exam_name: examName || null,
         marks_obtained: parseFloat(sub.marks_obtained),
         total_marks: parseFloat(sub.total_marks),
-        file_name: storagePath,
-        school_id: schoolId
+        file_url: storagePath,
+        school_id: schoolId,
       });
     }
 
@@ -169,11 +171,12 @@ const ResultSenderPage = () => {
     const student = allStudents.find((s) => s.id === studentId);
     toast({
       title: "Result Sent Successfully!",
-      description: `Marks for ${student?.name || "student"} have been recorded.`
+      description: `Marks for ${student?.name || "student"} have been recorded.`,
     });
     setStudentId("");
     setStandard("");
     setSection("");
+    setExamName("");
     setFile(null);
     setSubjects([{ name: "", marks_obtained: "", total_marks: "" }]);
     setIsSubmitting(false);
@@ -187,24 +190,24 @@ const ResultSenderPage = () => {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto space-y-6">
-        
+        className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto space-y-6"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
-            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>
+            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>{" "}
             <select
               value={standard}
               onChange={(e) => setStandard(e.target.value)}
-              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
-              
+              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
               <option value="" disabled>
                 Select Standard
               </option>
-              {standards.map((s) =>
-              <option key={s} value={s}>
+              {standards.map((s) => (
+                <option key={s} value={s}>
                   {s}
                 </option>
-              )}
+              ))}
             </select>
             <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
           </div>
@@ -213,136 +216,155 @@ const ResultSenderPage = () => {
             <select
               value={section}
               onChange={(e) => setSection(e.target.value)}
-              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
-              
+              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
               <option value="" disabled>
                 Select Section
               </option>
-              {["A", "B", "C", "D", "E"].map((s) =>
-              <option key={s} value={s}>
+              {["A", "B", "C", "D", "E"].map((s) => (
+                <option key={s} value={s}>
                   {s}
                 </option>
-              )}
+              ))}
             </select>
             <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
           </div>
         </div>
 
+        <div className="relative">
+          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">EXAM TYPE</label>
+          <select
+            value={examName}
+            onChange={(e) => setExamName(e.target.value)}
+            className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+          >
+            <option value="">Select Exam (Optional)</option>
+            <option value="Unit Test">Unit Test</option>
+            <option value="Mid Term">Mid Term</option>
+            <option value="Final Exam">Final Exam</option>
+            <option value="Weekly Test">Weekly Test</option>
+          </select>
+          <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
+        </div>
+
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SELECT STUDENT</label>
-          {filteredStudents.length > 0 ?
-          <Select value={studentId} onValueChange={setStudentId}>
+          {filteredStudents.length > 0 ? (
+            <Select value={studentId} onValueChange={setStudentId}>
               <SelectTrigger className="w-full p-3 bg-black/40 border border-primary/20 rounded-lg text-foreground">
                 <SelectValue placeholder="Select a student" />
               </SelectTrigger>
               <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
-                {filteredStudents.map((s) =>
-              <SelectItem
-                key={s.id}
-                value={s.id}
-                className="text-foreground focus:bg-primary/10 focus:text-primary">
-                
+                {filteredStudents.map((s) => (
+                  <SelectItem
+                    key={s.id}
+                    value={s.id}
+                    className="text-foreground focus:bg-primary/10 focus:text-primary"
+                  >
                     {s.name} ({s.standard}-{s.section})
                   </SelectItem>
-              )}
+                ))}
               </SelectContent>
-            </Select> :
-
-          <p className="text-foreground/40 text-sm py-3">No students found. Add students first.</p>
-          }
+            </Select>
+          ) : (
+            <p className="text-foreground/40 text-sm py-3">No students found. Add students first.</p>
+          )}
         </div>
 
         <div className="space-y-3">
           <label className="block text-xs font-bold tracking-wider text-primary/60">SUBJECTS & MARKS</label>
-          {subjects.map((subject, index) =>
-          <div key={index} className="space-y-2">
+          {subjects.map((subject, index) => (
+            <div key={index} className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                {showCustomSubject === index ?
-              <div className="flex-1 flex gap-2 min-w-0">
+                {showCustomSubject === index ? (
+                  <div className="flex-1 flex gap-2 min-w-0">
                     <input
-                  type="text"
-                  value={customSubject}
-                  onChange={(e) => setCustomSubject(e.target.value)}
-                  placeholder="Enter subject name..."
-                  className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  autoFocus />
-                
+                      type="text"
+                      value={customSubject}
+                      onChange={(e) => setCustomSubject(e.target.value)}
+                      placeholder="Enter subject name..."
+                      className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      autoFocus
+                    />
+
                     <Button
-                  type="button"
-                  onClick={() => handleAddCustomSubject(index)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
-                  
+                      type="button"
+                      onClick={() => handleAddCustomSubject(index)}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+                    >
                       Add
                     </Button>
                     <Button
-                  type="button"
-                  onClick={() => setShowCustomSubject(null)}
-                  variant="ghost"
-                  className="text-foreground/60">
-                  
+                      type="button"
+                      onClick={() => setShowCustomSubject(null)}
+                      variant="ghost"
+                      className="text-foreground/60"
+                    >
                       Cancel
                     </Button>
-                  </div> :
-
-              <div className="flex-1 min-w-0 relative">
+                  </div>
+                ) : (
+                  <div className="flex-1 min-w-0 relative">
                     <select
-                  value={subject.name}
-                  onChange={(e) => handleSubjectSelect(index, e.target.value)}
-                  className="w-full appearance-none p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
-                  
+                      value={subject.name}
+                      onChange={(e) => handleSubjectSelect(index, e.target.value)}
+                      className="w-full appearance-none p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    >
                       <option value="" disabled className="bg-black text-white">
                         Select Subject
                       </option>
-                      {availableSubjects.map((s) =>
-                  <option key={s} value={s} className="bg-black text-white">
+                      {availableSubjects.map((s) => (
+                        <option key={s} value={s} className="bg-black text-white">
                           {s}
                         </option>
-                  )}
+                      ))}
                       <option value="ADD_NEW" className="bg-black text-primary font-bold">
                         + Add Subject Name
                       </option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 pointer-events-none" />
                   </div>
-              }
+                )}
                 <input
-                type="number"
-                value={subject.marks_obtained}
-                onChange={(e) => handleMarksChange(index, "marks_obtained", e.target.value)}
+                  type="number"
+                  value={subject.marks_obtained}
+                  onChange={(e) => handleMarksChange(index, "marks_obtained", e.target.value)}
+                  title="Marks obtained (e.g. 78)"
+                  className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
+                  placeholder="Marks"
+                />
 
-                title="Marks obtained (e.g. 78)"
-                className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm" placeholder="Marks" />
-              
                 <input
-                type="number"
-                value={subject.total_marks}
-                onChange={(e) => handleMarksChange(index, "total_marks", e.target.value)}
+                  type="number"
+                  value={subject.total_marks}
+                  onChange={(e) => handleMarksChange(index, "total_marks", e.target.value)}
+                  title="Total exam marks (e.g. 100)"
+                  className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
+                  placeholder="Total"
+                />
 
-                title="Total exam marks (e.g. 100)"
-                className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm" placeholder="Total" />
-              
                 <Button
-                type="button"
-                onClick={() => setSubjects(subjects.filter((_, i) => i !== index))}
-                variant="destructive"
-                className="p-3 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30 flex-shrink-0">
-                
+                  type="button"
+                  onClick={() => setSubjects(subjects.filter((_, i) => i !== index))}
+                  variant="destructive"
+                  className="p-3 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30 flex-shrink-0"
+                >
                   <Trash2 size={16} />
                 </Button>
               </div>
-              {showCustomSubject !== index &&
-            <div className="flex gap-4 text-xs text-foreground/40 pl-1">
+              {showCustomSubject !== index && (
+                <div className="flex gap-4 text-xs text-foreground/40 pl-1">
                   <span>Marks (e.g. 78)</span>
                   <span>Total (e.g. 100)</span>
                 </div>
-            }
+              )}
             </div>
-          )}
+          ))}
           <Button
             type="button"
             onClick={() => setSubjects([...subjects, { name: "", marks_obtained: "", total_marks: "" }])}
-            className="text-primary/80 hover:text-primary bg-black/40 hover:bg-primary/10 w-full border border-primary/20">
-            
+            className="text-primary/80 hover:text-primary bg-black/40 hover:bg-primary/10 w-full border border-primary/20"
+          >
             + Add Another Subject
           </Button>
         </div>
@@ -356,8 +378,9 @@ const ResultSenderPage = () => {
               type="file"
               onChange={handleFileChange}
               className="absolute inset-0 w-full h-full opacity-0"
-              accept=".pdf,.jpg,.jpeg,.png,.webp" />
-            
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+            />
+
             <div className="flex flex-col items-center justify-center space-y-2 text-foreground/60">
               <Upload size={32} />
               {file ? <p>Selected: {file.name}</p> : <p>Click to upload (PDF, PNG, JPG, WebP — max 7MB)</p>}
@@ -368,19 +391,19 @@ const ResultSenderPage = () => {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
-          
-          {isSubmitting ?
-          "Submitting..." :
-
-          <>
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
+        >
+          {isSubmitting ? (
+            "Submitting..."
+          ) : (
+            <>
               <Send size={20} className="mr-2" /> Send Result
             </>
-          }
+          )}
         </Button>
       </form>
-    </div>);
-
+    </div>
+  );
 };
 
 export default ResultSenderPage;
