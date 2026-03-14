@@ -43,16 +43,26 @@ interface Result {
   id: string;
   student_id: string;
   subject: string;
+  exam_name: string | null;
   marks_obtained: number;
   total_marks: number;
   percentage: number;
-  exam_name: string | null;
-  file_name: string | null;
   file_url: string | null;
   created_by: string | null;
   created_at: string;
   school_id: string | null;
   student?: Student;
+}
+
+interface StudentHistory {
+  id: string;
+  student_id: string | null;
+  school_id: string | null;
+  standard: string | null;
+  section: string | null;
+  start_year: number | null;
+  end_year: number | null;
+  created_at: string;
 }
 
 interface Announcement {
@@ -110,9 +120,10 @@ interface AppStore {
   addResult: (result: {
     student_id: string;
     subject: string;
+    exam_name?: string | null;
     marks_obtained: number;
     total_marks: number;
-    file_name?: string | null;
+    file_url?: string | null;
     school_id: string;
   }) => Promise<void>;
   addAnnouncement: (announcement: {
@@ -121,6 +132,7 @@ interface AppStore {
     type?: string;
     school_id: string;
   }) => Promise<void>;
+  logStudentHistory: (studentId: string, schoolId: string, standard: string, section: string) => Promise<void>;
   getStudentsByClass: (standard?: string, section?: string) => Student[];
   getResultsByStudent: (studentId: string) => Result[];
 }
@@ -311,10 +323,11 @@ const useAppStore = create<AppStore>()((set, get) => ({
       .insert({
         student_id: result.student_id,
         subject: result.subject,
+        exam_name: result.exam_name || null,
         marks_obtained: result.marks_obtained,
         total_marks: result.total_marks,
         percentage: result.total_marks > 0 ? Math.round((result.marks_obtained / result.total_marks) * 100) : 0,
-        file_name: result.file_name || null,
+        file_url: result.file_url || null,
         school_id: result.school_id,
         created_by: user?.id || null,
       })
@@ -342,6 +355,24 @@ const useAppStore = create<AppStore>()((set, get) => ({
       .single();
     if (data && !error) {
       set((state) => ({ announcements: [data as unknown as Announcement, ...state.announcements] }));
+    }
+  },
+
+  logStudentHistory: async (studentId, schoolId, standard, section) => {
+    try {
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth();
+      const startYear = currentMonth >= 3 ? currentYear : currentYear - 1;
+      await supabase.from("student_history").insert({
+        student_id: studentId,
+        school_id: schoolId,
+        standard,
+        section,
+        start_year: startYear,
+        end_year: startYear + 1,
+      });
+    } catch (e) {
+      console.warn("logStudentHistory failed:", e);
     }
   },
 
