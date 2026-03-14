@@ -14,6 +14,7 @@ interface Student {
   created_by: string | null;
   created_at: string;
   school_id: string | null;
+  failed_attempts: number;
 }
 
 interface Homework {
@@ -135,6 +136,7 @@ interface AppStore {
   logStudentHistory: (studentId: string, schoolId: string, standard: string, section: string) => Promise<void>;
   getStudentsByClass: (standard?: string, section?: string) => Student[];
   getResultsByStudent: (studentId: string) => Result[];
+  resetFailedAttempts: (studentId: string) => Promise<void>;
 }
 
 const useAppStore = create<AppStore>()((set, get) => ({
@@ -373,6 +375,18 @@ const useAppStore = create<AppStore>()((set, get) => ({
       });
     } catch (e) {
       console.warn("logStudentHistory failed:", e);
+    }
+  },
+
+  resetFailedAttempts: async (studentId) => {
+    const { error } = await supabase
+      .from("students")
+      .update({ failed_attempts: 0 } as any)
+      .eq("id", studentId);
+    if (!error) {
+      set((state) => ({
+        students: state.students.map((s) => (s.id === studentId ? { ...s, failed_attempts: 0 } : s)),
+      }));
     }
   },
 
