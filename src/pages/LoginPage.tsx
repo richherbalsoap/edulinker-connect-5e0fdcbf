@@ -31,7 +31,7 @@ const LoginPage = () => {
         title: "Email Not Verified",
         description: "Please verify your email before logging in.",
         variant: "destructive",
-        duration: 8000,
+        duration: 8000
       });
       return;
     }
@@ -55,36 +55,36 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-background/50 border-primary/20"
-            />
+              className="bg-background/50 border-primary/20" />
+            
             <Input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-background/50 border-primary/20"
-            />
+              className="bg-background/50 border-primary/20" />
+            
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
-            >
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
+              
               <LogIn size={18} className="mr-2" /> {loading ? "Signing in..." : "Login"}
             </Button>
             <div className="flex justify-between text-sm">
               <Link to="/signup" className="text-primary/80 hover:text-primary transition-colors">
                 Create Account
               </Link>
-              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
-                Forgot Password?
+              <Link to="/forgot-password" className="transition-colors text-primary font-sans">
+                ​Gmail Confirmation
               </Link>
             </div>
           </form>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 };
 
 export default LoginPage;
