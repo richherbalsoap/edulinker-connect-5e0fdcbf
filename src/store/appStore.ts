@@ -46,7 +46,9 @@ interface Result {
   marks_obtained: number;
   total_marks: number;
   percentage: number;
+  exam_name: string | null;
   file_name: string | null;
+  file_url: string | null;
   created_by: string | null;
   created_at: string;
   school_id: string | null;
