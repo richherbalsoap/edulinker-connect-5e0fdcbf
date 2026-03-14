@@ -284,6 +284,7 @@ const StudentManagementPage = () => {
   const addStudent = useAppStore((state) => state.addStudent);
   const updateStudent = useAppStore((state) => state.updateStudent);
   const deleteStudentFromStore = useAppStore((state) => state.deleteStudent);
+  const resetFailedAttempts = useAppStore((state) => state.resetFailedAttempts);
   const fetchStudents = useAppStore((state) => state.fetchStudents);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -518,25 +519,33 @@ const StudentManagementPage = () => {
                       </div>
                     )}
                     {/* Failed Login Attempts — same style as fee card */}
-                    {(student as any).failed_attempts >= 1 && (
+                    {student.failed_attempts >= 1 && (
                       <div className="bg-destructive/5 border border-destructive/15 rounded-lg p-3 space-y-2">
-                        <div className="flex items-center gap-2 text-destructive/70 text-xs font-bold">
-                          <ShieldAlert size={14} /> LOGIN ATTEMPTS ({(student as any).failed_attempts}/5)
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-destructive/70 text-xs font-bold">
+                            <ShieldAlert size={14} />
+                            {student.failed_attempts >= 5
+                              ? "ACCOUNT LOCKED"
+                              : `LOGIN ATTEMPTS (${student.failed_attempts}/5)`}
+                          </div>
+                          <button
+                            onClick={async () => {
+                              await resetFailedAttempts(student.id);
+                              toast({ title: "Reset Done", description: `${student.name}'s login attempts cleared.` });
+                            }}
+                            className="text-[10px] font-bold text-primary/70 hover:text-primary border border-primary/20 hover:border-primary/50 px-2 py-0.5 rounded transition-colors"
+                          >
+                            RESET
+                          </button>
                         </div>
-                        {(student as any).failed_attempts >= 5 ? (
-                          <>
-                            <p className="text-xs text-destructive/80 font-semibold">
-                              Account locked — student cannot login.
-                            </p>
-                            <p className="text-xs text-foreground/40">
-                              Reset failed attempts from Supabase or ask admin to update.
-                            </p>
-                          </>
+                        {student.failed_attempts >= 5 ? (
+                          <p className="text-xs text-destructive/80 font-semibold">
+                            Student cannot login — ask them to contact you.
+                          </p>
                         ) : (
                           <p className="text-xs text-foreground/60">
-                            Student has {(student as any).failed_attempts} failed login attempt
-                            {(student as any).failed_attempts > 1 ? "s" : ""}. {5 - (student as any).failed_attempts}{" "}
-                            remaining before lockout.
+                            {student.failed_attempts} failed attempt{student.failed_attempts > 1 ? "s" : ""}.{" "}
+                            {5 - student.failed_attempts} remaining before lockout.
                           </p>
                         )}
                       </div>
