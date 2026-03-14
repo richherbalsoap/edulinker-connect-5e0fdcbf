@@ -5,6 +5,7 @@ import { useSchoolId } from "@/hooks/useSchoolId";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const classes = ["A", "B", "C", "D", "E"];
+const examTypes = ["Unit Test", "Mid Term", "Final Exam", "Weekly Test"];
 
 const timeRanges = [
   { label: "Last 7 Days", value: "7d" },
@@ -22,7 +23,7 @@ const getStartDate = (range: string): Date | null => {
   if (range === "3m") return new Date(now.setMonth(now.getMonth() - 3));
   if (range === "6m") return new Date(now.setMonth(now.getMonth() - 6));
   if (range === "1y") return new Date(now.setFullYear(now.getFullYear() - 1));
-  return null; // 'all'
+  return null;
 };
 
 const AnalyticsPage = () => {
@@ -34,18 +35,17 @@ const AnalyticsPage = () => {
   const [filterStandard, setFilterStandard] = useState("");
   const [filterClass, setFilterClass] = useState("");
   const [filterStudentId, setFilterStudentId] = useState("");
+  const [filterExamName, setFilterExamName] = useState("");
   const [timeRange, setTimeRange] = useState("all");
 
   useEffect(() => {
     if (schoolId) fetchAll(schoolId);
   }, [schoolId]);
 
-  // Reset student when standard/class changes
   useEffect(() => {
     setFilterStudentId("");
   }, [filterStandard, filterClass]);
 
-  // Students filtered by standard + class for dropdown
   const filteredStudentOptions = useMemo(() => {
     return students.filter((s) => {
       if (filterStandard && filterClass) return s.standard === filterStandard && s.section === filterClass;
@@ -55,21 +55,17 @@ const AnalyticsPage = () => {
     });
   }, [students, filterStandard, filterClass]);
 
-  // Apply all filters to results
   const filteredResults = useMemo(() => {
     const startDate = getStartDate(timeRange);
     return results.filter((r) => {
-      // Time filter
       if (startDate && new Date(r.created_at) < startDate) return false;
-      // Student filter
       if (filterStudentId && r.student_id !== filterStudentId) return false;
-      // Standard filter
       if (filterStandard && r.student?.standard !== filterStandard) return false;
-      // Class filter
       if (filterClass && r.student?.section !== filterClass) return false;
+      if (filterExamName && r.exam_name !== filterExamName) return false;
       return true;
     });
-  }, [results, filterStandard, filterClass, filterStudentId, timeRange]);
+  }, [results, filterStandard, filterClass, filterStudentId, filterExamName, timeRange]);
 
   const subjectPerformance = useMemo(() => {
     const subjectMap: Record<string, { totalObtained: number; totalMarks: number; count: number }> = {};
@@ -101,7 +97,10 @@ const AnalyticsPage = () => {
   }, [filteredResults]);
 
   const classPerformance = useMemo(() => {
-    const classMap: Record<string, { totalObtained: number; totalMarks: number; count: number; students: Set<string> }> = {};
+    const classMap: Record<
+      string,
+      { totalObtained: number; totalMarks: number; count: number; students: Set<string> }
+    > = {};
     filteredResults.forEach((result) => {
       const student = result.student;
       if (!student) return;
@@ -134,7 +133,6 @@ const AnalyticsPage = () => {
   );
   const hasData = filteredResults.length > 0;
 
-  // Unique student count in filtered results
   const uniqueStudentCount = useMemo(() => {
     return new Set(filteredResults.map((r) => r.student_id)).size;
   }, [filteredResults]);
@@ -150,13 +148,13 @@ const AnalyticsPage = () => {
     { icon: BookOpen, label: "Results Recorded", value: filteredResults.length },
   ];
 
-  const isFiltered = filterStandard || filterClass || filterStudentId || timeRange !== "all";
+  const isFiltered = filterStandard || filterClass || filterStudentId || filterExamName || timeRange !== "all";
 
   return (
     <div className="space-y-6 relative z-10 px-4 py-6">
       <h1 className="text-3xl font-bold text-foreground text-center">Analytics Dashboard</h1>
 
-      {/* ── FILTERS ── */}
+      {/* FILTERS */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 max-w-4xl mx-auto space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <Filter size={16} className="text-primary" />
@@ -180,8 +178,8 @@ const AnalyticsPage = () => {
           ))}
         </div>
 
-        {/* Standard + Class + Student */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Standard + Class + Student + Exam */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
             <label className="block text-xs font-medium text-primary/60 mb-1">STANDARD</label>
             <select
@@ -213,7 +211,7 @@ const AnalyticsPage = () => {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-primary/60 mb-1">STUDENT (Optional)</label>
+            <label className="block text-xs font-medium text-primary/60 mb-1">STUDENT</label>
             <select
               value={filterStudentId}
               onChange={(e) => setFilterStudentId(e.target.value)}
@@ -227,15 +225,30 @@ const AnalyticsPage = () => {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-primary/60 mb-1">EXAM TYPE</label>
+            <select
+              value={filterExamName}
+              onChange={(e) => setFilterExamName(e.target.value)}
+              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              <option value="">All Exams</option>
+              {examTypes.map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Clear Filters */}
         {isFiltered && (
           <button
             onClick={() => {
               setFilterStandard("");
               setFilterClass("");
               setFilterStudentId("");
+              setFilterExamName("");
               setTimeRange("all");
             }}
             className="text-xs text-primary/60 hover:text-primary underline underline-offset-2 transition-colors"
@@ -245,7 +258,7 @@ const AnalyticsPage = () => {
         )}
       </div>
 
-      {/* ── STAT CARDS ── */}
+      {/* STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat) => (
           <div key={stat.label} className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6">
@@ -258,12 +271,15 @@ const AnalyticsPage = () => {
         ))}
       </div>
 
-      {/* ── CHARTS ── */}
+      {/* CHARTS */}
       {hasData ? (
         <>
           {subjectPerformance.length > 0 && (
             <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-primary mb-6">Subject-wise Performance</h2>
+              <h2 className="text-xl font-semibold text-primary mb-6">
+                Subject-wise Performance
+                {filterExamName && <span className="text-sm text-foreground/50 ml-2">({filterExamName})</span>}
+              </h2>
               <div className="space-y-4">
                 {subjectPerformance.map((subject) => (
                   <div key={subject.subject}>
@@ -283,7 +299,6 @@ const AnalyticsPage = () => {
             </div>
           )}
 
-          {/* Hide class-wise if single student selected */}
           {classPerformance.length > 0 && !filterStudentId && (
             <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6">
               <h2 className="text-xl font-semibold text-primary mb-6">Class-wise Performance</h2>
