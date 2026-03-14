@@ -76,7 +76,7 @@ const LoginPage = () => {
               <Link to="/signup" className="text-primary/80 hover:text-primary transition-colors">
                 Create Account
               </Link>
-              <Link to="/forgot-password" className="transition-colors text-primary font-sans">
+              <Link to="/gmail-confirmation" className="transition-colors text-primary font-sans">
                 ​Gmail Confirmation
               </Link>
             </div>
