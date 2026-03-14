@@ -193,7 +193,8 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          file_name: string | null
+          exam_name: string | null
+          file_url: string | null
           id: string
           marks_obtained: number
           percentage: number
@@ -205,7 +206,8 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          file_name?: string | null
+          exam_name?: string | null
+          file_url?: string | null
           id?: string
           marks_obtained: number
           percentage?: number
@@ -217,7 +219,8 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          file_name?: string | null
+          exam_name?: string | null
+          file_url?: string | null
           id?: string
           marks_obtained?: number
           percentage?: number
@@ -269,6 +272,54 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      student_history: {
+        Row: {
+          created_at: string | null
+          end_year: number | null
+          id: string
+          school_id: string
+          section: string | null
+          standard: string
+          start_year: number | null
+          student_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_year?: number | null
+          id?: string
+          school_id: string
+          section?: string | null
+          standard: string
+          start_year?: number | null
+          student_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_year?: number | null
+          id?: string
+          school_id?: string
+          section?: string | null
+          standard?: string
+          start_year?: number | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_history_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_keys_archive: {
         Row: {
