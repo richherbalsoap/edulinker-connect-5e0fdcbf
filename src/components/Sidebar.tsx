@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { usePin } from '@/context/PinContext';
 import edulinkerLogo from '@/assets/edulinker-logo.png';
+
 interface NavItemType {
   path: string;
   icon: React.ElementType;
@@ -29,6 +30,8 @@ const principalTools: NavItemType[] = [
   { path: '/fees', icon: DollarSign, label: 'Fees Reminder' },
 ];
 
+const principalPaths = new Set(principalTools.map(t => t.path));
+
 const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) => (
   <li>
     <NavLink
@@ -49,8 +52,43 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
   </li>
 );
 
-const CollapsibleSection = ({ title, icon: Icon, items, onClick }: {
+// PIN-protected nav item — intercepts click, asks for PIN first
+const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType; onClick: () => void; requestAccess: () => Promise<boolean> }) => {
+  const navigate = useNavigate();
+
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClick(); // close sidebar
+    const granted = await requestAccess();
+    if (granted) {
+      navigate(item.path);
+    }
+  };
+
+  return (
+    <li>
+      <NavLink
+        to={item.path}
+        onClick={handleClick}
+        className={({ isActive }) => `
+          flex items-center gap-3 px-4 py-3 rounded-lg
+          transition-colors duration-200 group
+          ${isActive
+            ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
+            : 'text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent'
+          }
+        `}
+      >
+        <item.icon size={20} />
+        <span className="font-medium text-sm">{item.label}</span>
+      </NavLink>
+    </li>
+  );
+};
+
+const CollapsibleSection = ({ title, icon: Icon, items, onClick, protected: isProtected, requestAccess }: {
   title: string; icon: React.ElementType; items: NavItemType[]; onClick: () => void;
+  protected?: boolean; requestAccess?: () => Promise<boolean>;
 }) => {
   const [isOpen, setIsOpen] = React.useState(true);
   return (
@@ -64,7 +102,11 @@ const CollapsibleSection = ({ title, icon: Icon, items, onClick }: {
       </button>
       {isOpen && (
         <ul className="space-y-1 pl-2 pt-1">
-          {items.map((item) => <NavItem key={item.path} item={item} onClick={onClick} />)}
+          {items.map((item) => (
+            isProtected && requestAccess
+              ? <ProtectedNavItem key={item.path} item={item} onClick={onClick} requestAccess={requestAccess} />
+              : <NavItem key={item.path} item={item} onClick={onClick} />
+          ))}
         </ul>
       )}
     </div>
@@ -74,7 +116,7 @@ const CollapsibleSection = ({ title, icon: Icon, items, onClick }: {
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const schoolName = localStorage.getItem('schoolName') || 'My School';
   const { signOut } = useAuth();
-  const { pinSet, lock } = usePin();
+  const { pinSet, lock, requestAccess } = usePin();
   const navigate = useNavigate();
 
   const handleLock = () => {
@@ -82,8 +124,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
     lock();
   };
 
+  const handleSettingsClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    toggleSidebar();
+    const granted = await requestAccess();
+    if (granted) navigate('/settings');
+  };
+
   const handleLogout = async () => {
     toggleSidebar();
+    const granted = await requestAccess();
+    if (!granted) return;
     localStorage.clear();
     await signOut();
     navigate('/login', { replace: true });
@@ -118,9 +169,18 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
             <NavItem item={{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' }} onClick={toggleSidebar} />
           </ul>
           <CollapsibleSection title="TEACHER TOOLS" icon={BookOpen} items={teacherTools} onClick={toggleSidebar} />
-          <CollapsibleSection title="PRINCIPAL TOOLS" icon={Users} items={principalTools} onClick={toggleSidebar} />
+          <CollapsibleSection title="PRINCIPAL TOOLS" icon={Users} items={principalTools} onClick={toggleSidebar} protected requestAccess={requestAccess} />
           <ul className="space-y-1 pt-3 border-t border-primary/10">
-            <NavItem item={{ path: '/settings', icon: Settings, label: 'Settings' }} onClick={toggleSidebar} />
+            <li>
+              <a
+                href="/settings"
+                onClick={handleSettingsClick}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent transition-colors duration-200"
+              >
+                <Settings size={20} />
+                <span className="font-medium text-sm">Settings</span>
+              </a>
+            </li>
           </ul>
           {pinSet && (
             <button

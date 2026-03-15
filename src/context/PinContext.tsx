@@ -6,16 +6,19 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 interface PinContextType {
   pinSet: boolean;
-  isLocked: boolean;
+  principalUnlocked: boolean;
   loading: boolean;
-  setupPin: (pin: string) => Promise<void>;
-  verifyPin: (pin: string) => Promise<boolean>;
+  requestAccess: () => Promise<boolean>;
   lock: () => void;
+  // Modal state
+  modalOpen: boolean;
+  modalMode: 'setup' | 'verify';
+  handleModalSubmit: (pin: string) => Promise<boolean>;
+  closeModal: () => void;
 }
 
 const PinContext = createContext<PinContextType | null>(null);
 
-// Simple hash — SHA-256 via Web Crypto API
 const hashPin = async (pin: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(pin + 'edulinker_salt_2026');
@@ -27,11 +30,13 @@ const hashPin = async (pin: string): Promise<string> => {
 export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, schoolId } = useAuth();
   const [pinSet, setPinSet] = useState(false);
-  const [isLocked, setIsLocked] = useState(true);
+  const [principalUnlocked, setPrincipalUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'setup' | 'verify'>('verify');
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
+  const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
-  // Fetch school PIN status on mount
   useEffect(() => {
     if (!schoolId) return;
     const fetchPinStatus = async () => {
@@ -42,71 +47,93 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .eq('id', schoolId)
         .maybeSingle();
       setPinSet(data?.pin_set || false);
-      setIsLocked(true); // Always locked on fresh load
+      setPrincipalUnlocked(false);
       setLoading(false);
     };
     fetchPinStatus();
   }, [schoolId]);
 
-  // Inactivity timer — reset on user activity
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     inactivityTimer.current = setTimeout(() => {
-      setIsLocked(true);
+      setPrincipalUnlocked(false);
     }, INACTIVITY_TIMEOUT);
   }, []);
 
-  // Listen for user activity
   useEffect(() => {
-    if (!pinSet || isLocked) return;
-
+    if (!pinSet || !principalUnlocked) return;
     const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
     events.forEach(e => window.addEventListener(e, resetInactivityTimer, { passive: true }));
-    resetInactivityTimer(); // Start timer
-
+    resetInactivityTimer();
     return () => {
       events.forEach(e => window.removeEventListener(e, resetInactivityTimer));
       if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     };
-  }, [pinSet, isLocked, resetInactivityTimer]);
+  }, [pinSet, principalUnlocked, resetInactivityTimer]);
 
-  const setupPin = async (pin: string) => {
-    if (!schoolId) throw new Error('No school found');
-    const hash = await hashPin(pin);
-    const { error } = await supabase
-      .from('schools')
-      .update({ pin_hash: hash, pin_set: true } as any)
-      .eq('id', schoolId);
-    if (error) throw error;
-    setPinSet(true);
-    setIsLocked(false);
-    resetInactivityTimer();
-  };
+  const requestAccess = useCallback((): Promise<boolean> => {
+    if (principalUnlocked && pinSet) return Promise.resolve(true);
 
-  const verifyPin = async (pin: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      resolveRef.current = resolve;
+      setModalMode(pinSet ? 'verify' : 'setup');
+      setModalOpen(true);
+    });
+  }, [principalUnlocked, pinSet]);
+
+  const handleModalSubmit = async (pin: string): Promise<boolean> => {
     if (!schoolId) return false;
-    const { data } = await supabase
-      .from('schools')
-      .select('pin_hash')
-      .eq('id', schoolId)
-      .maybeSingle();
-    if (!data?.pin_hash) return false;
-    const hash = await hashPin(pin);
-    const correct = hash === data.pin_hash;
-    if (correct) {
-      setIsLocked(false);
+
+    if (modalMode === 'setup') {
+      const hash = await hashPin(pin);
+      const { error } = await supabase
+        .from('schools')
+        .update({ pin_hash: hash, pin_set: true } as any)
+        .eq('id', schoolId);
+      if (error) return false;
+      setPinSet(true);
+      setPrincipalUnlocked(true);
       resetInactivityTimer();
+      setModalOpen(false);
+      resolveRef.current?.(true);
+      resolveRef.current = null;
+      return true;
+    } else {
+      const { data } = await supabase
+        .from('schools')
+        .select('pin_hash')
+        .eq('id', schoolId)
+        .maybeSingle();
+      if (!data?.pin_hash) return false;
+      const hash = await hashPin(pin);
+      const correct = hash === data.pin_hash;
+      if (correct) {
+        setPrincipalUnlocked(true);
+        resetInactivityTimer();
+        setModalOpen(false);
+        resolveRef.current?.(true);
+        resolveRef.current = null;
+      }
+      return correct;
     }
-    return correct;
   };
+
+  const closeModal = useCallback(() => {
+    setModalOpen(false);
+    resolveRef.current?.(false);
+    resolveRef.current = null;
+  }, []);
 
   const lock = useCallback(() => {
-    setIsLocked(true);
+    setPrincipalUnlocked(false);
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
   }, []);
 
   return (
-    <PinContext.Provider value={{ pinSet, isLocked, loading, setupPin, verifyPin, lock }}>
+    <PinContext.Provider value={{
+      pinSet, principalUnlocked, loading, requestAccess, lock,
+      modalOpen, modalMode, handleModalSubmit, closeModal
+    }}>
       {children}
     </PinContext.Provider>
   );
