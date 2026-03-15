@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { User, KeyRound, Loader2 } from "lucide-react";
+import { usePin } from "@/context/PinContext";
+import { User, KeyRound, Loader2, LockKeyhole } from "lucide-react";
 
 const SettingsPage = () => {
   const { toast } = useToast();
@@ -199,6 +200,20 @@ const SettingsPage = () => {
           </Button>
         </form>
       </div>
+      {/* PIN Lock Info */}
+      {!isRecoveryMode && (
+        <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <LockKeyhole size={20} className="text-primary" />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground">PIN Lock</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            PIN lock is managed from the sidebar. Use the <strong className="text-primary">Lock App</strong> button to lock instantly, or the app auto-locks after 5 minutes of inactivity.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
