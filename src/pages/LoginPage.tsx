@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
 import GoldenBackground from "@/components/GoldenBackground";
+import InstallBanner from "@/components/InstallBanner";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
 
 const LoginPage = () => {
@@ -82,7 +83,8 @@ const LoginPage = () => {
             </div>
           </form>
         </CardContent>
-      </Card>
+    </Card>
+      <InstallBanner />
     </div>);
 
 };
