@@ -3,6 +3,7 @@ import { BookOpen, MessageSquare, FileText, Calendar, Users } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
 import { useSchoolId } from '@/hooks/useSchoolId';
+import InstallPopup from '@/components/InstallPopup';
 
 const getAcademicYears = () => {
   const years: string[] = ['Overall'];
@@ -92,6 +93,8 @@ const DashboardPage = () => {
   const nextMonth = () => setSelectedDate(new Date(calYear, calMonth + 1, 1));
 
   return (
+    <>
+    <InstallPopup />
     <div className="space-y-6 relative z-10 w-full max-w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-6">
       <div className="relative flex flex-col sm:flex-row sm:justify-center items-center w-full gap-4 sm:gap-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Dashboard</h1>
@@ -192,6 +195,7 @@ const DashboardPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
