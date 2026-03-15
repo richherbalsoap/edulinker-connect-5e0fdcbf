@@ -122,9 +122,18 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           <ul className="space-y-1 pt-3 border-t border-primary/10">
             <NavItem item={{ path: '/settings', icon: Settings, label: 'Settings' }} onClick={toggleSidebar} />
           </ul>
+          {pinSet && (
+            <button
+              onClick={handleLock}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-primary/70 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-colors duration-200 mt-1"
+            >
+              <LockKeyhole size={20} />
+              <span className="font-medium text-sm">Lock App</span>
+            </button>
+          )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-colors duration-200 mt-2"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-colors duration-200 mt-1"
           >
             <LogOut size={20} />
             <span className="font-medium text-sm">Logout</span>
