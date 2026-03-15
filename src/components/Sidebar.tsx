@@ -74,7 +74,13 @@ const CollapsibleSection = ({ title, icon: Icon, items, onClick }: {
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const schoolName = localStorage.getItem('schoolName') || 'My School';
   const { signOut } = useAuth();
+  const { pinSet, lock } = usePin();
   const navigate = useNavigate();
+
+  const handleLock = () => {
+    toggleSidebar();
+    lock();
+  };
 
   const handleLogout = async () => {
     toggleSidebar();
