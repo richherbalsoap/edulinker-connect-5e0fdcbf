@@ -83,7 +83,8 @@ const LoginPage = () => {
             </div>
           </form>
         </CardContent>
-      </Card>
+    </Card>
+      <InstallBanner />
     </div>);
 
 };
