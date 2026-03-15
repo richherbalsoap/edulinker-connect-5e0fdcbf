@@ -3,6 +3,7 @@ import { BookOpen, MessageSquare, FileText, Calendar, Users } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
 import { useSchoolId } from '@/hooks/useSchoolId';
+import InstallPopup from '@/components/InstallPopup';
 
 const getAcademicYears = () => {
   const years: string[] = ['Overall'];
