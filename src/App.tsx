@@ -35,6 +35,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter future={{ v7_relativeSplatPath: true }}>
         <AuthProvider>
+          <PinProvider>
           <ScrollToTop />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
