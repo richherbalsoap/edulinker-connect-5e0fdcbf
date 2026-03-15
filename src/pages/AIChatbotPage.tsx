@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import useAppStore from "@/store/appStore";
 import { useAuth } from "@/context/AuthContext";
 
+// Result line format — exam_name agar ho toh dikhao
+const formatResult = (r: any) => {
+  const exam = r.exam_name ? ` [${r.exam_name}]` : "";
+  return `• ${r.student?.name || "Unknown"}: ${r.subject}${exam} — ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)`;
+};
+
 const AIChatbotPage = () => {
   const { schoolId } = useAuth(); // Fix 1: schoolId se fetch karo
   const results = useAppStore((state) => state.results);
@@ -53,8 +59,7 @@ const AIChatbotPage = () => {
       if (results.length === 0) return "No results have been recorded yet.";
       let res = `${results.length} result records:\n\n`;
       results.forEach((r) => {
-        const name = r.student?.name || "Unknown";
-        res += `• ${name}: ${r.subject} — ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)\n`;
+        res += formatResult(r) + "\n";
       });
       return res;
     }
@@ -107,7 +112,7 @@ const AIChatbotPage = () => {
       if (failed.length === 0) return "No students have failed any subject. 🎉";
       let res = `Students below 35%:\n\n`;
       failed.forEach((r) => {
-        res += `• ${r.student?.name || "Unknown"}: ${r.subject} — ${r.percentage}%\n`;
+        res += formatResult(r) + "\n";
       });
       return res;
     }
@@ -120,7 +125,7 @@ const AIChatbotPage = () => {
       const avg = Math.round(subResults.reduce((s, r) => s + (r.percentage || 0), 0) / subResults.length);
       let res = `${matchedSubject.charAt(0).toUpperCase() + matchedSubject.slice(1)} Results (${subResults.length} records, avg: ${avg}%):\n\n`;
       subResults.forEach((r) => {
-        res += `• ${r.student?.name || "Unknown"}: ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)\n`;
+        res += formatResult(r) + "\n";
       });
       return res;
     }
@@ -147,7 +152,8 @@ const AIChatbotPage = () => {
         const avg = Math.round(recs.reduce((s, r) => s + (r.percentage || 0), 0) / recs.length);
         res += `📊 ${name} (Class ${student?.standard}-${student?.section}) — Avg: ${avg}%\n`;
         recs.forEach((r) => {
-          res += `  • ${r.subject}: ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)\n`;
+          const exam = r.exam_name ? ` [${r.exam_name}]` : "";
+          res += `  • ${r.subject}${exam}: ${r.marks_obtained}/${r.total_marks} (${r.percentage}%)\n`;
         });
         res += "\n";
       });
