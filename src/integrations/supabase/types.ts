@@ -251,6 +251,8 @@ export type Database = {
           created_at: string
           id: string
           owner_user_id: string | null
+          pin_hash: string | null
+          pin_set: boolean | null
           school_code: string
           school_name: string
           user_id: string | null
@@ -259,6 +261,8 @@ export type Database = {
           created_at?: string
           id?: string
           owner_user_id?: string | null
+          pin_hash?: string | null
+          pin_set?: boolean | null
           school_code: string
           school_name: string
           user_id?: string | null
@@ -267,6 +271,8 @@ export type Database = {
           created_at?: string
           id?: string
           owner_user_id?: string | null
+          pin_hash?: string | null
+          pin_set?: boolean | null
           school_code?: string
           school_name?: string
           user_id?: string | null
@@ -350,6 +356,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           created_by: string | null
+          failed_attempts: number | null
           id: string
           name: string
           parent_contact: string | null
@@ -364,6 +371,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           created_by?: string | null
+          failed_attempts?: number | null
           id?: string
           name: string
           parent_contact?: string | null
@@ -378,6 +386,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           created_by?: string | null
+          failed_attempts?: number | null
           id?: string
           name?: string
           parent_contact?: string | null
