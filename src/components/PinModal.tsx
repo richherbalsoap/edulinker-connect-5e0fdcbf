@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ShieldCheck, Delete, X } from 'lucide-react';
 import { usePin } from '@/context/PinContext';
@@ -7,73 +7,57 @@ import { toast } from 'sonner';
 const PinModal = () => {
   const { modalOpen, modalMode, handleModalSubmit, closeModal } = usePin();
   const [pin, setPin] = useState('');
-  const [confirmPin, setConfirmPin] = useState('');
   const [step, setStep] = useState<'enter' | 'confirm'>('enter');
+  const [firstPin, setFirstPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [shake, setShake] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const processingRef = useRef(false);
 
-  // Reset state when modal opens/closes
+  // Reset state when modal opens
   useEffect(() => {
     if (modalOpen) {
       setPin('');
-      setConfirmPin('');
+      setFirstPin('');
       setStep('enter');
       setLoading(false);
       setShake(false);
       setAttempts(0);
+      processingRef.current = false;
     }
   }, [modalOpen]);
 
-  // Auto-submit on 4 digits
+  // Handle PIN completion
   useEffect(() => {
-    if (pin.length === 4) {
-      if (modalMode === 'setup') {
-        if (step === 'enter') {
-          setTimeout(() => {
-            setConfirmPin('');
-            setStep('confirm');
-            setPin('');
-          }, 200);
+    if (pin.length !== 4 || processingRef.current) return;
+    processingRef.current = true;
+
+    if (modalMode === 'setup') {
+      if (step === 'enter') {
+        setFirstPin(pin);
+        setTimeout(() => {
+          setStep('confirm');
+          setPin('');
+          processingRef.current = false;
+        }, 200);
+      } else {
+        // Confirm step
+        if (pin === firstPin) {
+          handleSetup(pin);
+        } else {
+          setShake(true);
+          setTimeout(() => setShake(false), 500);
+          setPin('');
+          setStep('enter');
+          setFirstPin('');
+          processingRef.current = false;
+          toast.error('PINs did not match. Try again.');
         }
-      } else {
-        handleVerify(pin);
       }
-    }
-  }, [pin]);
-
-  useEffect(() => {
-    if (modalMode === 'setup' && step === 'confirm' && confirmPin.length === 4) {
-      // Check if PINs match
-      // We need to store first pin - let's use a different approach
-    }
-  }, [confirmPin]);
-
-  // For setup mode, we need to track first PIN
-  const [firstPin, setFirstPin] = useState('');
-
-  useEffect(() => {
-    if (modalMode === 'setup' && step === 'enter' && pin.length === 4) {
-      setFirstPin(pin);
-      setTimeout(() => {
-        setStep('confirm');
-        setPin('');
-      }, 200);
-    } else if (modalMode === 'setup' && step === 'confirm' && pin.length === 4) {
-      if (pin === firstPin) {
-        handleSetup(pin);
-      } else {
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-        setPin('');
-        setStep('enter');
-        setFirstPin('');
-        toast.error('PINs did not match. Try again.');
-      }
-    } else if (modalMode === 'verify' && pin.length === 4) {
+    } else {
       handleVerify(pin);
     }
-  }, [pin.length]);
+  }, [pin]);
 
   const handleVerify = async (enteredPin: string) => {
     setLoading(true);
@@ -83,6 +67,7 @@ const PinModal = () => {
       setShake(true);
       setTimeout(() => setShake(false), 500);
       setPin('');
+      processingRef.current = false;
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
       if (newAttempts >= 5) {
@@ -138,7 +123,6 @@ const PinModal = () => {
             className="relative w-full max-w-xs mx-4"
           >
             <div className="bg-card/95 backdrop-blur-[40px] border border-primary/20 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] overflow-hidden">
-              {/* Close button */}
               <button
                 onClick={closeModal}
                 className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors z-10"
@@ -147,7 +131,6 @@ const PinModal = () => {
               </button>
 
               <div className="p-6 space-y-5">
-                {/* Header */}
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]">
                     {modalMode === 'setup' ? <ShieldCheck size={22} className="text-primary" /> : <Lock size={22} className="text-primary" />}
@@ -156,7 +139,6 @@ const PinModal = () => {
                   <p className="text-muted-foreground text-xs mt-1">{subtitle}</p>
                 </div>
 
-                {/* PIN Dots */}
                 <motion.div
                   animate={shake ? { x: [-8, 8, -8, 8, -4, 4, 0] } : {}}
                   transition={{ duration: 0.4 }}
@@ -171,7 +153,6 @@ const PinModal = () => {
                   ))}
                 </motion.div>
 
-                {/* Numpad */}
                 <div className="grid grid-cols-3 gap-2">
                   {numpadKeys.map((key, i) => {
                     if (key === '') return <div key={i} />;
