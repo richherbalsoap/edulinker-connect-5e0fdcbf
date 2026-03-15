@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Trash2 } from "lucide-react";
+import { DollarSign, Trash2, AlertTriangle, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-const classes = ["A", "B", "C", "D", "E"];
+const sections = ["A", "B", "C", "D", "E"];
 
 interface FeeReminder {
   id: string;
@@ -22,26 +22,95 @@ interface FeeReminder {
 
 const quickAmounts = [500, 1000, 2000, 5000];
 
+// Confirmation Dialog — same style as PromotionPanelPage
+const ConfirmDialog = ({
+  open,
+  title,
+  message,
+  confirmLabel = "Confirm",
+  danger = false,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  danger?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onCancel}>
+      <div
+        className="bg-black/90 backdrop-blur-2xl rounded-2xl p-6 w-full max-w-sm border border-primary/30"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <AlertTriangle size={20} className={danger ? "text-destructive" : "text-primary"} />
+          <h3 className="text-lg font-bold text-foreground">{title}</h3>
+        </div>
+        <p className="text-foreground/70 text-sm mb-6">{message}</p>
+        <div className="flex gap-3">
+          <Button
+            onClick={onCancel}
+            className="flex-1 bg-black/40 hover:bg-black/60 text-foreground border border-primary/20"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onConfirm}
+            className={`flex-1 font-bold ${danger ? "bg-destructive hover:bg-destructive/80 text-white" : "bg-primary hover:bg-primary/90 text-primary-foreground"}`}
+          >
+            {confirmLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const FeesReminderPage = () => {
   const { toast } = useToast();
   const { schoolId } = useAuth();
   const allStudents = useAppStore((state) => state.students);
+
+  // Form state
   const [standard, setStandard] = useState("");
-  const [selectedClass, setSelectedClass] = useState("");
-  const [student, setStudent] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [reminders, setReminders] = useState<FeeReminder[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Reminders state
+  const [reminders, setReminders] = useState<FeeReminder[]>([]);
+
+  // Filter state for sent reminders
+  const [filterStandard, setFilterStandard] = useState("");
+  const [filterSection, setFilterSection] = useState("");
+  const [filterName, setFilterName] = useState("");
+
+  // Confirm dialog state
+  const [confirm, setConfirm] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    confirmLabel: string;
+    danger: boolean;
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", confirmLabel: "Confirm", danger: false, onConfirm: () => {} });
+
+  // Form: filtered students
   const filteredStudents = useMemo(() => {
     return allStudents.filter((s) => {
-      if (standard && selectedClass) return s.standard === standard && s.section === selectedClass;
+      if (standard && selectedSection) return s.standard === standard && s.section === selectedSection;
       if (standard) return s.standard === standard;
       return true;
     });
-  }, [allStudents, standard, selectedClass]);
+  }, [allStudents, standard, selectedSection]);
 
   const fetchReminders = async () => {
     if (!schoolId) return;
@@ -57,12 +126,25 @@ const FeesReminderPage = () => {
     fetchReminders();
   }, [schoolId]);
 
+  // Filter sent reminders
+  const filteredReminders = useMemo(() => {
+    return reminders.filter((r) => {
+      const std = r.student?.standard || "";
+      const sec = r.student?.section || "";
+      const name = r.student?.name?.toLowerCase() || "";
+      if (filterStandard && std !== filterStandard) return false;
+      if (filterSection && sec !== filterSection) return false;
+      if (filterName && !name.includes(filterName.toLowerCase())) return false;
+      return true;
+    });
+  }, [reminders, filterStandard, filterSection, filterName]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!standard || !selectedClass || !studentId || !title || !amount) {
+    if (!standard || !selectedSection || !studentId || !title || !amount) {
       toast({
         title: "Incomplete Information",
-        description: "Please select standard, class, student, enter a title and amount.",
+        description: "Please fill all required fields.",
         variant: "destructive",
       });
       return;
@@ -71,7 +153,7 @@ const FeesReminderPage = () => {
     const { error } = await supabase.from("fees_reminders").insert({
       student_id: studentId,
       title,
-      message: title, // message column bhi same fill karo (DB requirement)
+      message: title,
       amount: parseFloat(amount),
       school_id: schoolId,
     });
@@ -80,28 +162,72 @@ const FeesReminderPage = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Fees Reminder Sent!", description: `Reminder sent to parent of ${student}.` });
+    toast({ title: "Fees Reminder Sent!", description: `Reminder sent for ${studentName}.` });
     setStandard("");
-    setSelectedClass("");
-    setStudent("");
+    setSelectedSection("");
+    setStudentName("");
     setStudentId("");
     setTitle("");
     setAmount("");
     fetchReminders();
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("fees_reminders").delete().eq("id", id);
-    setReminders((prev) => prev.filter((r) => r.id !== id));
-    toast({ title: "Deleted", description: "Reminder deleted." });
+  const handleDelete = (id: string, name: string) => {
+    setConfirm({
+      open: true,
+      title: "Delete Reminder",
+      message: `Delete this reminder for ${name}? This cannot be undone.`,
+      confirmLabel: "Delete",
+      danger: true,
+      onConfirm: async () => {
+        setConfirm((c) => ({ ...c, open: false }));
+        await supabase.from("fees_reminders").delete().eq("id", id);
+        setReminders((prev) => prev.filter((r) => r.id !== id));
+        toast({ title: "Deleted", description: "Reminder deleted.", variant: "destructive" });
+      },
+    });
+  };
+
+  const handleDeleteAll = () => {
+    const count = filteredReminders.length;
+    if (count === 0) return;
+    setConfirm({
+      open: true,
+      title: "Delete All Reminders",
+      message: `Are you sure you want to delete ${count} reminder${count > 1 ? "s" : ""}? This cannot be undone.`,
+      confirmLabel: `Delete All (${count})`,
+      danger: true,
+      onConfirm: async () => {
+        setConfirm((c) => ({ ...c, open: false }));
+        const ids = filteredReminders.map((r) => r.id);
+        await supabase.from("fees_reminders").delete().in("id", ids);
+        setReminders((prev) => prev.filter((r) => !ids.includes(r.id)));
+        toast({
+          title: "All Deleted",
+          description: `${count} reminder${count > 1 ? "s" : ""} deleted.`,
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   return (
     <div className="space-y-6 px-4 py-6 relative z-10">
+      <ConfirmDialog
+        open={confirm.open}
+        title={confirm.title}
+        message={confirm.message}
+        confirmLabel={confirm.confirmLabel}
+        danger={confirm.danger}
+        onConfirm={confirm.onConfirm}
+        onCancel={() => setConfirm((c) => ({ ...c, open: false }))}
+      />
+
       <h1 className="text-3xl font-bold text-foreground text-center">Fees Reminder</h1>
+
+      {/* Send Form */}
       <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Standard + Class */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">STANDARD *</label>
@@ -109,43 +235,42 @@ const FeesReminderPage = () => {
                 value={standard}
                 onChange={(e) => {
                   setStandard(e.target.value);
-                  setStudent("");
+                  setStudentName("");
                   setStudentId("");
                 }}
                 required
                 className="w-full px-4 py-3 bg-black border border-primary/20 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
               >
                 <option value="">Select Standard</option>
-                {standards.map((std) => (
-                  <option key={std} value={std}>
-                    {std}
+                {standards.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary/60 mb-2">CLASS *</label>
+              <label className="block text-sm font-medium text-primary/60 mb-2">SECTION *</label>
               <select
-                value={selectedClass}
+                value={selectedSection}
                 onChange={(e) => {
-                  setSelectedClass(e.target.value);
-                  setStudent("");
+                  setSelectedSection(e.target.value);
+                  setStudentName("");
                   setStudentId("");
                 }}
                 required
                 className="w-full px-4 py-3 bg-black border border-primary/20 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
               >
-                <option value="">Select Class</option>
-                {classes.map((cls) => (
-                  <option key={cls} value={cls}>
-                    {cls}
+                <option value="">Select Section</option>
+                {sections.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Student */}
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">SELECT STUDENT *</label>
             {filteredStudents.length > 0 ? (
@@ -154,7 +279,7 @@ const FeesReminderPage = () => {
                 onChange={(e) => {
                   const s = filteredStudents.find((st) => st.id === e.target.value);
                   setStudentId(e.target.value);
-                  setStudent(s?.name || "");
+                  setStudentName(s?.name || "");
                 }}
                 required
                 className="w-full px-4 py-3 bg-black border border-primary/20 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
@@ -167,11 +292,10 @@ const FeesReminderPage = () => {
                 ))}
               </select>
             ) : (
-              <p className="text-foreground/40 text-sm py-3">No students found. Add students first.</p>
+              <p className="text-foreground/40 text-sm py-3">No students found. Select standard & section first.</p>
             )}
           </div>
 
-          {/* Title */}
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">TITLE *</label>
             <input
@@ -184,7 +308,6 @@ const FeesReminderPage = () => {
             />
           </div>
 
-          {/* Amount + Quick Amount Buttons */}
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">AMOUNT (₹) *</label>
             <input
@@ -196,7 +319,6 @@ const FeesReminderPage = () => {
               placeholder="Enter amount or pick below..."
               className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 mb-3"
             />
-            {/* Quick Amount Shortcuts */}
             <div className="flex flex-wrap gap-2">
               {quickAmounts.map((amt) => (
                 <Button
@@ -222,42 +344,110 @@ const FeesReminderPage = () => {
         </form>
       </div>
 
-      {/* Sent Reminders History */}
+      {/* Sent Reminders */}
       {reminders.length > 0 && (
         <div className="max-w-2xl mx-auto space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Sent Reminders</h2>
-          <div className="space-y-3">
-            {reminders.map((r) => (
-              <div
-                key={r.id}
-                className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 flex items-start justify-between gap-4"
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-foreground">Sent Reminders ({filteredReminders.length})</h2>
+            {filteredReminders.length > 0 && (
+              <Button
+                onClick={handleDeleteAll}
+                variant="ghost"
+                className="text-destructive hover:bg-destructive/10 border border-destructive/20 text-sm font-bold gap-2"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-bold text-foreground">{r.student?.name || "Unknown"}</span>
-                    {r.student && (
-                      <span className="text-xs bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">
-                        Class {r.student.standard} - {r.student.section}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-foreground font-semibold text-sm">{r.title || "—"}</p>
-                  {r.amount && r.amount > 0 && (
-                    <p className="text-green-400 font-bold text-base mt-1">₹{r.amount.toLocaleString()}</p>
-                  )}
-                  <p className="text-foreground/40 text-xs mt-1">{new Date(r.created_at).toLocaleString()}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(r.id)}
-                  className="text-destructive hover:bg-destructive/10 flex-shrink-0"
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </div>
-            ))}
+                <Trash2 size={15} /> Delete All
+              </Button>
+            )}
           </div>
+
+          {/* Filters for sent reminders */}
+          <div className="bg-black/20 border border-primary/15 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2 text-primary/60 text-xs font-bold">
+              <Filter size={13} /> FILTER REMINDERS
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <select
+                value={filterStandard}
+                onChange={(e) => setFilterStandard(e.target.value)}
+                className="w-full px-3 py-2 bg-black/40 border border-primary/20 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <option value="">All Standards</option>
+                {standards.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={filterSection}
+                onChange={(e) => setFilterSection(e.target.value)}
+                className="w-full px-3 py-2 bg-black/40 border border-primary/20 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <option value="">All Sections</option>
+                {sections.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                placeholder="Search student name..."
+                className="w-full px-3 py-2 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+            </div>
+            {(filterStandard || filterSection || filterName) && (
+              <button
+                onClick={() => {
+                  setFilterStandard("");
+                  setFilterSection("");
+                  setFilterName("");
+                }}
+                className="text-xs text-primary/60 hover:text-primary underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          {filteredReminders.length === 0 ? (
+            <p className="text-foreground/40 text-sm text-center py-6">No reminders match the selected filters.</p>
+          ) : (
+            <div className="space-y-3">
+              {filteredReminders.map((r) => (
+                <div
+                  key={r.id}
+                  className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 flex items-start justify-between gap-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="font-bold text-foreground">{r.student?.name || "Unknown"}</span>
+                      {r.student && (
+                        <span className="text-xs bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">
+                          Class {r.student.standard}-{r.student.section}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-foreground font-semibold text-sm">{r.title || "—"}</p>
+                    {r.amount && r.amount > 0 && (
+                      <p className="text-green-400 font-bold text-base mt-1">₹{r.amount.toLocaleString()}</p>
+                    )}
+                    <p className="text-foreground/40 text-xs mt-1">{new Date(r.created_at).toLocaleString()}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(r.id, r.student?.name || "this student")}
+                    className="text-destructive hover:bg-destructive/10 flex-shrink-0"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
