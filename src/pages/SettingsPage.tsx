@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { User, KeyRound, Loader2 } from "lucide-react";
+import { usePin } from "@/context/PinContext";
+import { User, KeyRound, Loader2, LockKeyhole } from "lucide-react";
 
 const SettingsPage = () => {
   const { toast } = useToast();
