@@ -5,6 +5,7 @@ import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { useAuth } from "@/context/AuthContext";
+import { sendNotification } from "@/utils/sendNotification";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -37,6 +38,14 @@ const AnnouncementsPage = () => {
       school_id: schoolId,
     });
     await fetchAnnouncements(schoolId);
+
+    // Notification bhejo
+    await sendNotification("announcement", {
+      school_id: schoolId,
+      title: broadcastToAll ? "📢 School Announcement" : `📢 Announcement for ${standard}-${section}`,
+      content: message,
+    });
+
     const description = broadcastToAll
       ? "Announcement has been sent to ALL Classes."
       : `Announcement has been sent to Standard ${standard}, Section ${section}.`;
