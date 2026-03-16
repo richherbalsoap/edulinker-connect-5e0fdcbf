@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { sendNotification } from "@/utils/sendNotification";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social Studies", "Computer Science"];
@@ -25,7 +26,6 @@ const ResultSenderPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [subjects, setSubjects] = useState([{ name: "", marks_obtained: "", total_marks: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [availableSubjects, setAvailableSubjects] = useState(initialSubjects);
   const [showCustomSubject, setShowCustomSubject] = useState<number | null>(null);
   const [customSubject, setCustomSubject] = useState("");
@@ -97,7 +97,6 @@ const ResultSenderPage = () => {
       .from("edulinker-files")
       .upload(storagePath, file, { contentType: file.type, upsert: false });
     if (error) {
-      console.error("Upload error:", error);
       toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
       return null;
     }
@@ -106,7 +105,6 @@ const ResultSenderPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!studentId) {
       toast({
         title: "Missing Student",
@@ -115,7 +113,6 @@ const ResultSenderPage = () => {
       });
       return;
     }
-
     if (!schoolId) {
       toast({
         title: "School identity missing",
@@ -143,7 +140,6 @@ const ResultSenderPage = () => {
     }
 
     setIsSubmitting(true);
-
     let storagePath: string | null = null;
     if (file) {
       storagePath = await uploadFile(studentId, file);
@@ -165,8 +161,22 @@ const ResultSenderPage = () => {
       });
     }
 
-    // Re-fetch results after insert
     await fetchResults(schoolId);
+
+    // Notification bhejo — pehle subject ki summary
+    const firstSub = validSubjects[0];
+    const totalObtained = validSubjects.reduce((sum, s) => sum + parseFloat(s.marks_obtained), 0);
+    const totalMax = validSubjects.reduce((sum, s) => sum + parseFloat(s.total_marks), 0);
+    const percentage = Math.round((totalObtained / totalMax) * 100);
+
+    await sendNotification("result", {
+      student_id: studentId,
+      exam_name: examName || "Exam",
+      subject: validSubjects.length === 1 ? firstSub.name : `${validSubjects.length} Subjects`,
+      marks_obtained: totalObtained,
+      total_marks: totalMax,
+      percentage,
+    });
 
     const student = allStudents.find((s) => s.id === studentId);
     toast({
@@ -194,7 +204,7 @@ const ResultSenderPage = () => {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
-            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>{" "}
+            <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>
             <select
               value={standard}
               onChange={(e) => setStandard(e.target.value)}
@@ -230,7 +240,6 @@ const ResultSenderPage = () => {
             <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
           </div>
         </div>
-
         <div className="relative">
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">EXAM TYPE</label>
           <select
@@ -246,7 +255,6 @@ const ResultSenderPage = () => {
           </select>
           <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
         </div>
-
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SELECT STUDENT</label>
           {filteredStudents.length > 0 ? (
@@ -270,7 +278,6 @@ const ResultSenderPage = () => {
             <p className="text-foreground/40 text-sm py-3">No students found. Add students first.</p>
           )}
         </div>
-
         <div className="space-y-3">
           <label className="block text-xs font-bold tracking-wider text-primary/60">SUBJECTS & MARKS</label>
           {subjects.map((subject, index) => (
@@ -286,7 +293,6 @@ const ResultSenderPage = () => {
                       className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                       autoFocus
                     />
-
                     <Button
                       type="button"
                       onClick={() => handleAddCustomSubject(index)}
@@ -329,20 +335,18 @@ const ResultSenderPage = () => {
                   type="number"
                   value={subject.marks_obtained}
                   onChange={(e) => handleMarksChange(index, "marks_obtained", e.target.value)}
-                  title="Marks obtained (e.g. 78)"
+                  title="Marks obtained"
                   className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
                   placeholder="Marks"
                 />
-
                 <input
                   type="number"
                   value={subject.total_marks}
                   onChange={(e) => handleMarksChange(index, "total_marks", e.target.value)}
-                  title="Total exam marks (e.g. 100)"
+                  title="Total marks"
                   className="w-20 sm:w-24 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
                   placeholder="Total"
                 />
-
                 <Button
                   type="button"
                   onClick={() => setSubjects(subjects.filter((_, i) => i !== index))}
@@ -368,7 +372,6 @@ const ResultSenderPage = () => {
             + Add Another Subject
           </Button>
         </div>
-
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">
             UPLOAD RESULT FILE (Optional)
@@ -380,14 +383,12 @@ const ResultSenderPage = () => {
               className="absolute inset-0 w-full h-full opacity-0"
               accept=".pdf,.jpg,.jpeg,.png,.webp"
             />
-
             <div className="flex flex-col items-center justify-center space-y-2 text-foreground/60">
               <Upload size={32} />
               {file ? <p>Selected: {file.name}</p> : <p>Click to upload (PDF, PNG, JPG, WebP — max 7MB)</p>}
             </div>
           </div>
         </div>
-
         <Button
           type="submit"
           disabled={isSubmitting}
