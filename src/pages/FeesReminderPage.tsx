@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { sendNotification } from "@/utils/sendNotification";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -22,7 +23,6 @@ interface FeeReminder {
 
 const quickAmounts = [500, 1000, 2000, 5000];
 
-// Confirmation Dialog — same style as PromotionPanelPage
 const ConfirmDialog = ({
   open,
   title,
@@ -76,7 +76,6 @@ const FeesReminderPage = () => {
   const { schoolId } = useAuth();
   const allStudents = useAppStore((state) => state.students);
 
-  // Form state
   const [standard, setStandard] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
   const [studentName, setStudentName] = useState("");
@@ -84,16 +83,10 @@ const FeesReminderPage = () => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Reminders state
   const [reminders, setReminders] = useState<FeeReminder[]>([]);
-
-  // Filter state for sent reminders
   const [filterStandard, setFilterStandard] = useState("");
   const [filterSection, setFilterSection] = useState("");
   const [filterName, setFilterName] = useState("");
-
-  // Confirm dialog state
   const [confirm, setConfirm] = useState<{
     open: boolean;
     title: string;
@@ -103,7 +96,6 @@ const FeesReminderPage = () => {
     onConfirm: () => void;
   }>({ open: false, title: "", message: "", confirmLabel: "Confirm", danger: false, onConfirm: () => {} });
 
-  // Form: filtered students
   const filteredStudents = useMemo(() => {
     return allStudents.filter((s) => {
       if (standard && selectedSection) return s.standard === standard && s.section === selectedSection;
@@ -126,7 +118,6 @@ const FeesReminderPage = () => {
     fetchReminders();
   }, [schoolId]);
 
-  // Filter sent reminders
   const filteredReminders = useMemo(() => {
     return reminders.filter((r) => {
       const std = r.student?.standard || "";
@@ -162,6 +153,14 @@ const FeesReminderPage = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
+
+    // Notification bhejo
+    await sendNotification("fees", {
+      student_id: studentId,
+      title,
+      message: `Please pay ₹${parseFloat(amount).toLocaleString()} for ${title}`,
+    });
+
     toast({ title: "Fees Reminder Sent!", description: `Reminder sent for ${studentName}.` });
     setStandard("");
     setSelectedSection("");
@@ -202,33 +201,18 @@ const FeesReminderPage = () => {
         const ids = filteredReminders.map((r) => r.id);
         await supabase.from("fees_reminders").delete().in("id", ids);
         setReminders((prev) => prev.filter((r) => !ids.includes(r.id)));
-        toast({
-          title: "All Deleted",
-          description: `${count} reminder${count > 1 ? "s" : ""} deleted.`,
-          variant: "destructive",
-        });
+        toast({ title: "All Deleted", description: `${count} reminders deleted.`, variant: "destructive" });
       },
     });
   };
 
   return (
-    <div className="space-y-6 px-4 py-6 relative z-10">
-      <ConfirmDialog
-        open={confirm.open}
-        title={confirm.title}
-        message={confirm.message}
-        confirmLabel={confirm.confirmLabel}
-        danger={confirm.danger}
-        onConfirm={confirm.onConfirm}
-        onCancel={() => setConfirm((c) => ({ ...c, open: false }))}
-      />
-
+    <div className="space-y-6 relative z-10 px-4 py-6">
+      <ConfirmDialog {...confirm} onCancel={() => setConfirm((c) => ({ ...c, open: false }))} />
       <h1 className="text-3xl font-bold text-foreground text-center">Fees Reminder</h1>
-
-      {/* Send Form */}
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">STANDARD *</label>
               <select
@@ -270,7 +254,6 @@ const FeesReminderPage = () => {
               </select>
             </div>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">SELECT STUDENT *</label>
             {filteredStudents.length > 0 ? (
@@ -295,7 +278,6 @@ const FeesReminderPage = () => {
               <p className="text-foreground/40 text-sm py-3">No students found. Select standard & section first.</p>
             )}
           </div>
-
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">TITLE *</label>
             <input
@@ -307,7 +289,6 @@ const FeesReminderPage = () => {
               className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">AMOUNT (₹) *</label>
             <input
@@ -333,7 +314,6 @@ const FeesReminderPage = () => {
               ))}
             </div>
           </div>
-
           <Button
             type="submit"
             disabled={loading}
@@ -344,7 +324,6 @@ const FeesReminderPage = () => {
         </form>
       </div>
 
-      {/* Sent Reminders */}
       {reminders.length > 0 && (
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="flex items-center justify-between">
@@ -359,8 +338,6 @@ const FeesReminderPage = () => {
               </Button>
             )}
           </div>
-
-          {/* Filters for sent reminders */}
           <div className="bg-black/20 border border-primary/15 rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-primary/60 text-xs font-bold">
               <Filter size={13} /> FILTER REMINDERS
@@ -411,7 +388,6 @@ const FeesReminderPage = () => {
               </button>
             )}
           </div>
-
           {filteredReminders.length === 0 ? (
             <p className="text-foreground/40 text-sm text-center py-6">No reminders match the selected filters.</p>
           ) : (
