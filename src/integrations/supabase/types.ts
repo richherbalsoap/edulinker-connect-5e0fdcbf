@@ -97,6 +97,27 @@ export type Database = {
           },
         ]
       }
+      fcm_tokens: {
+        Row: {
+          created_at: string | null
+          id: string
+          student_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          student_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          student_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       fees_reminders: {
         Row: {
           amount: number | null
