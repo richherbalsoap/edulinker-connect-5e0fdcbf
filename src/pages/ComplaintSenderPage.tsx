@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { sendNotification } from "@/utils/sendNotification";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const classes = ["A", "B", "C", "D", "E"];
@@ -83,9 +84,8 @@ const ComplaintSenderPage = () => {
     }
     setIsSubmitting(true);
     let fileUrl: string | null = null;
-    if (file) {
-      fileUrl = await uploadFile(file);
-    }
+    if (file) fileUrl = await uploadFile(file);
+
     const student = allStudents.find((s) => s.id === formData.studentId);
     await addComplaint({
       student_id: formData.studentId,
@@ -94,6 +94,13 @@ const ComplaintSenderPage = () => {
       school_id: schoolId,
     });
     await fetchComplaints(schoolId);
+
+    // Notification bhejo
+    await sendNotification("complaint", {
+      student_id: formData.studentId,
+      description: formData.description,
+    });
+
     toast({
       title: "Complaint Registered!",
       description: `Your complaint regarding ${student?.name || "student"} has been submitted.`,
@@ -193,7 +200,6 @@ const ComplaintSenderPage = () => {
               placeholder="Describe the issue clearly..."
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">ATTACH FILE (OPTIONAL)</label>
             <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">
@@ -225,7 +231,6 @@ const ComplaintSenderPage = () => {
               </div>
             </div>
           </div>
-
           <Button
             type="submit"
             disabled={isSubmitting}
