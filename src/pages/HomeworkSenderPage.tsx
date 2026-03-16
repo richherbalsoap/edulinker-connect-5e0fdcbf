@@ -5,6 +5,7 @@ import { Send, ChevronDown, Upload, X } from "lucide-react";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { sendNotification } from "@/utils/sendNotification";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -78,9 +79,8 @@ const HomeworkSenderPage = () => {
     setIsSubmitting(true);
     try {
       let fileUrl: string | null = null;
-      if (file) {
-        fileUrl = await uploadFile(file);
-      }
+      if (file) fileUrl = await uploadFile(file);
+
       await addHomework({
         standard: formData.standard,
         section: formData.section,
@@ -90,6 +90,16 @@ const HomeworkSenderPage = () => {
         school_id: schoolId,
       });
       await fetchHomework(schoolId);
+
+      // Notification bhejo
+      await sendNotification("homework", {
+        school_id: schoolId,
+        standard: formData.standard,
+        section: formData.section,
+        subject: finalSubject,
+        description: formData.homework,
+      });
+
       toast({
         title: "Homework Sent Successfully!",
         description: `Homework for ${formData.standard} - ${formData.section} (${finalSubject}) has been sent.`,
@@ -234,7 +244,6 @@ const HomeworkSenderPage = () => {
             className="w-full p-3 h-32 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
           />
         </div>
-
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">ATTACH FILE (OPTIONAL)</label>
           <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">
@@ -266,7 +275,6 @@ const HomeworkSenderPage = () => {
             </div>
           </div>
         </div>
-
         <Button
           type="submit"
           disabled={isSubmitting}
