@@ -7,8 +7,6 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const INSTALL_DISMISSED_KEY = "edulinker_install_banner_dismissed";
-
 const InstallBanner = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
@@ -16,7 +14,7 @@ const InstallBanner = () => {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem(INSTALL_DISMISSED_KEY)) return;
+    // Always show on login page (skip only if already installed as standalone)
     if (window.matchMedia("(display-mode: standalone)").matches) return;
 
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
@@ -44,7 +42,6 @@ const InstallBanner = () => {
   const handleClose = () => {
     setVisible(false);
     setShowGuide(false);
-    localStorage.setItem(INSTALL_DISMISSED_KEY, "true");
   };
 
   if (!visible) return null;
