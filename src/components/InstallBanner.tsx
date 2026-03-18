@@ -42,7 +42,6 @@ const InstallBanner = () => {
   const handleClose = () => {
     setVisible(false);
     setShowGuide(false);
-    localStorage.setItem(INSTALL_DISMISSED_KEY, "true");
   };
 
   if (!visible) return null;
