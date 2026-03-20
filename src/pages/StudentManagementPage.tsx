@@ -283,20 +283,34 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
               )}
               {keyMode === "manual" && (
                 <div>
-                  <input
-                    type="text"
-                    placeholder="Enter key (8-20 chars, A-Z, 0-9)"
-                    value={manualKey}
-                    onChange={(e) => {
-                      setManualKey(e.target.value.toUpperCase().replace(/\s/g, ""));
-                      setKeyError("");
-                    }}
-                    maxLength={20}
-                    className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40 font-mono tracking-wider"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter key (e.g. EDU-XXXXX-XXXXX)"
+                      value={manualKey}
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase().replace(/\s/g, "");
+                        setManualKey(val);
+                        setKeyError("");
+                        setKeyFound(false);
+                      }}
+                      maxLength={20}
+                      className="flex-1 p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40 font-mono tracking-wider"
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => scanKey(manualKey)}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-4"
+                    >
+                      Scan
+                    </Button>
+                  </div>
+                  {keyFound && (
+                    <p className="text-xs text-green-400 mt-1 font-semibold">✓ Student found! Details auto-filled below.</p>
+                  )}
                   {keyError && <p className="text-xs text-destructive mt-1">{keyError}</p>}
                   <p className="text-xs text-foreground/40 mt-1">
-                    Uppercase + numbers, no spaces. Students can re-use this key if they transfer schools.
+                    Enter key with or without dashes. Press Scan to auto-fill if student exists.
                   </p>
                 </div>
               )}
