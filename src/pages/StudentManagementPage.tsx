@@ -18,6 +18,7 @@ const getSortableClassIndex = (classVal: string) => {
 };
 
 const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
+  const { schoolId } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState(
     student
@@ -685,3 +686,4 @@ const StudentManagementPage = () => {
 };
 
 export default StudentManagementPage;
+
