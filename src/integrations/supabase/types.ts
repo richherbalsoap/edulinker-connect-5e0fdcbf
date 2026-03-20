@@ -481,6 +481,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_student_by_secret_id: {
+        Args: { _secret_id: string }
+        Returns: {
+          avatar_url: string
+          name: string
+          parent_contact: string
+          parent_name: string
+          roll_no: number
+          school_id: string
+          secret_id: string
+          section: string
+          standard: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "parent"
