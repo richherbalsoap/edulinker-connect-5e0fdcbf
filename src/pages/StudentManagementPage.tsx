@@ -36,6 +36,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   const [keyMode, setKeyMode] = useState<"auto" | "manual">("auto");
   const [manualKey, setManualKey] = useState("");
   const [keyError, setKeyError] = useState("");
+  const [keyFound, setKeyFound] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
