@@ -107,12 +107,9 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
 
     for (const candidate of candidates) {
       const { data } = await supabase
-        .from("students")
-        .select("name, standard, section, roll_no, parent_name, parent_contact, avatar_url, secret_id")
-        .eq("secret_id", candidate)
-        .maybeSingle();
-      if (data) {
-        found = data;
+        .rpc("lookup_student_by_secret_id", { _secret_id: candidate });
+      if (data && (data as any[]).length > 0) {
+        found = (data as any[])[0];
         matchedKey = candidate;
         break;
       }
