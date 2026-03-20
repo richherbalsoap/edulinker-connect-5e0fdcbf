@@ -82,31 +82,58 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   };
 
   const scanKey = async (key: string) => {
-    if (!key || key.length < 8) return;
-    const err = validateManualKey(key);
-    if (err) return;
+    if (!key || key.length < 5) {
+      setKeyError("Key too short to scan.");
+      return;
+    }
+
+    // Try multiple formats: as-is, with dashes added (EDU-XXXXX-XXXXX), and without dashes
+    const keyNoDashes = key.replace(/-/g, "");
+    const candidates = [key];
     
-    const { data: existing } = await supabase
-      .from("students")
-      .select("name, standard, section, roll_no, parent_name, parent_contact, avatar_url")
-      .eq("secret_id", key)
-      .maybeSingle();
-    
-    if (existing) {
+    // If key has no dashes and starts with EDU, try adding dashes in EDU-XXXXX-XXXXX format
+    if (!key.includes("-") && keyNoDashes.startsWith("EDU") && keyNoDashes.length >= 13) {
+      const formatted = `EDU-${keyNoDashes.slice(3, 8)}-${keyNoDashes.slice(8, 13)}`;
+      candidates.push(formatted);
+    }
+    // If key has dashes, also try without
+    if (key.includes("-")) {
+      candidates.push(keyNoDashes);
+    }
+
+    let found = null;
+    let matchedKey = key;
+
+    for (const candidate of candidates) {
+      const { data } = await supabase
+        .from("students")
+        .select("name, standard, section, roll_no, parent_name, parent_contact, avatar_url, secret_id")
+        .eq("secret_id", candidate)
+        .maybeSingle();
+      if (data) {
+        found = data;
+        matchedKey = candidate;
+        break;
+      }
+    }
+
+    if (found) {
+      setManualKey(found.secret_id || matchedKey);
       setFormData({
-        name: existing.name || "",
-        standard: existing.standard || "",
-        section: existing.section || "",
-        roll_no: existing.roll_no?.toString() || "",
-        parent_name: existing.parent_name || "",
-        parent_contact: existing.parent_contact || "",
-        avatar_url: existing.avatar_url || null,
+        name: found.name || "",
+        standard: found.standard || "",
+        section: found.section || "",
+        roll_no: found.roll_no?.toString() || "",
+        parent_name: found.parent_name || "",
+        parent_contact: found.parent_contact || "",
+        avatar_url: found.avatar_url || null,
       });
       setKeyFound(true);
       setKeyError("");
-      toast({ title: "Student Found!", description: `"${existing.name}" — Class ${existing.standard}-${existing.section}. Details auto-filled.` });
+      toast({ title: "Student Found! ✅", description: `"${found.name}" — Class ${found.standard}-${found.section}. Details auto-filled.` });
     } else {
       setKeyFound(false);
+      setKeyError("No student found with this key. You can add as a new student.");
     }
   };
 
