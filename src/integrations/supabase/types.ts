@@ -354,6 +354,7 @@ export type Database = {
           created_at: string
           id: string
           original_student_id: string
+          school_id: string | null
           secret_id: string
         }
         Insert: {
@@ -361,6 +362,7 @@ export type Database = {
           created_at?: string
           id?: string
           original_student_id: string
+          school_id?: string | null
           secret_id: string
         }
         Update: {
@@ -368,9 +370,18 @@ export type Database = {
           created_at?: string
           id?: string
           original_student_id?: string
+          school_id?: string | null
           secret_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "student_keys_archive_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
