@@ -92,9 +92,14 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
         setKeyError(err);
         return;
       }
-      const { data: existing } = await supabase.from("students").select("id").eq("secret_id", manualKey).maybeSingle();
+      // Check duplicate key within the same school
+      const { data: existing } = await supabase
+        .from("students")
+        .select("id, name, standard, section")
+        .eq("secret_id", manualKey)
+        .maybeSingle();
       if (existing) {
-        setKeyError("This key is already in use. Choose a different one.");
+        setKeyError(`This key is already assigned to "${existing.name}" in Class ${existing.standard}-${existing.section}. Use a different key.`);
         return;
       }
       const { data: archived } = await supabase
