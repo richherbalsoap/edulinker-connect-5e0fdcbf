@@ -466,4 +466,222 @@ const StudentManagementPage = () => {
             <Button
               onClick={() => setIsImportModalOpen(true)}
               variant="outline"
-              className="bg-primary text-primary-foreground ho
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)] text-xs sm:text-sm"
+            >
+              <FileUp size={16} className="mr-1 sm:mr-2" /> Import
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingStudent(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)] text-xs sm:text-sm"
+            >
+              <Plus size={16} className="mr-1 sm:mr-2" /> Add Student
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-6 w-full mx-auto space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">CLASS</label>
+              <Select value={selectedClass} onValueChange={setSelectedClass}>
+                <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground">
+                  <SelectValue placeholder="All Classes" />
+                </SelectTrigger>
+                <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                  <SelectItem value="All Classes" className="text-foreground focus:bg-primary/10 focus:text-primary">
+                    All Classes
+                  </SelectItem>
+                  {allAvailableClasses.map((c) => (
+                    <SelectItem key={c} value={c} className="text-foreground focus:bg-primary/10 focus:text-primary">
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SECTION</label>
+              <Select value={selectedSection} onValueChange={setSelectedSection}>
+                <SelectTrigger className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground">
+                  <SelectValue placeholder="All Sections" />
+                </SelectTrigger>
+                <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                  <SelectItem value="All Sections" className="text-foreground focus:bg-primary/10 focus:text-primary">
+                    All Sections
+                  </SelectItem>
+                  {allAvailableSections.map((s) => (
+                    <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STUDENT NAME</label>
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+            </div>
+          </div>
+        </div>
+
+        {filteredStudents.length > 0 ? (
+          Object.keys(groupedStudents).map((classGroup) => (
+            <div key={classGroup}>
+              <h2 className="text-foreground text-2xl font-bold mb-4 px-2">{classGroup}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {groupedStudents[classGroup].map((student: any) => (
+                  <div
+                    key={student.id}
+                    className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-5 space-y-4 flex flex-col hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-4 flex-grow">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/40 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden flex-shrink-0 border border-primary/20">
+                        {student.avatar_url ? (
+                          <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
+                        ) : (
+                          student.name.charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">{student.name}</h3>
+                        <div className="flex gap-2 text-xs mt-1 flex-wrap">
+                          <span className="bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">
+                            Section {student.section}
+                          </span>
+                          {(student as any).roll_no && (
+                            <span className="bg-primary/10 text-primary/80 px-2 py-0.5 rounded border border-primary/20">
+                              Roll No. {(student as any).roll_no}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-black/40 p-3 sm:p-4 rounded-lg space-y-2 text-foreground/80 text-sm border border-primary/10">
+                      <div className="flex items-center gap-3">
+                        <Key size={16} className="text-primary/50 flex-shrink-0" />
+                        <span className="font-mono text-primary text-xs truncate">{student.secret_id}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <User size={16} className="text-primary/50 flex-shrink-0" />
+                        <span className="truncate">Parent: {student.parent_name || "--"}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Phone size={16} className="text-primary/50 flex-shrink-0" />
+                        <span className="truncate">{student.parent_contact || "--"}</span>
+                      </div>
+                    </div>
+                    {/* Fee Reminders for this student */}
+                    {feeReminders[student.id] && feeReminders[student.id].length > 0 && (
+                      <div className="bg-primary/5 border border-primary/15 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2 text-primary/70 text-xs font-bold">
+                          <DollarSign size={14} /> FEE REMINDERS ({feeReminders[student.id].length})
+                        </div>
+                        {feeReminders[student.id].slice(0, 2).map((rem, idx) => (
+                          <div key={idx} className="text-xs text-foreground/60">
+                            <p className="truncate">{rem.message}</p>
+                            <p className="text-foreground/30">{new Date(rem.created_at).toLocaleDateString()}</p>
+                          </div>
+                        ))}
+                        {feeReminders[student.id].length > 2 && (
+                          <p className="text-xs text-primary/50">+{feeReminders[student.id].length - 2} more</p>
+                        )}
+                      </div>
+                    )}
+                    {/* Failed Login Attempts — same style as fee card */}
+                    {student.failed_attempts >= 1 && (
+                      <div className="bg-destructive/5 border border-destructive/15 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-destructive/70 text-xs font-bold">
+                            <ShieldAlert size={14} />
+                            {student.failed_attempts >= 5
+                              ? "ACCOUNT LOCKED"
+                              : `LOGIN ATTEMPTS (${student.failed_attempts}/5)`}
+                          </div>
+                          <button
+                            onClick={async () => {
+                              await resetFailedAttempts(student.id);
+                              toast({ title: "Reset Done", description: `${student.name}'s login attempts cleared.` });
+                            }}
+                            className="text-[10px] font-bold text-primary/70 hover:text-primary border border-primary/20 hover:border-primary/50 px-2 py-0.5 rounded transition-colors"
+                          >
+                            RESET
+                          </button>
+                        </div>
+                        {student.failed_attempts >= 5 ? (
+                          <p className="text-xs text-destructive/80 font-semibold">
+                            Student cannot login — ask them to contact you.
+                          </p>
+                        ) : (
+                          <p className="text-xs text-foreground/60">
+                            {student.failed_attempts} failed attempt{student.failed_attempts > 1 ? "s" : ""}.{" "}
+                            {5 - student.failed_attempts} remaining before lockout.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex gap-3 mt-4">
+                      <Button
+                        onClick={() => {
+                          setEditingStudent(student);
+                          setIsModalOpen(true);
+                        }}
+                        variant="outline"
+                        className="w-full bg-black/40 hover:bg-primary/10 border-primary/20 text-foreground"
+                      >
+                        <Edit size={16} className="mr-2" /> Edit
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          await deleteStudentFromStore(student.id);
+                          toast({ title: "Success", description: "Student record deleted." });
+                        }}
+                        variant="destructive"
+                        className="w-full bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive"
+                      >
+                        <Trash2 size={16} className="mr-2" /> Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-foreground/50 text-lg">No students found.</p>
+            <p className="text-foreground/40">Add students using the "Add Student" button above.</p>
+          </div>
+        )}
+      </div>
+      <StudentModal
+        key={editingStudent?.id || "new"}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingStudent(null);
+        }}
+        onSave={handleSaveStudent}
+        student={editingStudent}
+      />
+      <ImportStudentsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        schoolId={schoolId}
+        onImportComplete={() => {
+          if (schoolId) fetchStudents(schoolId);
+        }}
+      />
+    </>
+  );
+};
+
+export default StudentManagementPage;
