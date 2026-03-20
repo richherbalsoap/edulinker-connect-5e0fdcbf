@@ -36,6 +36,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   const [keyMode, setKeyMode] = useState<"auto" | "manual">("auto");
   const [manualKey, setManualKey] = useState("");
   const [keyError, setKeyError] = useState("");
+  const [keyFound, setKeyFound] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -76,8 +77,37 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   const validateManualKey = (key: string) => {
     if (key.length < 8 || key.length > 20) return "Key must be 8–20 characters.";
     if (/\s/.test(key)) return "Key must not contain spaces.";
-    if (!/^[A-Z0-9]+$/.test(key)) return "Only uppercase letters and numbers allowed.";
+    if (!/^[A-Z0-9\-]+$/.test(key)) return "Only uppercase letters, numbers, and dashes allowed.";
     return "";
+  };
+
+  const scanKey = async (key: string) => {
+    if (!key || key.length < 8) return;
+    const err = validateManualKey(key);
+    if (err) return;
+    
+    const { data: existing } = await supabase
+      .from("students")
+      .select("name, standard, section, roll_no, parent_name, parent_contact, avatar_url")
+      .eq("secret_id", key)
+      .maybeSingle();
+    
+    if (existing) {
+      setFormData({
+        name: existing.name || "",
+        standard: existing.standard || "",
+        section: existing.section || "",
+        roll_no: existing.roll_no?.toString() || "",
+        parent_name: existing.parent_name || "",
+        parent_contact: existing.parent_contact || "",
+        avatar_url: existing.avatar_url || null,
+      });
+      setKeyFound(true);
+      setKeyError("");
+      toast({ title: "Student Found!", description: `"${existing.name}" — Class ${existing.standard}-${existing.section}. Details auto-filled.` });
+    } else {
+      setKeyFound(false);
+    }
   };
 
   const handleSave = async () => {
@@ -92,24 +122,26 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
         setKeyError(err);
         return;
       }
-      // Check duplicate key within the same school
-      const { data: existing } = await supabase
-        .from("students")
-        .select("id, name, standard, section")
-        .eq("secret_id", manualKey)
-        .maybeSingle();
-      if (existing) {
-        setKeyError(`This key is already assigned to "${existing.name}" in Class ${existing.standard}-${existing.section}. Use a different key.`);
-        return;
-      }
-      const { data: archived } = await supabase
-        .from("student_keys_archive")
-        .select("id")
-        .eq("secret_id", manualKey)
-        .maybeSingle();
-      if (archived) {
-        setKeyError("This key was previously used and is permanently reserved.");
-        return;
+      if (!keyFound) {
+        // Only check duplicates if we didn't auto-fill from existing
+        const { data: existing } = await supabase
+          .from("students")
+          .select("id, name, standard, section")
+          .eq("secret_id", manualKey)
+          .maybeSingle();
+        if (existing) {
+          setKeyError(`This key is already assigned to "${existing.name}" in Class ${existing.standard}-${existing.section}. Use a different key.`);
+          return;
+        }
+        const { data: archived } = await supabase
+          .from("student_keys_archive")
+          .select("id")
+          .eq("secret_id", manualKey)
+          .maybeSingle();
+        if (archived) {
+          setKeyError("This key was previously used and is permanently reserved.");
+          return;
+        }
       }
     }
     onSave({ ...formData, roll_no: rollNum }, keyMode === "manual" && !student ? manualKey : null);
@@ -251,20 +283,34 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
               )}
               {keyMode === "manual" && (
                 <div>
-                  <input
-                    type="text"
-                    placeholder="Enter key (8-20 chars, A-Z, 0-9)"
-                    value={manualKey}
-                    onChange={(e) => {
-                      setManualKey(e.target.value.toUpperCase().replace(/\s/g, ""));
-                      setKeyError("");
-                    }}
-                    maxLength={20}
-                    className="w-full p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40 font-mono tracking-wider"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter key (e.g. EDU-XXXXX-XXXXX)"
+                      value={manualKey}
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase().replace(/\s/g, "");
+                        setManualKey(val);
+                        setKeyError("");
+                        setKeyFound(false);
+                      }}
+                      maxLength={20}
+                      className="flex-1 p-3 bg-black/40 rounded-lg text-foreground placeholder:text-foreground/40 border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/40 font-mono tracking-wider"
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => scanKey(manualKey)}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-4"
+                    >
+                      Scan
+                    </Button>
+                  </div>
+                  {keyFound && (
+                    <p className="text-xs text-green-400 mt-1 font-semibold">✓ Student found! Details auto-filled below.</p>
+                  )}
                   {keyError && <p className="text-xs text-destructive mt-1">{keyError}</p>}
                   <p className="text-xs text-foreground/40 mt-1">
-                    Uppercase + numbers, no spaces. Students can re-use this key if they transfer schools.
+                    Enter key with or without dashes. Press Scan to auto-fill if student exists.
                   </p>
                 </div>
               )}
