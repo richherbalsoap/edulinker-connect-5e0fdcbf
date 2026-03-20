@@ -107,12 +107,9 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
 
     for (const candidate of candidates) {
       const { data } = await supabase
-        .from("students")
-        .select("name, standard, section, roll_no, parent_name, parent_contact, avatar_url, secret_id")
-        .eq("secret_id", candidate)
-        .maybeSingle();
-      if (data) {
-        found = data;
+        .rpc("lookup_student_by_secret_id", { _secret_id: candidate });
+      if (data && (data as any[]).length > 0) {
+        found = (data as any[])[0];
         matchedKey = candidate;
         break;
       }
@@ -151,13 +148,11 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
         return;
       }
       if (!keyFound) {
-        // Only check duplicates within SAME school — other schools can reuse the key
-        const { data: existing } = await supabase
-          .from("students")
-          .select("id, name, standard, section, school_id")
-          .eq("secret_id", manualKey)
-          .maybeSingle();
-        if (existing && (existing as any).school_id === schoolId) {
+        // Use RPC to check across all schools, then only block same-school duplicates
+        const { data: lookupData } = await supabase
+          .rpc("lookup_student_by_secret_id", { _secret_id: manualKey });
+        const existing = lookupData && (lookupData as any[]).length > 0 ? (lookupData as any[])[0] : null;
+        if (existing && existing.school_id === schoolId) {
           setKeyError(`This key is already assigned to "${existing.name}" in Class ${existing.standard}-${existing.section}. Use a different key.`);
           return;
         }
