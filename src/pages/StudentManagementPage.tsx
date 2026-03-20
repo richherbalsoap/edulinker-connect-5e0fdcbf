@@ -77,8 +77,37 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
   const validateManualKey = (key: string) => {
     if (key.length < 8 || key.length > 20) return "Key must be 8–20 characters.";
     if (/\s/.test(key)) return "Key must not contain spaces.";
-    if (!/^[A-Z0-9]+$/.test(key)) return "Only uppercase letters and numbers allowed.";
+    if (!/^[A-Z0-9\-]+$/.test(key)) return "Only uppercase letters, numbers, and dashes allowed.";
     return "";
+  };
+
+  const scanKey = async (key: string) => {
+    if (!key || key.length < 8) return;
+    const err = validateManualKey(key);
+    if (err) return;
+    
+    const { data: existing } = await supabase
+      .from("students")
+      .select("name, standard, section, roll_no, parent_name, parent_contact, avatar_url")
+      .eq("secret_id", key)
+      .maybeSingle();
+    
+    if (existing) {
+      setFormData({
+        name: existing.name || "",
+        standard: existing.standard || "",
+        section: existing.section || "",
+        roll_no: existing.roll_no?.toString() || "",
+        parent_name: existing.parent_name || "",
+        parent_contact: existing.parent_contact || "",
+        avatar_url: existing.avatar_url || null,
+      });
+      setKeyFound(true);
+      setKeyError("");
+      toast({ title: "Student Found!", description: `"${existing.name}" — Class ${existing.standard}-${existing.section}. Details auto-filled.` });
+    } else {
+      setKeyFound(false);
+    }
   };
 
   const handleSave = async () => {
