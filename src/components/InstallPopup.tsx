@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Download, Smartphone, Check, Share, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -17,7 +16,6 @@ const InstallPopup = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Don't show if already dismissed
     if (localStorage.getItem(INSTALL_DISMISSED_KEY)) return;
 
     const ua = navigator.userAgent;
@@ -25,7 +23,7 @@ const InstallPopup = () => {
 
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);
-      return; // Already installed, don't show
+      return;
     }
 
     setVisible(true);
@@ -58,7 +56,7 @@ const InstallPopup = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 px-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <Card className="w-full max-w-md bg-card border-primary/20 shadow-2xl relative animate-in slide-in-from-top-4 duration-300">
+      <div className="w-full max-w-md bg-card border border-primary/20 rounded-lg shadow-2xl relative animate-in slide-in-from-top-4 duration-300">
         <button
           onClick={handleClose}
           className="absolute right-3 top-3 p-1.5 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors z-10"
@@ -66,17 +64,17 @@ const InstallPopup = () => {
           <X size={16} />
         </button>
 
-        <CardHeader className="text-center space-y-2 pb-3">
+        <div className="text-center space-y-2 p-6 pb-3">
           <div className="mx-auto w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
             <Smartphone size={26} className="text-primary" />
           </div>
-          <CardTitle className="text-xl text-primary">Install EDULinker</CardTitle>
-          <CardDescription className="text-muted-foreground text-sm">
+          <h3 className="text-xl font-semibold text-primary">Install EDULinker</h3>
+          <p className="text-muted-foreground text-sm">
             App install karo — real app jaisi feel milegi!
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </div>
 
-        <CardContent className="space-y-3 pt-0">
+        <div className="space-y-3 p-6 pt-0">
           {isIOS ? (
             <div className="space-y-2 text-center">
               <p className="text-foreground text-sm">iPhone/iPad pe:</p>
@@ -132,8 +130,8 @@ const InstallPopup = () => {
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
