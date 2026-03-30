@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, MessageSquare, FileText,
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
-  ChevronDown, LogOut, LockKeyhole
+  ChevronDown, LogOut, LockKeyhole, FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePin } from '@/context/PinContext';
@@ -167,6 +167,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-3">
           <ul className="space-y-1">
             <NavItem item={{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' }} onClick={toggleSidebar} />
+            <NavItem item={{ path: '/report', icon: FileSpreadsheet, label: 'Download Report' }} onClick={toggleSidebar} />
           </ul>
           <CollapsibleSection title="TEACHER TOOLS" icon={BookOpen} items={teacherTools} onClick={toggleSidebar} />
           <CollapsibleSection title="PRINCIPAL TOOLS" icon={Users} items={principalTools} onClick={toggleSidebar} protected requestAccess={requestAccess} />
