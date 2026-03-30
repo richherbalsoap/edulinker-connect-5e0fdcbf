@@ -56,6 +56,7 @@ const App = () => (
               <Route path="ai-chatbot" element={<AIChatbotPage />} />
               <Route path="promotion" element={<PromotionPanelPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="report" element={<ReportPage />} />
             </Route>
             <Route path="install" element={<InstallPage />} />
             <Route path="*" element={<NotFound />} />
