@@ -10,9 +10,10 @@ import { User, KeyRound, Loader2, LockKeyhole } from "lucide-react";
 
 const SettingsPage = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, schoolId } = useAuth();
   const navigate = useNavigate();
   const [newName, setNewName] = useState(localStorage.getItem("schoolName") || "My School");
+  const [nameLoading, setNameLoading] = useState(false);
 
   // Password change state
   const [newPassword, setNewPassword] = useState("");
@@ -22,6 +23,22 @@ const SettingsPage = () => {
   // Recovery mode state
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
+
+  // Load school name from Supabase on mount — localStorage nahi, DB se
+  useEffect(() => {
+    if (!schoolId) return;
+    supabase
+      .from("schools")
+      .select("school_name")
+      .eq("id", schoolId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.school_name) {
+          setNewName(data.school_name);
+          localStorage.setItem("schoolName", data.school_name);
+        }
+      });
+  }, [schoolId]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -38,7 +55,6 @@ const SettingsPage = () => {
             toast({ title: "Error", description: "Invalid or expired recovery link.", variant: "destructive" });
           } else {
             setIsRecoveryMode(true);
-            // Clean hash from URL
             window.history.replaceState(null, "", window.location.pathname);
           }
           setRecoveryLoading(false);
@@ -47,23 +63,36 @@ const SettingsPage = () => {
     }
   }, []);
 
-  const handleNameSubmit = (e: React.FormEvent) => {
+  const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) {
       toast({ title: "Name cannot be empty", variant: "destructive" });
       return;
     }
+    if (!schoolId) {
+      toast({ title: "School not found", description: "Please logout and login again.", variant: "destructive" });
+      return;
+    }
+
+    setNameLoading(true);
+    const { error } = await supabase.from("schools").update({ school_name: newName.trim() }).eq("id", schoolId);
+    setNameLoading(false);
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to update school name.", variant: "destructive" });
+      return;
+    }
+
+    // localStorage bhi sync karo
     localStorage.setItem("schoolName", newName.trim());
-    // Header ko instantly update karne ke liye custom event dispatch karo
     window.dispatchEvent(new CustomEvent("schoolNameUpdated", { detail: newName.trim() }));
-    toast({ title: "Name Updated Successfully!", description: `Display name changed to ${newName.trim()}.` });
+    toast({ title: "Name Updated Successfully!", description: `School name changed to "${newName.trim()}".` });
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isRecoveryMode) {
-      // Recovery mode: no current password needed
       if (newPassword.length < 6) {
         toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
         return;
@@ -85,7 +114,6 @@ const SettingsPage = () => {
       return;
     }
 
-    // Direct password change — no re-auth needed
     if (newPassword.length < 6) {
       toast({ title: "Error", description: "New password must be at least 6 characters.", variant: "destructive" });
       return;
@@ -133,14 +161,14 @@ const SettingsPage = () => {
         </div>
       )}
 
-      {/* Change Display Name - hide in recovery mode */}
+      {/* Change Display Name */}
       {!isRecoveryMode && (
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
               <User size={20} className="text-primary" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground">Change Display Name</h2>
+            <h2 className="text-xl font-semibold text-foreground">Change School Name</h2>
           </div>
           <form onSubmit={handleNameSubmit} className="space-y-6">
             <div>
@@ -154,8 +182,14 @@ const SettingsPage = () => {
                 placeholder="Enter your school name"
               />
             </div>
-            <Button type="submit" className={btnClass}>
-              Update Name
+            <Button type="submit" disabled={nameLoading} className={btnClass}>
+              {nameLoading ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" /> Saving...
+                </>
+              ) : (
+                "Update Name"
+              )}
             </Button>
           </form>
         </div>
@@ -200,6 +234,7 @@ const SettingsPage = () => {
           </Button>
         </form>
       </div>
+
       {/* PIN Lock Info */}
       {!isRecoveryMode && (
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
@@ -210,7 +245,8 @@ const SettingsPage = () => {
             <h2 className="text-xl font-semibold text-foreground">PIN Lock</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            PIN lock is managed from the sidebar. Use the <strong className="text-primary">Lock App</strong> button to lock instantly, or the app auto-locks after 5 minutes of inactivity.
+            PIN lock is managed from the sidebar. Use the <strong className="text-primary">Lock App</strong> button to
+            lock instantly, or the app auto-locks after 5 minutes of inactivity.
           </p>
         </div>
       )}
