@@ -19,8 +19,11 @@ export type Database = {
           content: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           id: string
+          is_deleted: boolean
           school_id: string | null
+          source: string
           title: string | null
           type: string | null
         }
@@ -28,8 +31,11 @@ export type Database = {
           content?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           school_id?: string | null
+          source?: string
           title?: string | null
           type?: string | null
         }
@@ -37,8 +43,11 @@ export type Database = {
           content?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           id?: string
+          is_deleted?: boolean
           school_id?: string | null
+          source?: string
           title?: string | null
           type?: string | null
         }
@@ -56,28 +65,37 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           description: string
           file_url: string | null
           id: string
+          is_deleted: boolean
           school_id: string | null
+          source: string
           student_id: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description: string
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           school_id?: string | null
+          source?: string
           student_id: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           school_id?: string | null
+          source?: string
           student_id?: string
         }
         Relationships: [
@@ -170,33 +188,42 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           description: string
           file_url: string | null
           id: string
+          is_deleted: boolean
           school_id: string | null
           section: string
+          source: string
           standard: string
           subject: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description: string
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           school_id?: string | null
           section: string
+          source?: string
           standard: string
           subject: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           school_id?: string | null
           section?: string
+          source?: string
           standard?: string
           subject?: string
         }
@@ -214,12 +241,15 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           exam_name: string | null
           file_url: string | null
           id: string
+          is_deleted: boolean
           marks_obtained: number
           percentage: number
           school_id: string | null
+          source: string
           student_id: string
           subject: string
           total_marks: number
@@ -227,12 +257,15 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           exam_name?: string | null
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           marks_obtained: number
           percentage?: number
           school_id?: string | null
+          source?: string
           student_id: string
           subject: string
           total_marks: number
@@ -240,12 +273,15 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           exam_name?: string | null
           file_url?: string | null
           id?: string
+          is_deleted?: boolean
           marks_obtained?: number
           percentage?: number
           school_id?: string | null
+          source?: string
           student_id?: string
           subject?: string
           total_marks?: number
@@ -297,6 +333,42 @@ export type Database = {
           school_code?: string
           school_name?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      student_bin: {
+        Row: {
+          deleted_at: string | null
+          expires_at: string | null
+          file_url: string | null
+          id: string
+          item_data: Json
+          item_id: string
+          item_type: string
+          school_id: string
+          student_id: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          expires_at?: string | null
+          file_url?: string | null
+          id?: string
+          item_data: Json
+          item_id: string
+          item_type: string
+          school_id: string
+          student_id: string
+        }
+        Update: {
+          deleted_at?: string | null
+          expires_at?: string | null
+          file_url?: string | null
+          id?: string
+          item_data?: Json
+          item_id?: string
+          item_type?: string
+          school_id?: string
+          student_id?: string
         }
         Relationships: []
       }
@@ -379,6 +451,95 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_pins: {
+        Row: {
+          created_at: string | null
+          pin_hash: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          pin_hash: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string | null
+          pin_hash?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_pins_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_self_results: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          exam_name: string | null
+          file_url: string | null
+          id: string
+          is_deleted: boolean
+          marks_obtained: number
+          percentage: number | null
+          school_id: string
+          source: string
+          student_id: string
+          subject: string
+          total_marks: number
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          exam_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_deleted?: boolean
+          marks_obtained: number
+          percentage?: number | null
+          school_id: string
+          source?: string
+          student_id: string
+          subject: string
+          total_marks: number
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          exam_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_deleted?: boolean
+          marks_obtained?: number
+          percentage?: number | null
+          school_id?: string
+          source?: string
+          student_id?: string
+          subject?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_self_results_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_self_results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]
