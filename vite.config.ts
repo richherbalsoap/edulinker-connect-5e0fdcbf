@@ -18,8 +18,14 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
+      devOptions: {
+        enabled: false,
+      },
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
       },
       manifest: {
         name: "EDULinker - School Management",
