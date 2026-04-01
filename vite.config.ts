@@ -26,6 +26,34 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:html)$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-cache",
+              expiration: { maxEntries: 10 },
+              networkTimeoutSeconds: 3,
+            },
+          },
+          {
+            urlPattern: /\.(?:js|css)$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "static-cache",
+              expiration: { maxEntries: 50 },
+              networkTimeoutSeconds: 3,
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|ico|webp)$/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "image-cache",
+              expiration: { maxEntries: 60, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
+        ],
       },
       manifest: {
         name: "EDULinker - School Management",
