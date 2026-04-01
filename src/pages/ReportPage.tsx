@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { filterRowsByCreatedAt, normalizeDateRange } from '@/utils/reportFilters';
 
 type DateRange = '1m' | '3m' | '6m' | '1y' | 'all' | 'custom';
 
@@ -51,12 +52,17 @@ const ReportPage = () => {
       case 'custom': start = customFrom ? startOfDay(customFrom) : null; break;
     }
     const finalEnd = range === 'custom' && customTo ? endOfDay(customTo) : end;
-    return { startDate: start, endDate: finalEnd };
+    return normalizeDateRange(start, finalEnd);
   }, [range, customFrom, customTo]);
 
   const fetchData = useCallback(async () => {
-    if (!schoolId) return;
+    if (!schoolId) {
+      setData(null);
+      return;
+    }
+
     setLoading(true);
+    setData(null);
 
     try {
       const applyDateFilter = (query: any) => {
@@ -73,7 +79,7 @@ const ReportPage = () => {
         return q;
       };
 
-      const [resResults, resHomework, resAnnouncements, resComplaints, resFees, resStudents] = await Promise.all([
+      const responses = await Promise.all([
         applyDateFilter(supabase.from('results').select('*, student:students(name, standard, section, roll_no)')).order('created_at', { ascending: false }),
         applyDateFilter(supabase.from('homework').select('*')).order('created_at', { ascending: false }),
         applyDateFilter(supabase.from('announcements').select('*')).order('created_at', { ascending: false }),
@@ -82,21 +88,41 @@ const ReportPage = () => {
         applyDateFilterSimple(supabase.from('students').select('*').eq('school_id', schoolId)).order('created_at', { ascending: false }),
       ]);
 
+      const [resResults, resHomework, resAnnouncements, resComplaints, resFees, resStudents] = responses;
+      const firstError = responses.find((response) => response.error)?.error;
+
+      if (firstError) throw firstError;
+
       setData({
-        results: resResults.data || [],
-        homework: resHomework.data || [],
-        announcements: resAnnouncements.data || [],
-        complaints: resComplaints.data || [],
-        fees: resFees.data || [],
-        students: resStudents.data || [],
+        results: filterRowsByCreatedAt(resResults.data || [], startDate, endDate),
+        homework: filterRowsByCreatedAt(resHomework.data || [], startDate, endDate),
+        announcements: filterRowsByCreatedAt(resAnnouncements.data || [], startDate, endDate),
+        complaints: filterRowsByCreatedAt(resComplaints.data || [], startDate, endDate),
+        fees: filterRowsByCreatedAt(resFees.data || [], startDate, endDate),
+        students: filterRowsByCreatedAt(resStudents.data || [], startDate, endDate),
       });
     } catch (err) {
       console.error('Report fetch error:', err);
+      setData(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [schoolId, startDate, endDate]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const reportData = useMemo(() => {
+    if (!data) return null;
+
+    return {
+      results: filterRowsByCreatedAt(data.results, startDate, endDate),
+      homework: filterRowsByCreatedAt(data.homework, startDate, endDate),
+      announcements: filterRowsByCreatedAt(data.announcements, startDate, endDate),
+      complaints: filterRowsByCreatedAt(data.complaints, startDate, endDate),
+      fees: filterRowsByCreatedAt(data.fees, startDate, endDate),
+      students: filterRowsByCreatedAt(data.students, startDate, endDate),
+    };
+  }, [data, startDate, endDate]);
 
   const dateLabel = useMemo(() => {
     if (range === 'all') return 'AllTime';
@@ -106,11 +132,11 @@ const ReportPage = () => {
   }, [range, customFrom, customTo]);
 
   const handleDownload = () => {
-    if (!data) return;
+    if (!reportData) return;
     const wb = XLSX.utils.book_new();
 
     // Results
-    const resultsRows = data.results.map(r => ({
+    const resultsRows = reportData.results.map(r => ({
       'Student Name': r.student?.name || '',
       'Class': r.student?.standard || '',
       'Section': r.student?.section || '',
@@ -127,7 +153,7 @@ const ReportPage = () => {
     XLSX.utils.book_append_sheet(wb, wsResults, 'Results');
 
     // Homework
-    const hwRows = data.homework.map(h => ({
+    const hwRows = reportData.homework.map(h => ({
       'Class': h.standard,
       'Section': h.section,
       'Subject': h.subject,
@@ -139,7 +165,7 @@ const ReportPage = () => {
     XLSX.utils.book_append_sheet(wb, wsHw, 'Homework');
 
     // Announcements
-    const annRows = data.announcements.map(a => ({
+    const annRows = reportData.announcements.map(a => ({
       'Title': a.title || '',
       'Content': a.content || '',
       'Type': a.type || '',
@@ -150,7 +176,7 @@ const ReportPage = () => {
     XLSX.utils.book_append_sheet(wb, wsAnn, 'Announcements');
 
     // Complaints
-    const compRows = data.complaints.map(c => ({
+    const compRows = reportData.complaints.map(c => ({
       'Student Name': c.student?.name || '',
       'Class': c.student?.standard || '',
       'Section': c.student?.section || '',
@@ -162,7 +188,7 @@ const ReportPage = () => {
     XLSX.utils.book_append_sheet(wb, wsComp, 'Complaints');
 
     // Fees
-    const feeRows = data.fees.map(f => ({
+    const feeRows = reportData.fees.map(f => ({
       'Student Name': f.student?.name || '',
       'Class': f.student?.standard || '',
       'Section': f.student?.section || '',
@@ -175,7 +201,7 @@ const ReportPage = () => {
     XLSX.utils.book_append_sheet(wb, wsFee, 'Fees Reminders');
 
     // Students
-    const stdRows = data.students.map(s => ({
+    const stdRows = reportData.students.map(s => ({
       'Name': s.name,
       'Class': s.standard,
       'Section': s.section,
@@ -208,7 +234,7 @@ const ReportPage = () => {
   };
 
   const handlePrint = () => {
-    if (!data) return;
+    if (!reportData) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
@@ -232,34 +258,34 @@ const ReportPage = () => {
       <h1>📊 EDULinker Report — ${schoolName}</h1>
       <p style="text-align:center;color:#aaa;">Date Range: ${dateLabel} | Generated: ${format(new Date(), 'dd MMM yyyy, hh:mm a')}</p>
       
-      <h2>📝 Results (${data.results.length})</h2>
+      <h2>📝 Results (${reportData.results.length})</h2>
       ${makeTable(['Student', 'Class', 'Section', 'Roll No', 'Subject', 'Exam', 'Marks', 'Total', '%', 'Date'],
-        data.results.map(r => [r.student?.name||'', r.student?.standard||'', r.student?.section||'', r.student?.roll_no||'', r.subject, r.exam_name||'', r.marks_obtained, r.total_marks, r.percentage, format(new Date(r.created_at), 'dd MMM yyyy')])
+        reportData.results.map(r => [r.student?.name||'', r.student?.standard||'', r.student?.section||'', r.student?.roll_no||'', r.subject, r.exam_name||'', r.marks_obtained, r.total_marks, r.percentage, format(new Date(r.created_at), 'dd MMM yyyy')])
       )}
       
-      <h2>📚 Homework (${data.homework.length})</h2>
+      <h2>📚 Homework (${reportData.homework.length})</h2>
       ${makeTable(['Class', 'Section', 'Subject', 'Description', 'Date'],
-        data.homework.map(h => [h.standard, h.section, h.subject, h.description, format(new Date(h.created_at), 'dd MMM yyyy')])
+        reportData.homework.map(h => [h.standard, h.section, h.subject, h.description, format(new Date(h.created_at), 'dd MMM yyyy')])
       )}
       
-      <h2>📢 Announcements (${data.announcements.length})</h2>
+      <h2>📢 Announcements (${reportData.announcements.length})</h2>
       ${makeTable(['Title', 'Content', 'Type', 'Date'],
-        data.announcements.map(a => [a.title||'', a.content||'', a.type||'', format(new Date(a.created_at), 'dd MMM yyyy')])
+        reportData.announcements.map(a => [a.title||'', a.content||'', a.type||'', format(new Date(a.created_at), 'dd MMM yyyy')])
       )}
       
-      <h2>⚠️ Complaints (${data.complaints.length})</h2>
+      <h2>⚠️ Complaints (${reportData.complaints.length})</h2>
       ${makeTable(['Student', 'Class', 'Section', 'Description', 'Date'],
-        data.complaints.map(c => [c.student?.name||'', c.student?.standard||'', c.student?.section||'', c.description, format(new Date(c.created_at), 'dd MMM yyyy')])
+        reportData.complaints.map(c => [c.student?.name||'', c.student?.standard||'', c.student?.section||'', c.description, format(new Date(c.created_at), 'dd MMM yyyy')])
       )}
       
-      <h2>💰 Fees Reminders (${data.fees.length})</h2>
+      <h2>💰 Fees Reminders (${reportData.fees.length})</h2>
       ${makeTable(['Student', 'Class', 'Section', 'Title', 'Amount (₹)', 'Date'],
-        data.fees.map(f => [f.student?.name||'', f.student?.standard||'', f.student?.section||'', f.title||'', f.amount||0, format(new Date(f.created_at), 'dd MMM yyyy')])
+        reportData.fees.map(f => [f.student?.name||'', f.student?.standard||'', f.student?.section||'', f.title||'', f.amount||0, format(new Date(f.created_at), 'dd MMM yyyy')])
       )}
       
-      <h2>👨‍🎓 Students (${data.students.length})</h2>
+      <h2>👨‍🎓 Students (${reportData.students.length})</h2>
       ${makeTable(['Name', 'Class', 'Section', 'Roll No', 'Parent', 'Contact', 'Secret ID', 'Added'],
-        data.students.map(s => [s.name, s.standard, s.section, s.roll_no||'', s.parent_name||'', s.parent_contact||'', s.secret_id, format(new Date(s.created_at), 'dd MMM yyyy')])
+        reportData.students.map(s => [s.name, s.standard, s.section, s.roll_no||'', s.parent_name||'', s.parent_contact||'', s.secret_id, format(new Date(s.created_at), 'dd MMM yyyy')])
       )}
     </body></html>`;
 
@@ -269,16 +295,16 @@ const ReportPage = () => {
   };
 
   const counts = useMemo(() => {
-    if (!data) return null;
+    if (!reportData) return null;
     return [
-      { icon: FileText, label: 'Results', count: data.results.length, color: 'text-primary' },
-      { icon: BookOpen, label: 'Homework', count: data.homework.length, color: 'text-primary' },
-      { icon: Bell, label: 'Announcements', count: data.announcements.length, color: 'text-primary' },
-      { icon: MessageSquare, label: 'Complaints', count: data.complaints.length, color: 'text-primary' },
-      { icon: DollarSign, label: 'Fees', count: data.fees.length, color: 'text-primary' },
-      { icon: Users, label: 'Students', count: data.students.length, color: 'text-primary' },
+      { icon: FileText, label: 'Results', count: reportData.results.length, color: 'text-primary' },
+      { icon: BookOpen, label: 'Homework', count: reportData.homework.length, color: 'text-primary' },
+      { icon: Bell, label: 'Announcements', count: reportData.announcements.length, color: 'text-primary' },
+      { icon: MessageSquare, label: 'Complaints', count: reportData.complaints.length, color: 'text-primary' },
+      { icon: DollarSign, label: 'Fees', count: reportData.fees.length, color: 'text-primary' },
+      { icon: Users, label: 'Students', count: reportData.students.length, color: 'text-primary' },
     ];
-  }, [data]);
+  }, [reportData]);
 
   return (
     <div className="space-y-6 relative z-10 w-full max-w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-6">
@@ -360,7 +386,7 @@ const ReportPage = () => {
             <Button
               onClick={handleDownload}
               className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_hsl(51,100%,50%,0.3)] px-8 py-3 text-base"
-              disabled={!data}
+              disabled={!reportData}
             >
               <Download className="mr-2" size={20} /> Download Excel Report
             </Button>
@@ -368,7 +394,7 @@ const ReportPage = () => {
               onClick={handlePrint}
               variant="outline"
               className="border-primary/40 text-primary hover:bg-primary/10 px-8 py-3 text-base"
-              disabled={!data}
+              disabled={!reportData}
             >
               <Printer className="mr-2" size={20} /> Print Report
             </Button>
