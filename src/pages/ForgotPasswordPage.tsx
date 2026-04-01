@@ -25,7 +25,7 @@ const ForgotPasswordPage = () => {
     });
     setLoading(false);
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: 'Something went wrong. Please check your email and try again.', variant: 'destructive' });
     } else {
       toast({ title: 'Email Sent', description: 'Confirmation link sent to your email. Check your inbox.' });
     }
