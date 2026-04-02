@@ -3,7 +3,6 @@ import { BookOpen, MessageSquare, FileText, Calendar, Users } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
 import { useSchoolId } from '@/hooks/useSchoolId';
-import InstallPopup from '@/components/InstallPopup';
 
 const getAcademicYears = () => {
   const years: string[] = ['Overall'];
@@ -63,7 +62,6 @@ const DashboardPage = () => {
     });
   }, [results, yearRange]);
 
-  // Date-filtered items for the selected calendar date (use local date comparison)
   const matchesDate = (createdAt: string) => {
     const d = new Date(createdAt);
     return d.getDate() === selectedDate.getDate() &&
@@ -93,8 +91,6 @@ const DashboardPage = () => {
   const nextMonth = () => setSelectedDate(new Date(calYear, calMonth + 1, 1));
 
   return (
-    <>
-    <InstallPopup />
     <div className="space-y-6 relative z-10 w-full max-w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-6">
       <div className="relative flex flex-col sm:flex-row sm:justify-center items-center w-full gap-4 sm:gap-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Dashboard</h1>
@@ -126,7 +122,6 @@ const DashboardPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        {/* Date Activity Panel */}
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-foreground mb-3">
             Activity on {selectedDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -157,7 +152,6 @@ const DashboardPage = () => {
           )}
         </div>
 
-        {/* Calendar */}
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -195,7 +189,6 @@ const DashboardPage = () => {
         </div>
       </div>
     </div>
-    </>
   );
 };
 

@@ -2,22 +2,35 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// PWA: detect new service worker and force reload for instant updates
-const isInIframe = (() => {
-  try { return window.self !== window.top; } catch { return true; }
-})();
-const isPreviewHost =
-  window.location.hostname.includes("id-preview--") ||
-  window.location.hostname.includes("lovableproject.com");
+const rootElement = document.getElementById("root")!;
 
-if (isPreviewHost || isInIframe) {
-  navigator.serviceWorker?.getRegistrations().then((regs) =>
-    regs.forEach((r) => r.unregister())
-  );
-} else if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    window.location.reload();
-  });
-}
+const bootstrapApp = async () => {
+  if ("serviceWorker" in navigator) {
+    const cleanupFlag = "edulinker-sw-cleanup-reloaded";
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    const hadExistingController = Boolean(navigator.serviceWorker.controller);
+    const hadRegistrations = registrations.length > 0;
 
-createRoot(document.getElementById("root")!).render(<App />);
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+
+    if ("caches" in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+    }
+
+    if ((hadExistingController || hadRegistrations) && !sessionStorage.getItem(cleanupFlag)) {
+      sessionStorage.setItem(cleanupFlag, "true");
+      window.location.reload();
+      return;
+    }
+
+    sessionStorage.removeItem(cleanupFlag);
+  }
+
+  createRoot(rootElement).render(<App />);
+};
+
+bootstrapApp().catch((error) => {
+  console.error("Failed to clear legacy PWA state:", error);
+  createRoot(rootElement).render(<App />);
+});

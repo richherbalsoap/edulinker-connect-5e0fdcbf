@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
 import GoldenBackground from "@/components/GoldenBackground";
-import InstallBanner from "@/components/InstallBanner";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
 
 const LoginPage = () => {
@@ -32,7 +31,7 @@ const LoginPage = () => {
         title: "Email Not Verified",
         description: "Please verify your email before logging in.",
         variant: "destructive",
-        duration: 8000
+        duration: 8000,
       });
       return;
     }
@@ -56,21 +55,23 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-background/50 border-primary/20" />
-            
+              className="bg-background/50 border-primary/20"
+            />
+
             <Input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-background/50 border-primary/20" />
-            
+              className="bg-background/50 border-primary/20"
+            />
+
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]">
-              
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
+            >
               <LogIn size={18} className="mr-2" /> {loading ? "Signing in..." : "Login"}
             </Button>
             <div className="flex justify-between text-sm">
@@ -83,10 +84,9 @@ const LoginPage = () => {
             </div>
           </form>
         </CardContent>
-    </Card>
-      <InstallBanner />
-    </div>);
-
+      </Card>
+    </div>
+  );
 };
 
 export default LoginPage;
