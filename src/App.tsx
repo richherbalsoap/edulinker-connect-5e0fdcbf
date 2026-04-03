@@ -3,8 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
-import { toast } from "sonner";
 import ScrollToTop from "@/components/ScrollToTop";
 import { AuthProvider } from "@/context/AuthContext";
 import { PinProvider } from "@/context/PinContext";
@@ -31,45 +29,7 @@ import InstallPage from "@/pages/InstallPage";
 
 const queryClient = new QueryClient();
 
-// PWA auto-update listener — naya SW aane par 3 second baad auto reload
-function usePWAAutoUpdate() {
-  useEffect(() => {
-    if (!("serviceWorker" in navigator)) return;
-
-    const handleSWUpdate = (registration: ServiceWorkerRegistration) => {
-      const newSW = registration.installing || registration.waiting;
-      if (!newSW) return;
-
-      newSW.addEventListener("statechange", () => {
-        if (newSW.state === "activated") {
-          toast.success("EDULinker update ho gaya! Reload ho raha hai...", {
-            duration: 3000,
-          });
-          setTimeout(() => window.location.reload(), 3000);
-        }
-      });
-    };
-
-    navigator.serviceWorker.getRegistration().then((reg) => {
-      if (reg) {
-        // Already registered — update check karo
-        reg.addEventListener("updatefound", () => handleSWUpdate(reg));
-        // Periodic check: har 60 seconds mein
-        const interval = setInterval(() => reg.update(), 60000);
-        return () => clearInterval(interval);
-      }
-    });
-
-    // Naya registration
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      window.location.reload();
-    });
-  }, []);
-}
-
 const AppContent = () => {
-  usePWAAutoUpdate();
-
   return (
     <BrowserRouter future={{ v7_relativeSplatPath: true }}>
       <AuthProvider>
