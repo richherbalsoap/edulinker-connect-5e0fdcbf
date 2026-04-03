@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, X, Share, MoreVertical } from "lucide-react";
 
@@ -7,11 +7,23 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// Capture the event as early as possible — before React even mounts
+// This prevents missing the event if it fires before useEffect runs
+let _cachedPrompt: BeforeInstallPromptEvent | null = null;
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e: Event) => {
+    e.preventDefault();
+    _cachedPrompt = e as BeforeInstallPromptEvent;
+    // Dispatch a custom event so any mounted component can react
+    window.dispatchEvent(new Event("pwa-prompt-ready"));
+  });
+}
+
 const InstallBanner = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(_cachedPrompt);
   const [visible, setVisible] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const isIOS = useRef(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream);
 
   useEffect(() => {
     // Don't show if already installed as standalone
@@ -19,24 +31,33 @@ const InstallBanner = () => {
     // Don't show if dismissed this session
     if (sessionStorage.getItem("edulinker_install_banner_dismissed")) return;
 
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
-    setVisible(true);
+    // If we already have the cached prompt (captured before mount), show banner immediately
+    if (_cachedPrompt || isIOS.current) {
+      setVisible(true);
+    }
 
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    // Also listen for future prompt-ready events (e.g. if component mounts very early)
+    const onPromptReady = () => {
+      setDeferredPrompt(_cachedPrompt);
+      if (!sessionStorage.getItem("edulinker_install_banner_dismissed")) {
+        setVisible(true);
+      }
     };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    window.addEventListener("pwa-prompt-ready", onPromptReady);
+    return () => window.removeEventListener("pwa-prompt-ready", onPromptReady);
   }, []);
 
   const handleInstall = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") handleClose();
+    // Always try the latest cached prompt in case state is stale
+    const prompt = deferredPrompt || _cachedPrompt;
+    if (prompt) {
+      await prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      _cachedPrompt = null;
       setDeferredPrompt(null);
+      if (outcome === "accepted") handleClose();
     } else {
+      // Fallback: show manual guide for iOS or browsers that don't support prompt
       setShowGuide(true);
     }
   };
@@ -68,34 +89,46 @@ const InstallBanner = () => {
           >
             Install
           </Button>
-          <button onClick={handleClose} className="p-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
+          <button
+            onClick={handleClose}
+            className="p-1 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          >
             <X size={16} />
           </button>
         </div>
       </div>
 
-      {/* Guide Modal */}
+      {/* Guide Modal — shown only when native prompt unavailable */}
       {showGuide && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-card border border-primary/20 rounded-xl w-full max-w-sm p-5 relative shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
-            <button onClick={() => setShowGuide(false)} className="absolute right-3 top-3 p-1.5 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              onClick={() => setShowGuide(false)}
+              className="absolute right-3 top-3 p-1.5 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            >
               <X size={16} />
             </button>
             <h3 className="text-primary font-bold text-lg mb-3">Install EDULinker</h3>
-            {isIOS ? (
+            {isIOS.current ? (
               <div className="space-y-2">
                 <p className="text-foreground text-sm font-medium">iPhone / iPad pe:</p>
                 <div className="space-y-2 bg-muted/30 rounded-lg p-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                      1
+                    </span>
                     Safari mein <Share size={12} className="text-primary inline" /> Share button dabao
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                      2
+                    </span>
                     "Add to Home Screen" select karo
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                      3
+                    </span>
                     "Add" pe tap karo — Done!
                   </p>
                 </div>
@@ -105,15 +138,21 @@ const InstallBanner = () => {
                 <p className="text-foreground text-sm font-medium">Android / Chrome pe:</p>
                 <div className="space-y-2 bg-muted/30 rounded-lg p-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                      1
+                    </span>
                     Chrome mein <MoreVertical size={12} className="text-primary inline" /> 3-dot menu dabao
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                      2
+                    </span>
                     "Install app" ya "Add to Home Screen" select karo
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                      3
+                    </span>
                     "Install" pe tap karo — Done!
                   </p>
                 </div>
