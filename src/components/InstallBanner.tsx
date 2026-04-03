@@ -44,7 +44,7 @@ const InstallBanner = () => {
   const handleClose = () => {
     setVisible(false);
     setShowGuide(false);
-    localStorage.setItem(INSTALL_DISMISSED_KEY, "true");
+    sessionStorage.setItem("edulinker_install_banner_dismissed", "true");
   };
 
   if (!visible) return null;

@@ -42,6 +42,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
       <GoldenBackground />
+      <InstallBanner />
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-primary/20 relative z-10">
         <CardHeader className="text-center space-y-3">
           <img src={edulinkerLogo} alt="EDULinker Logo" className="mx-auto w-20 h-20 rounded-xl object-contain" loading="eager" fetchPriority="high" decoding="sync" />
