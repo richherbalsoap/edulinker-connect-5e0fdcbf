@@ -193,7 +193,7 @@ export type Database = {
           file_url: string | null
           id: string
           is_deleted: boolean
-          school_id: string | null
+          school_id: string
           section: string
           source: string
           standard: string
@@ -207,7 +207,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_deleted?: boolean
-          school_id?: string | null
+          school_id: string
           section: string
           source?: string
           standard: string
@@ -221,7 +221,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_deleted?: boolean
-          school_id?: string | null
+          school_id?: string
           section?: string
           source?: string
           standard?: string
@@ -248,7 +248,7 @@ export type Database = {
           is_deleted: boolean
           marks_obtained: number
           percentage: number
-          school_id: string | null
+          school_id: string
           source: string
           student_id: string
           subject: string
@@ -264,7 +264,7 @@ export type Database = {
           is_deleted?: boolean
           marks_obtained: number
           percentage?: number
-          school_id?: string | null
+          school_id: string
           source?: string
           student_id: string
           subject: string
@@ -280,7 +280,7 @@ export type Database = {
           is_deleted?: boolean
           marks_obtained?: number
           percentage?: number
-          school_id?: string | null
+          school_id?: string
           source?: string
           student_id?: string
           subject?: string
