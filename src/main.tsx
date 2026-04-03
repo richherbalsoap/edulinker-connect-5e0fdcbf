@@ -5,32 +5,23 @@ import "./index.css";
 const rootElement = document.getElementById("root")!;
 
 const bootstrapApp = async () => {
+  // Step 1: Unregister OLD/stale service workers (non-VitePWA ones)
+  // VitePWA apna SW khud manage karta hai, hume manually unregister nahi karna
   if ("serviceWorker" in navigator) {
-    const cleanupFlag = "edulinker-sw-cleanup-reloaded";
     const registrations = await navigator.serviceWorker.getRegistrations();
-    const hadExistingController = Boolean(navigator.serviceWorker.controller);
-    const hadRegistrations = registrations.length > 0;
-
-    await Promise.all(registrations.map((registration) => registration.unregister()));
-
-    if ("caches" in window) {
-      const cacheKeys = await caches.keys();
-      await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+    const staleRegs = registrations.filter(
+      (r) => r.active?.scriptURL && !r.active.scriptURL.includes("sw.js")
+    );
+    if (staleRegs.length > 0) {
+      await Promise.all(staleRegs.map((r) => r.unregister()));
     }
-
-    if ((hadExistingController || hadRegistrations) && !sessionStorage.getItem(cleanupFlag)) {
-      sessionStorage.setItem(cleanupFlag, "true");
-      window.location.reload();
-      return;
-    }
-
-    sessionStorage.removeItem(cleanupFlag);
   }
 
+  // Step 2: App render karo
   createRoot(rootElement).render(<App />);
 };
 
 bootstrapApp().catch((error) => {
-  console.error("Failed to clear legacy PWA state:", error);
+  console.error("Bootstrap error:", error);
   createRoot(rootElement).render(<App />);
 });
