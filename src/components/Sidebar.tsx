@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, MessageSquare, FileText,
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
-  ChevronDown, LogOut, LockKeyhole, FileSpreadsheet
+  ChevronDown, LogOut, LockKeyhole, FileSpreadsheet, Award
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePin } from '@/context/PinContext';
