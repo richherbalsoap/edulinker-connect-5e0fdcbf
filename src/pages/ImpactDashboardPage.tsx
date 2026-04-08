@@ -5,9 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
@@ -19,14 +16,13 @@ import {
   ChevronDown,
   Plus,
   Trash2,
-  Pencil,
   Printer,
   BarChart3,
   Calendar,
   School,
   Target,
   FileText,
-  Award,
+  RefreshCw,
 } from "lucide-react";
 
 // ─── Types ───
@@ -50,54 +46,14 @@ interface Milestone {
   icon: string;
 }
 
-// ─── Sample data shown when no real data exists ───
-const SAMPLE_BASELINES: Omit<Baseline, "id" | "school_id">[] = [
-  {
-    category: "Results",
-    metric_name: "Average Pass %",
-    baseline_value: 68,
-    current_value: 79,
-    unit: "%",
-    baseline_label: "Before EDULinker",
-    current_label: "After EDULinker",
-  },
-  {
-    category: "Fees",
-    metric_name: "Fee Collection Rate",
-    baseline_value: 72,
-    current_value: 91,
-    unit: "%",
-    baseline_label: "Before EDULinker",
-    current_label: "After EDULinker",
-  },
-  {
-    category: "Attendance",
-    metric_name: "Monthly Attendance Rate",
-    baseline_value: 81,
-    current_value: 88,
-    unit: "%",
-    baseline_label: "Before EDULinker",
-    current_label: "After EDULinker",
-  },
-  {
-    category: "Communication",
-    metric_name: "Parent Notices Sent (per month)",
-    baseline_value: 4,
-    current_value: 22,
-    unit: "count",
-    baseline_label: "Before EDULinker",
-    current_label: "After EDULinker",
-  },
-];
+interface AutoMetric {
+  metric_category: string;
+  metric_name: string;
+  current_value: number;
+  unit: string;
+}
 
-const SAMPLE_MILESTONES: Omit<Milestone, "id" | "school_id">[] = [
-  { title: "EDULinker adopted", date: "2024-06-01", icon: "🚀" },
-  { title: "First digital result published", date: "2024-07-15", icon: "📊" },
-  { title: "100% fee collection achieved", date: "2024-09-01", icon: "💰" },
-  { title: "Parent engagement doubled", date: "2025-01-10", icon: "👨‍👩‍👧" },
-];
-
-const CATEGORIES = ["Results", "Fees", "Attendance", "Communication", "Other"];
+const CATEGORIES = ["Results", "Fees", "Attendance", "Communication", "Students", "Other"];
 
 // ─── Animated counter hook ───
 function useAnimatedCounter(target: number, duration = 1500) {
@@ -165,7 +121,7 @@ function ImprovementBadge({ before, after, unit }: { before: number; after: numb
     );
   let diff: number;
   if (unit === "%") {
-    // Point difference for percentage metrics (81% → 88% = +7 points, not +8.6%)
+    // Point difference for percentage metrics
     diff = Math.round(after - before);
   } else {
     // Relative % change for count/days, capped at 100
@@ -196,16 +152,7 @@ function ImprovementBadge({ before, after, unit }: { before: number; after: numb
 }
 
 // ─── Metric row ───
-function MetricRow({
-  m,
-  onEdit,
-  onDelete,
-}: {
-  m: Baseline & { isSample?: boolean };
-  onEdit?: () => void;
-  onDelete?: () => void;
-}) {
-  // For % unit: bars go 0-100 directly. For others: scale relative to max value.
+function MetricRow({ m, onDelete }: { m: Baseline; onDelete?: () => void }) {
   const isPercent = m.unit === "%";
   const maxVal = isPercent ? 100 : Math.max(m.baseline_value, m.current_value, 1);
   const beforePct = Math.min((m.baseline_value / maxVal) * 100, 100);
@@ -215,367 +162,266 @@ function MetricRow({
     <div className="p-4 rounded-xl bg-muted/30 border border-primary/10 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h4 className="font-semibold text-foreground text-sm">{m.metric_name}</h4>
-          {(m as any).isSample && (
-            <Badge variant="outline" className="text-[10px] text-muted-foreground border-muted-foreground/30">
-              Sample
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-foreground">{m.metric_name}</p>
           <ImprovementBadge before={m.baseline_value} after={m.current_value} unit={m.unit} />
-          {onEdit && (
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
-              <Pencil className="w-3 h-3" />
-            </Button>
-          )}
-          {onDelete && (
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onDelete}>
-              <Trash2 className="w-3 h-3" />
-            </Button>
-          )}
         </div>
+        {onDelete && (
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onDelete}>
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        )}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 text-xs">
         <div>
-          <p className="text-[10px] text-muted-foreground mb-1">{m.baseline_label || "Before"}</p>
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-400/60 rounded-full transition-all duration-700"
-              style={{ width: `${beforePct}%` }}
-            />
+          <p className="text-muted-foreground mb-1">{m.baseline_label || "Before"}</p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-red-500/40 transition-all duration-700" style={{ width: `${beforePct}%` }} />
+            </div>
+            <span className="font-semibold text-foreground w-12 text-right">
+              {m.baseline_value}
+              {m.unit}
+            </span>
           </div>
-          <p className="text-xs font-medium text-foreground mt-1">
-            {m.baseline_value} {m.unit}
-          </p>
         </div>
         <div>
-          <p className="text-[10px] text-muted-foreground mb-1">{m.current_label || "After"}</p>
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-emerald-400/70 rounded-full transition-all duration-700"
-              style={{ width: `${afterPct}%` }}
-            />
+          <p className="text-muted-foreground mb-1">{m.current_label || "Current"}</p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-primary transition-all duration-700" style={{ width: `${afterPct}%` }} />
+            </div>
+            <span className="font-semibold text-foreground w-12 text-right">
+              {m.current_value}
+              {m.unit}
+            </span>
           </div>
-          <p className="text-xs font-medium text-foreground mt-1">
-            {m.current_value} {m.unit}
-          </p>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Main Page ───
-const ImpactDashboardPage = () => {
+// ─── Main Component ───
+export const ImpactDashboardPage = () => {
   const schoolId = useSchoolId();
-  const schoolName = localStorage.getItem("schoolName") || "My School";
   const [baselines, setBaselines] = useState<Baseline[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isSampleData, setIsSampleData] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [schoolName, setSchoolName] = useState("");
+  const [adoptionDate, setAdoptionDate] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Form state for add/edit metric
-  const [editingMetric, setEditingMetric] = useState<Baseline | null>(null);
-  const [formCat, setFormCat] = useState("Results");
-  const [formName, setFormName] = useState("");
-  const [formBefore, setFormBefore] = useState("");
-  const [formAfter, setFormAfter] = useState("");
-  const [formUnit, setFormUnit] = useState("%");
-  const [formBeforeLabel, setFormBeforeLabel] = useState("");
-  const [formAfterLabel, setFormAfterLabel] = useState("");
-
-  // Milestone form
+  // Milestone form state
   const [msTitle, setMsTitle] = useState("");
-  const [msDate, setMsDate] = useState("");
+  const [msDate, setMsDate] = useState(new Date().toISOString().split("T")[0]);
   const [msIcon, setMsIcon] = useState("🎯");
 
-  // ─── Fetch data ───
+  // Fetch school info
   useEffect(() => {
     if (!schoolId) return;
-    const load = async () => {
-      setLoading(true);
-      const [{ data: bl }, { data: ml }] = await Promise.all([
-        supabase.from("impact_baselines").select("*").eq("school_id", schoolId).order("category"),
-        supabase.from("impact_milestones").select("*").eq("school_id", schoolId).order("date"),
-      ]);
-      if (bl && bl.length > 0) {
-        setBaselines(bl as unknown as Baseline[]);
-        setIsSampleData(false);
-      } else {
-        setBaselines(SAMPLE_BASELINES.map((s, i) => ({ ...s, id: `sample-${i}`, school_id: schoolId })));
-        setIsSampleData(true);
-      }
-      setMilestones(
-        ml && ml.length > 0
-          ? (ml as unknown as Milestone[])
-          : SAMPLE_MILESTONES.map((s, i) => ({ ...s, id: `sample-ms-${i}`, school_id: schoolId })),
-      );
-      setLoading(false);
-    };
-    load();
+    supabase
+      .from("schools")
+      .select("school_name, created_at")
+      .eq("id", schoolId)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setSchoolName(data.school_name || "Your School");
+          setAdoptionDate(data.created_at || null);
+        }
+      });
   }, [schoolId]);
 
-  // ─── Grouped metrics ───
-  const grouped = useMemo(() => {
-    const map: Record<string, (Baseline & { isSample?: boolean })[]> = {};
-    baselines.forEach((b) => {
-      if (!map[b.category]) map[b.category] = [];
-      map[b.category].push({ ...b, isSample: isSampleData });
-    });
-    return map;
-  }, [baselines, isSampleData]);
+  // Fetch baselines and milestones
+  const fetchData = async () => {
+    if (!schoolId) return;
+    setLoading(true);
 
-  // ─── Stats ───
-  const overallImprovement = useMemo(() => {
-    if (baselines.length === 0) return 0;
-    const improvements = baselines.map((b) => {
-      if (b.baseline_value === b.current_value) return 0;
-      if (b.unit === "%") {
-        // For percentage metrics: simple point difference, capped at 100
-        const diff = b.current_value - b.baseline_value;
-        return Math.min(Math.max(diff, -100), 100);
-      } else {
-        // For count/days/hours: % change but capped at 100 (we show improvement, not explosion)
-        if (b.baseline_value === 0) return b.current_value > 0 ? 100 : 0;
-        const pct = ((b.current_value - b.baseline_value) / b.baseline_value) * 100;
-        return Math.min(Math.max(Math.round(pct), -100), 100);
-      }
-    });
-    return Math.round(improvements.reduce((a, b) => a + b, 0) / improvements.length);
-  }, [baselines]);
+    // Fetch existing baselines
+    const { data: baselineData } = await supabase
+      .from("impact_baselines")
+      .select("*")
+      .eq("school_id", schoolId)
+      .order("created_at", { ascending: false });
 
-  const adoptionDate = useMemo(() => {
-    if (milestones.length === 0) return null;
-    const sorted = [...milestones].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    return sorted[0].date;
-  }, [milestones]);
+    setBaselines(baselineData || []);
 
-  const daysSinceAdoption = useMemo(() => {
-    if (!adoptionDate) return 0;
-    return Math.floor((Date.now() - new Date(adoptionDate).getTime()) / (1000 * 60 * 60 * 24));
-  }, [adoptionDate]);
+    // Fetch milestones
+    const { data: milestoneData } = await supabase
+      .from("impact_milestones")
+      .select("*")
+      .eq("school_id", schoolId)
+      .order("date", { ascending: true });
 
-  // ─── CRUD operations ───
-  const resetForm = () => {
-    setEditingMetric(null);
-    setFormCat("Results");
-    setFormName("");
-    setFormBefore("");
-    setFormAfter("");
-    setFormUnit("%");
-    setFormBeforeLabel("");
-    setFormAfterLabel("");
+    setMilestones(milestoneData || []);
+    setLoading(false);
   };
 
-  const openEditForm = (m: Baseline) => {
-    setEditingMetric(m);
-    setFormCat(m.category);
-    setFormName(m.metric_name);
-    setFormBefore(String(m.baseline_value));
-    setFormAfter(String(m.current_value));
-    setFormUnit(m.unit);
-    setFormBeforeLabel(m.baseline_label || "");
-    setFormAfterLabel(m.current_label || "");
-    setDrawerOpen(true);
-  };
+  useEffect(() => {
+    fetchData();
+  }, [schoolId]);
 
-  const saveMetric = async () => {
-    if (!schoolId || !formName.trim()) {
-      toast.error("Metric name is required");
-      return;
-    }
-    const payload = {
-      school_id: schoolId,
-      category: formCat,
-      metric_name: formName.trim(),
-      baseline_value: Number(formBefore) || 0,
-      current_value: Number(formAfter) || 0,
-      unit: formUnit,
-      baseline_label: formBeforeLabel || null,
-      current_label: formAfterLabel || null,
-      updated_at: new Date().toISOString(),
-    };
+  // Auto-refresh current values from real data
+  const refreshCurrentMetrics = async () => {
+    if (!schoolId) return;
 
-    if (editingMetric && !editingMetric.id.startsWith("sample")) {
-      const { error } = await supabase.from("impact_baselines").update(payload).eq("id", editingMetric.id);
-      if (error) {
-        toast.error("Failed to update");
+    try {
+      toast.loading("Refreshing metrics from real data...");
+
+      // Call the calculate function
+      const { data: autoMetrics, error } = (await supabase.rpc("calculate_impact_metrics", {
+        p_school_id: schoolId,
+      })) as { data: AutoMetric[] | null; error: any };
+
+      if (error) throw error;
+
+      if (!autoMetrics || autoMetrics.length === 0) {
+        toast.error("No data available yet. Add some results, students, or announcements first!");
         return;
       }
-      toast.success("Metric updated");
-    } else {
-      const { error } = await supabase.from("impact_baselines").insert(payload);
-      if (error) {
-        toast.error("Failed to save");
-        return;
+
+      // Update existing baselines with current values OR create new ones if they don't exist
+      for (const metric of autoMetrics) {
+        // Find if this metric already exists
+        const existing = baselines.find(
+          (b) => b.metric_name === metric.metric_name && b.category === metric.metric_category,
+        );
+
+        if (existing) {
+          // Update current value only
+          const { error: updateError } = await supabase
+            .from("impact_baselines")
+            .update({
+              current_value: metric.current_value,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existing.id);
+
+          if (updateError) throw updateError;
+        } else {
+          // Create new baseline with current value, baseline_value starts at 0
+          const { error: insertError } = await supabase.from("impact_baselines").insert({
+            school_id: schoolId,
+            category: metric.metric_category,
+            metric_name: metric.metric_name,
+            baseline_value: 0,
+            current_value: metric.current_value,
+            unit: metric.unit,
+            baseline_label: "Start",
+            current_label: "Current",
+          });
+
+          if (insertError) throw insertError;
+        }
       }
-      toast.success("Metric added");
-    }
-    resetForm();
-    setDrawerOpen(false);
-    // Reload
-    const { data } = await supabase.from("impact_baselines").select("*").eq("school_id", schoolId).order("category");
-    if (data && data.length > 0) {
-      setBaselines(data as unknown as Baseline[]);
-      setIsSampleData(false);
+
+      await fetchData();
+      toast.success("Metrics refreshed successfully!");
+    } catch (err: any) {
+      console.error("Error refreshing metrics:", err);
+      toast.error(err.message || "Failed to refresh metrics");
     }
   };
 
   const deleteMetric = async (id: string) => {
-    if (id.startsWith("sample")) {
-      toast.info("Cannot delete sample data");
-      return;
-    }
     const { error } = await supabase.from("impact_baselines").delete().eq("id", id);
     if (error) {
-      toast.error("Failed to delete");
-      return;
+      toast.error(error.message);
+    } else {
+      toast.success("Metric deleted");
+      fetchData();
     }
-    toast.success("Metric deleted");
-    setBaselines((prev) => prev.filter((b) => b.id !== id));
   };
 
   const addMilestone = async () => {
-    if (!schoolId || !msTitle.trim() || !msDate) {
-      toast.error("Title and date required");
+    if (!schoolId || !msTitle.trim()) {
+      toast.error("Title is required");
       return;
     }
-    const { error } = await supabase
-      .from("impact_milestones")
-      .insert({ school_id: schoolId, title: msTitle.trim(), date: msDate, icon: msIcon || "🎯" });
+    const { error } = await supabase.from("impact_milestones").insert({
+      school_id: schoolId,
+      title: msTitle.trim(),
+      date: msDate,
+      icon: msIcon || "🎯",
+    });
     if (error) {
-      toast.error("Failed to add");
-      return;
+      toast.error(error.message);
+    } else {
+      toast.success("Milestone added!");
+      setMsTitle("");
+      setMsDate(new Date().toISOString().split("T")[0]);
+      setMsIcon("🎯");
+      fetchData();
     }
-    toast.success("Milestone added");
-    setMsTitle("");
-    setMsDate("");
-    setMsIcon("🎯");
-    const { data } = await supabase.from("impact_milestones").select("*").eq("school_id", schoolId).order("date");
-    if (data) setMilestones(data as unknown as Milestone[]);
   };
 
   const deleteMilestone = async (id: string) => {
-    if (id.startsWith("sample")) {
-      toast.info("Cannot delete sample data");
-      return;
-    }
     const { error } = await supabase.from("impact_milestones").delete().eq("id", id);
     if (error) {
-      toast.error("Failed to delete");
-      return;
+      toast.error(error.message);
+    } else {
+      toast.success("Milestone deleted");
+      fetchData();
     }
-    toast.success("Milestone deleted");
-    setMilestones((prev) => prev.filter((m) => m.id !== id));
   };
 
-  if (loading)
+  // Group by category
+  const grouped = useMemo(() => {
+    const groups: Record<string, Baseline[]> = {};
+    baselines.forEach((b) => {
+      if (!groups[b.category]) groups[b.category] = [];
+      groups[b.category].push(b);
+    });
+    return groups;
+  }, [baselines]);
+
+  // Overall improvement
+  const overallImprovement = useMemo(() => {
+    if (baselines.length === 0) return 0;
+    let totalImprovement = 0;
+    baselines.forEach((b) => {
+      if (b.unit === "%") {
+        totalImprovement += b.current_value - b.baseline_value;
+      } else {
+        if (b.baseline_value === 0) {
+          totalImprovement += b.current_value > 0 ? 100 : 0;
+        } else {
+          totalImprovement += Math.min(((b.current_value - b.baseline_value) / b.baseline_value) * 100, 100);
+        }
+      }
+    });
+    return Math.round(totalImprovement / baselines.length);
+  }, [baselines]);
+
+  const daysSinceAdoption = useMemo(() => {
+    if (!adoptionDate) return 0;
+    const diff = Date.now() - new Date(adoptionDate).getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+  }, [adoptionDate]);
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
+          <p className="text-sm text-muted-foreground">Loading impact data...</p>
+        </div>
       </div>
     );
+  }
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="container mx-auto p-4 space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Award className="w-6 h-6 text-primary" /> School Impact Dashboard
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">Measurable improvements since adopting EDULinker</p>
-          {isSampleData && (
-            <Badge variant="outline" className="mt-2 text-amber-400 border-amber-400/30">
-              Showing Sample Data — Add your own metrics
-            </Badge>
-          )}
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">📊 Impact Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track your school's transformation with EDULinker</p>
         </div>
-        <div className="flex gap-2">
-          <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <SheetTrigger asChild>
-              <Button size="sm" onClick={resetForm}>
-                <Plus className="w-4 h-4 mr-1" /> Update Metrics
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>{editingMetric ? "Edit Metric" : "Add New Metric"}</SheetTitle>
-              </SheetHeader>
-              <div className="space-y-4 mt-6">
-                <div>
-                  <Label>Category</Label>
-                  <Select value={formCat} onValueChange={setFormCat}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Metric Name</Label>
-                  <Input
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    placeholder="e.g. Average Pass %"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Before Value</Label>
-                    <Input type="number" value={formBefore} onChange={(e) => setFormBefore(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label>After Value</Label>
-                    <Input type="number" value={formAfter} onChange={(e) => setFormAfter(e.target.value)} />
-                  </div>
-                </div>
-                <div>
-                  <Label>Unit</Label>
-                  <Select value={formUnit} onValueChange={setFormUnit}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="%">%</SelectItem>
-                      <SelectItem value="count">count</SelectItem>
-                      <SelectItem value="days">days</SelectItem>
-                      <SelectItem value="hours">hours</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Before Label (optional)</Label>
-                  <Input
-                    value={formBeforeLabel}
-                    onChange={(e) => setFormBeforeLabel(e.target.value)}
-                    placeholder="e.g. Before EDULinker (2023-24)"
-                  />
-                </div>
-                <div>
-                  <Label>After Label (optional)</Label>
-                  <Input
-                    value={formAfterLabel}
-                    onChange={(e) => setFormAfterLabel(e.target.value)}
-                    placeholder="e.g. After EDULinker (2024-25)"
-                  />
-                </div>
-                <Button className="w-full" onClick={saveMetric}>
-                  {editingMetric ? "Update Metric" : "Add Metric"}
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={refreshCurrentMetrics}>
+            <RefreshCw className="w-4 h-4 mr-1" /> Refresh Metrics
+          </Button>
           <Dialog open={reportOpen} onOpenChange={setReportOpen}>
             <DialogTrigger asChild>
               <Button size="sm" variant="outline">
@@ -682,50 +528,64 @@ const ImpactDashboardPage = () => {
         </Card>
       </div>
 
+      {/* Empty state */}
+      {baselines.length === 0 && (
+        <Card className="border-dashed border-2 border-primary/20">
+          <CardContent className="p-8 text-center">
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">No metrics yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click "Refresh Metrics" to automatically calculate your school's performance from real data
+            </p>
+            <Button onClick={refreshCurrentMetrics}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh Metrics Now
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Metrics by Category */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-          <Target className="w-5 h-5 text-primary" /> Performance Metrics
-        </h2>
-        {Object.entries(grouped).map(([cat, items]) => (
-          <Collapsible key={cat} defaultOpen>
-            <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-primary/10 hover:bg-muted/50 transition-colors">
-              <span className="font-semibold text-sm text-foreground">
-                {cat} <span className="text-muted-foreground font-normal">({items.length})</span>
-              </span>
-              <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 mt-2">
-              {items.map((m) => (
-                <MetricRow
-                  key={m.id}
-                  m={m}
-                  onEdit={m.isSample ? undefined : () => openEditForm(m)}
-                  onDelete={m.isSample ? undefined : () => deleteMetric(m.id)}
-                />
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-        ))}
-      </div>
+      {baselines.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <Target className="w-5 h-5 text-primary" /> Performance Metrics
+          </h2>
+          {Object.entries(grouped).map(([cat, items]) => (
+            <Collapsible key={cat} defaultOpen>
+              <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-primary/10 hover:bg-muted/50 transition-colors">
+                <span className="font-semibold text-sm text-foreground">
+                  {cat} <span className="text-muted-foreground font-normal">({items.length})</span>
+                </span>
+                <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 mt-2">
+                {items.map((m) => (
+                  <MetricRow key={m.id} m={m} onDelete={() => deleteMetric(m.id)} />
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
+        </div>
+      )}
 
       {/* Milestones Timeline */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" /> Milestones Timeline
         </h2>
-        <div className="relative border-l-2 border-primary/20 ml-4 space-y-6 pl-6">
-          {milestones.map((m) => (
-            <div key={m.id} className="relative">
-              <div className="absolute -left-[33px] top-0 w-5 h-5 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-[10px]">
-                {m.icon}
-              </div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">{m.title}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(m.date).toLocaleDateString()}</p>
+        {milestones.length > 0 && (
+          <div className="relative border-l-2 border-primary/20 ml-4 space-y-6 pl-6">
+            {milestones.map((m) => (
+              <div key={m.id} className="relative">
+                <div className="absolute -left-[33px] top-0 w-5 h-5 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-[10px]">
+                  {m.icon}
                 </div>
-                {!m.id.startsWith("sample") && (
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{m.title}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(m.date).toLocaleDateString()}</p>
+                  </div>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -734,11 +594,11 @@ const ImpactDashboardPage = () => {
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
-                )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Add milestone inline */}
         <Card className="bg-muted/20 border-primary/10">
