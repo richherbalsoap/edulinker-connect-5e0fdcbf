@@ -189,16 +189,20 @@ const DashboardPage = () => {
               const day = i + 1;
               const isToday = day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
               const isSelected = day === selectedDate.getDate() && calMonth === selectedDate.getMonth() && calYear === selectedDate.getFullYear();
+              const hasActivity = datesWithActivity.has(`${calYear}-${calMonth}-${day}`);
               return (
                 <div
                   key={day}
                   onClick={() => setSelectedDate(new Date(calYear, calMonth, day))}
-                  className={`py-1.5 rounded cursor-pointer transition-all duration-200 text-sm
+                  className={`py-1.5 rounded cursor-pointer transition-all duration-200 text-sm relative
                     ${isSelected ? 'bg-primary text-primary-foreground font-bold shadow-[0_0_10px_hsl(51,100%,50%,0.4)]'
                       : isToday ? 'bg-primary/20 text-primary font-bold border border-primary/30'
                       : 'text-foreground/70 hover:bg-primary/10 hover:text-foreground'}`}
                 >
                   {day}
+                  {hasActivity && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                  )}
                 </div>
               );
             })}
