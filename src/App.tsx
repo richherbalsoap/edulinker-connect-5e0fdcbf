@@ -24,6 +24,7 @@ import AIChatbotPage from "@/pages/AIChatbotPage";
 import PromotionPanelPage from "@/pages/PromotionPanelPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ReportPage from "@/pages/ReportPage";
+import ImpactDashboardPage from "@/pages/ImpactDashboardPage";
 import NotFound from "@/pages/NotFound";
 import InstallPage from "@/pages/InstallPage";
 
