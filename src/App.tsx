@@ -55,6 +55,7 @@ const AppContent = () => {
               <Route path="promotion" element={<PromotionPanelPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="report" element={<ReportPage />} />
+              <Route path="impact-dashboard" element={<ImpactDashboardPage />} />
             </Route>
             <Route path="install" element={<InstallPage />} />
             <Route path="*" element={<NotFound />} />

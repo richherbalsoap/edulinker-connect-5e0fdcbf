@@ -28,6 +28,7 @@ const principalTools: NavItemType[] = [
   { path: '/ai-chatbot', icon: Bot, label: 'AI Insight Chatbot' },
   { path: '/promotion', icon: TrendingUp, label: 'Promotion Panel' },
   { path: '/fees', icon: DollarSign, label: 'Fees Reminder' },
+  { path: '/impact-dashboard', icon: Award, label: 'Impact Dashboard' },
 ];
 
 const principalPaths = new Set(principalTools.map(t => t.path));
