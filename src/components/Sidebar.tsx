@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, BookOpen, MessageSquare, FileText,
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
-  ChevronDown, LogOut, LockKeyhole, FileSpreadsheet
+  ChevronDown, LogOut, LockKeyhole, FileSpreadsheet, Award
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePin } from '@/context/PinContext';
@@ -28,6 +28,7 @@ const principalTools: NavItemType[] = [
   { path: '/ai-chatbot', icon: Bot, label: 'AI Insight Chatbot' },
   { path: '/promotion', icon: TrendingUp, label: 'Promotion Panel' },
   { path: '/fees', icon: DollarSign, label: 'Fees Reminder' },
+  { path: '/impact-dashboard', icon: Award, label: 'Impact Dashboard' },
 ];
 
 const principalPaths = new Set(principalTools.map(t => t.path));

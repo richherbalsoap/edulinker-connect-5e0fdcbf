@@ -237,6 +237,91 @@ export type Database = {
           },
         ]
       }
+      impact_baselines: {
+        Row: {
+          baseline_label: string | null
+          baseline_value: number
+          category: string
+          created_at: string
+          current_label: string | null
+          current_value: number
+          id: string
+          metric_name: string
+          school_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          baseline_label?: string | null
+          baseline_value?: number
+          category: string
+          created_at?: string
+          current_label?: string | null
+          current_value?: number
+          id?: string
+          metric_name: string
+          school_id: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          baseline_label?: string | null
+          baseline_value?: number
+          category?: string
+          created_at?: string
+          current_label?: string | null
+          current_value?: number
+          id?: string
+          metric_name?: string
+          school_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impact_baselines_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      impact_milestones: {
+        Row: {
+          created_at: string
+          date: string
+          icon: string | null
+          id: string
+          school_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          icon?: string | null
+          id?: string
+          school_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          icon?: string | null
+          id?: string
+          school_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impact_milestones_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       results: {
         Row: {
           created_at: string
