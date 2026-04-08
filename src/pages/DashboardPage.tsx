@@ -115,7 +115,7 @@ const DashboardPage = () => {
             className="w-full sm:w-auto px-4 py-2 bg-black/40 backdrop-blur-md border border-primary/30 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 appearance-none cursor-pointer text-sm"
           >
             {academicYears.map(y => (
-              <option key={y} value={y} className="bg-black text-white">Academic Year {y}</option>
+              <option key={y} value={y} className="bg-black text-white">Year {y}</option>
             ))}
           </select>
         </div>
