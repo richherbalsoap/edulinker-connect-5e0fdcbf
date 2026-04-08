@@ -25,11 +25,8 @@ const DashboardPage = () => {
   const schoolId = useSchoolId();
   const { homework, complaints, results, students, fetchAll } = useAppStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const academicYears = useMemo(() => getAcademicYears(), []);
-  const currentMonth = new Date().getMonth();
-  const defaultYear = currentMonth >= 3
-    ? `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
-    : `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`;
+  const academicYears = useMemo(() => getYears(), []);
+  const defaultYear = `${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
 
   useEffect(() => {
