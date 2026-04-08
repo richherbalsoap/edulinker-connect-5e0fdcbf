@@ -33,7 +33,7 @@ const DashboardPage = () => {
     if (schoolId) fetchAll(schoolId);
   }, [schoolId]);
 
-  const yearRange = useMemo(() => selectedYear === 'Overall' ? null : getAcademicYearRange(selectedYear), [selectedYear]);
+  const yearRange = useMemo(() => selectedYear === 'Overall' ? null : getYearRange(selectedYear), [selectedYear]);
 
   const filteredHomework = useMemo(() => {
     if (!yearRange) return homework;
