@@ -269,7 +269,7 @@ export const ImpactDashboardPage = () => {
       toast.loading("Refreshing metrics from real data...");
 
       // Call the calculate function
-      const { data: autoMetrics, error } = (await supabase.rpc("calculate_impact_metrics", {
+      const { data: autoMetrics, error } = (await (supabase.rpc as any)("calculate_impact_metrics", {
         p_school_id: schoolId,
       })) as { data: AutoMetric[] | null; error: any };
 
