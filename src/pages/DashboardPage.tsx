@@ -4,19 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
 import { useSchoolId } from '@/hooks/useSchoolId';
 
-const getAcademicYears = () => {
+const getYears = () => {
   const years: string[] = ['Overall'];
   for (let y = 2050; y >= 2023; y--) {
-    years.push(`${y - 1}-${y}`);
+    years.push(`${y}`);
   }
   return years;
 };
 
-const getAcademicYearRange = (yearStr: string) => {
-  const [startYear] = yearStr.split('-').map(Number);
+const getYearRange = (yearStr: string) => {
+  const year = Number(yearStr);
   return {
-    start: new Date(startYear, 3, 1), // April 1
-    end: new Date(startYear + 1, 2, 31, 23, 59, 59), // March 31
+    start: new Date(year, 0, 1), // January 1
+    end: new Date(year, 11, 31, 23, 59, 59), // December 31
   };
 };
 
@@ -25,18 +25,15 @@ const DashboardPage = () => {
   const schoolId = useSchoolId();
   const { homework, complaints, results, students, fetchAll } = useAppStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const academicYears = useMemo(() => getAcademicYears(), []);
-  const currentMonth = new Date().getMonth();
-  const defaultYear = currentMonth >= 3
-    ? `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
-    : `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`;
+  const academicYears = useMemo(() => getYears(), []);
+  const defaultYear = `${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
 
   useEffect(() => {
     if (schoolId) fetchAll(schoolId);
   }, [schoolId]);
 
-  const yearRange = useMemo(() => selectedYear === 'Overall' ? null : getAcademicYearRange(selectedYear), [selectedYear]);
+  const yearRange = useMemo(() => selectedYear === 'Overall' ? null : getYearRange(selectedYear), [selectedYear]);
 
   const filteredHomework = useMemo(() => {
     if (!yearRange) return homework;
@@ -118,7 +115,7 @@ const DashboardPage = () => {
             className="w-full sm:w-auto px-4 py-2 bg-black/40 backdrop-blur-md border border-primary/30 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 appearance-none cursor-pointer text-sm"
           >
             {academicYears.map(y => (
-              <option key={y} value={y} className="bg-black text-white">Academic Year {y}</option>
+              <option key={y} value={y} className="bg-black text-white">Year {y}</option>
             ))}
           </select>
         </div>
