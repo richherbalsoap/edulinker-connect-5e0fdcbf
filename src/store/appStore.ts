@@ -174,6 +174,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       let query = supabase
         .from("complaints")
         .select("*, student:students(*)")
+        .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
