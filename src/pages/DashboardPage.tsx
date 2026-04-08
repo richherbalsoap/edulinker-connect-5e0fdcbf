@@ -62,16 +62,33 @@ const DashboardPage = () => {
     });
   }, [results, yearRange]);
 
-  const matchesDate = (createdAt: string) => {
+  const matchesDate = (createdAt: string, targetDate: Date) => {
     const d = new Date(createdAt);
-    return d.getDate() === selectedDate.getDate() &&
-      d.getMonth() === selectedDate.getMonth() &&
-      d.getFullYear() === selectedDate.getFullYear();
+    return d.getDate() === targetDate.getDate() &&
+      d.getMonth() === targetDate.getMonth() &&
+      d.getFullYear() === targetDate.getFullYear();
   };
-  const dateHomework = filteredHomework.filter(h => matchesDate(h.created_at));
-  const dateComplaints = filteredComplaints.filter(c => matchesDate(c.created_at));
-  const dateResults = filteredResults.filter(r => matchesDate(r.created_at));
+  const dateHomework = filteredHomework.filter(h => matchesDate(h.created_at, selectedDate));
+  const dateComplaints = filteredComplaints.filter(c => matchesDate(c.created_at, selectedDate));
+  const dateResults = filteredResults.filter(r => matchesDate(r.created_at, selectedDate));
   const hasDateData = dateHomework.length > 0 || dateComplaints.length > 0 || dateResults.length > 0;
+
+  const datesWithActivity = useMemo(() => {
+    const activitySet = new Set<string>();
+    filteredHomework.forEach(h => {
+      const d = new Date(h.created_at);
+      activitySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    });
+    filteredComplaints.forEach(c => {
+      const d = new Date(c.created_at);
+      activitySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    });
+    filteredResults.forEach(r => {
+      const d = new Date(r.created_at);
+      activitySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    });
+    return activitySet;
+  }, [filteredHomework, filteredComplaints, filteredResults]);
 
   const stats = [
     ...(selectedYear === 'Overall' ? [{ icon: Users, label: 'Total Students', value: students.length, color: 'from-primary to-secondary', path: '/students' }] : []),
