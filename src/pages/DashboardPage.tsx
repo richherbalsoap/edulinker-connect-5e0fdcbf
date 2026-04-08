@@ -4,19 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import useAppStore from '@/store/appStore';
 import { useSchoolId } from '@/hooks/useSchoolId';
 
-const getAcademicYears = () => {
+const getYears = () => {
   const years: string[] = ['Overall'];
   for (let y = 2050; y >= 2023; y--) {
-    years.push(`${y - 1}-${y}`);
+    years.push(`${y}`);
   }
   return years;
 };
 
-const getAcademicYearRange = (yearStr: string) => {
-  const [startYear] = yearStr.split('-').map(Number);
+const getYearRange = (yearStr: string) => {
+  const year = Number(yearStr);
   return {
-    start: new Date(startYear, 3, 1), // April 1
-    end: new Date(startYear + 1, 2, 31, 23, 59, 59), // March 31
+    start: new Date(year, 0, 1), // January 1
+    end: new Date(year, 11, 31, 23, 59, 59), // December 31
   };
 };
 
