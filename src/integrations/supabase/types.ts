@@ -719,6 +719,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_impact_metrics: {
+        Args: { p_school_id: string }
+        Returns: {
+          current_value: number
+          metric_category: string
+          metric_name: string
+          unit: string
+        }[]
+      }
       get_user_school_id: { Args: never; Returns: string }
       has_role: {
         Args: {
