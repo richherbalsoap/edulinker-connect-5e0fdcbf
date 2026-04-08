@@ -160,7 +160,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchHomework: async (schoolId) => {
     try {
-      let query = supabase.from("homework").select("*").order("created_at", { ascending: false });
+      let query = supabase.from("homework").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ homework: data as unknown as Homework[] });
@@ -174,6 +174,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       let query = supabase
         .from("complaints")
         .select("*, student:students(*)")
+        .eq("is_deleted", false)
         .order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
@@ -185,7 +186,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchResults: async (schoolId) => {
     try {
-      let query = supabase.from("results").select("*, student:students(*)").order("created_at", { ascending: false });
+      let query = supabase.from("results").select("*, student:students(*)").eq("is_deleted", false).order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ results: data as unknown as Result[] });
@@ -196,7 +197,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchAnnouncements: async (schoolId) => {
     try {
-      let query = supabase.from("announcements").select("*").order("created_at", { ascending: false });
+      let query = supabase.from("announcements").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ announcements: data as unknown as Announcement[] });

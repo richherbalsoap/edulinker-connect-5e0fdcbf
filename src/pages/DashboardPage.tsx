@@ -62,16 +62,33 @@ const DashboardPage = () => {
     });
   }, [results, yearRange]);
 
-  const matchesDate = (createdAt: string) => {
+  const matchesDate = (createdAt: string, targetDate: Date) => {
     const d = new Date(createdAt);
-    return d.getDate() === selectedDate.getDate() &&
-      d.getMonth() === selectedDate.getMonth() &&
-      d.getFullYear() === selectedDate.getFullYear();
+    return d.getDate() === targetDate.getDate() &&
+      d.getMonth() === targetDate.getMonth() &&
+      d.getFullYear() === targetDate.getFullYear();
   };
-  const dateHomework = filteredHomework.filter(h => matchesDate(h.created_at));
-  const dateComplaints = filteredComplaints.filter(c => matchesDate(c.created_at));
-  const dateResults = filteredResults.filter(r => matchesDate(r.created_at));
+  const dateHomework = filteredHomework.filter(h => matchesDate(h.created_at, selectedDate));
+  const dateComplaints = filteredComplaints.filter(c => matchesDate(c.created_at, selectedDate));
+  const dateResults = filteredResults.filter(r => matchesDate(r.created_at, selectedDate));
   const hasDateData = dateHomework.length > 0 || dateComplaints.length > 0 || dateResults.length > 0;
+
+  const datesWithActivity = useMemo(() => {
+    const activitySet = new Set<string>();
+    filteredHomework.forEach(h => {
+      const d = new Date(h.created_at);
+      activitySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    });
+    filteredComplaints.forEach(c => {
+      const d = new Date(c.created_at);
+      activitySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    });
+    filteredResults.forEach(r => {
+      const d = new Date(r.created_at);
+      activitySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    });
+    return activitySet;
+  }, [filteredHomework, filteredComplaints, filteredResults]);
 
   const stats = [
     ...(selectedYear === 'Overall' ? [{ icon: Users, label: 'Total Students', value: students.length, color: 'from-primary to-secondary', path: '/students' }] : []),
@@ -172,16 +189,20 @@ const DashboardPage = () => {
               const day = i + 1;
               const isToday = day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
               const isSelected = day === selectedDate.getDate() && calMonth === selectedDate.getMonth() && calYear === selectedDate.getFullYear();
+              const hasActivity = datesWithActivity.has(`${calYear}-${calMonth}-${day}`);
               return (
                 <div
                   key={day}
                   onClick={() => setSelectedDate(new Date(calYear, calMonth, day))}
-                  className={`py-1.5 rounded cursor-pointer transition-all duration-200 text-sm
+                  className={`py-1.5 rounded cursor-pointer transition-all duration-200 text-sm relative
                     ${isSelected ? 'bg-primary text-primary-foreground font-bold shadow-[0_0_10px_hsl(51,100%,50%,0.4)]'
                       : isToday ? 'bg-primary/20 text-primary font-bold border border-primary/30'
                       : 'text-foreground/70 hover:bg-primary/10 hover:text-foreground'}`}
                 >
                   {day}
+                  {hasActivity && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                  )}
                 </div>
               );
             })}
