@@ -143,3 +143,27 @@
   box-shadow: 0 -40px 100px -20px rgba(255,26,117,0.25), inset 0 20px 100px -20px rgba(255,26,117,0.1);
   z-index: 10; pointer-events: none;
 }
+
+/* Standalone PWA mode - true mobile app feel */
+@media (display-mode: standalone) {
+  body {
+    overscroll-behavior: none;
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    scrollbar-width: none;
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 767px) {
+  .golden-falling-line, .falling-line {
+    opacity: 0 !important;
+    animation: none !important;
+  }
+  .golden-horizon-ring, .horizon-ring {
+    display: none;
+  }
+}
