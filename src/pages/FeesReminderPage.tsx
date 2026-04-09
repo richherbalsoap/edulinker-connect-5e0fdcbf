@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Trash2, AlertTriangle, Filter } from "lucide-react";
+import { DollarSign, Trash2, AlertTriangle, Filter, Upload, QrCode, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,6 +87,12 @@ const FeesReminderPage = () => {
   const [filterStandard, setFilterStandard] = useState("");
   const [filterSection, setFilterSection] = useState("");
   const [filterName, setFilterName] = useState("");
+
+  // QR states
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrUploading, setQrUploading] = useState(false);
+  const [schoolDbId, setSchoolDbId] = useState<string | null>(null);
+
   const [confirm, setConfirm] = useState<{
     open: boolean;
     title: string;
@@ -114,8 +120,18 @@ const FeesReminderPage = () => {
     if (data) setReminders(data as unknown as FeeReminder[]);
   };
 
+  const fetchSchoolQR = async () => {
+    if (!schoolId) return;
+    const { data } = await supabase.from("schools").select("id, payment_qr_url").eq("id", schoolId).single();
+    if (data) {
+      setSchoolDbId(data.id);
+      setQrUrl(data.payment_qr_url || null);
+    }
+  };
+
   useEffect(() => {
     fetchReminders();
+    fetchSchoolQR();
   }, [schoolId]);
 
   const filteredReminders = useMemo(() => {
@@ -129,6 +145,59 @@ const FeesReminderPage = () => {
       return true;
     });
   }, [reminders, filterStandard, filterSection, filterName]);
+
+  const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !schoolId) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+      return;
+    }
+
+    setQrUploading(true);
+
+    // School-specific path — purana QR overwrite ho jayega
+    const ext = file.name.split(".").pop();
+    const filePath = `payment-qr/${schoolId}/qr.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("edulinker-files")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+      setQrUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("edulinker-files").getPublicUrl(filePath);
+
+    const publicUrl = urlData.publicUrl;
+
+    // schools table mein save karo
+    const { error: updateError } = await supabase
+      .from("schools")
+      .update({ payment_qr_url: publicUrl })
+      .eq("id", schoolId);
+
+    if (updateError) {
+      toast({ title: "Save failed", description: updateError.message, variant: "destructive" });
+      setQrUploading(false);
+      return;
+    }
+
+    setQrUrl(publicUrl);
+    setQrUploading(false);
+    toast({ title: "QR Saved! ✅", description: "Students fees page mein 'Pay Now' button dikhega." });
+  };
+
+  const handleRemoveQR = async () => {
+    if (!schoolId) return;
+    await supabase.from("schools").update({ payment_qr_url: null }).eq("id", schoolId);
+    setQrUrl(null);
+    toast({ title: "QR Removed", description: "Payment QR hata diya gaya." });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,7 +223,6 @@ const FeesReminderPage = () => {
       return;
     }
 
-    // Notification bhejo
     await sendNotification("fees", {
       student_id: studentId,
       title,
@@ -201,7 +269,11 @@ const FeesReminderPage = () => {
         const ids = filteredReminders.map((r) => r.id);
         await supabase.from("fees_reminders").delete().in("id", ids);
         setReminders((prev) => prev.filter((r) => !ids.includes(r.id)));
-        toast({ title: "All Deleted", description: `${count} reminders deleted.`, variant: "destructive" });
+        toast({
+          title: "All Deleted",
+          description: `${count} reminder${count > 1 ? "s" : ""} deleted.`,
+          variant: "destructive",
+        });
       },
     });
   };
@@ -209,10 +281,77 @@ const FeesReminderPage = () => {
   return (
     <div className="space-y-6 relative z-10 px-4 py-6">
       <ConfirmDialog {...confirm} onCancel={() => setConfirm((c) => ({ ...c, open: false }))} />
+
       <h1 className="text-3xl font-bold text-foreground text-center">Fees Reminder</h1>
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+      {/* ── Payment QR Section ── */}
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <QrCode size={20} className="text-primary" />
+            <h2 className="text-lg font-bold text-foreground">Payment QR Code</h2>
+            {qrUrl && <CheckCircle size={16} className="text-green-400" />}
+          </div>
+          <p className="text-foreground/40 text-xs mb-4">
+            School ka GPay / PhonePe / Bank QR upload karo — students fees page mein scan karke directly pay kar sakte
+            hain.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 items-start">
+            {/* QR Preview */}
+            {qrUrl && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="border-2 border-primary/30 rounded-xl p-2 bg-white">
+                  <img src={qrUrl} alt="Payment QR" className="w-28 h-28 object-contain" />
+                </div>
+                <button
+                  onClick={handleRemoveQR}
+                  className="text-xs text-destructive/70 hover:text-destructive underline"
+                >
+                  Remove QR
+                </button>
+              </div>
+            )}
+
+            {/* Upload Button */}
+            <div className="flex-1">
+              <label className="cursor-pointer block">
+                <div
+                  className={`flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-dashed transition-all
+                    ${
+                      qrUploading
+                        ? "border-primary/30 bg-primary/5 cursor-not-allowed"
+                        : "border-primary/40 hover:border-primary bg-black/20 hover:bg-primary/5 cursor-pointer"
+                    }`}
+                >
+                  <Upload size={18} className="text-primary flex-shrink-0" />
+                  <div>
+                    <p className="text-foreground/80 text-sm font-medium">
+                      {qrUploading ? "Uploading..." : qrUrl ? "Change QR Image" : "Upload QR Image"}
+                    </p>
+                    <p className="text-foreground/30 text-xs mt-0.5">PNG, JPG • GPay / PhonePe / Bank QR</p>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleQRUpload}
+                  disabled={qrUploading}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Send Reminder Form ── */}
+      <div className="max-w-2xl mx-auto bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6">
+        <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+          <DollarSign size={20} className="text-primary" /> Send Fee Reminder
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">STANDARD *</label>
               <select
@@ -254,6 +393,7 @@ const FeesReminderPage = () => {
               </select>
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">SELECT STUDENT *</label>
             {filteredStudents.length > 0 ? (
@@ -278,6 +418,7 @@ const FeesReminderPage = () => {
               <p className="text-foreground/40 text-sm py-3">No students found. Select standard & section first.</p>
             )}
           </div>
+
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">TITLE *</label>
             <input
@@ -289,6 +430,7 @@ const FeesReminderPage = () => {
               className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-primary/60 mb-2">AMOUNT (₹) *</label>
             <input
@@ -314,6 +456,7 @@ const FeesReminderPage = () => {
               ))}
             </div>
           </div>
+
           <Button
             type="submit"
             disabled={loading}
@@ -324,6 +467,7 @@ const FeesReminderPage = () => {
         </form>
       </div>
 
+      {/* ── Sent Reminders List ── */}
       {reminders.length > 0 && (
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="flex items-center justify-between">
@@ -338,6 +482,7 @@ const FeesReminderPage = () => {
               </Button>
             )}
           </div>
+
           <div className="bg-black/20 border border-primary/15 rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-primary/60 text-xs font-bold">
               <Filter size={13} /> FILTER REMINDERS
@@ -388,6 +533,7 @@ const FeesReminderPage = () => {
               </button>
             )}
           </div>
+
           {filteredReminders.length === 0 ? (
             <p className="text-foreground/40 text-sm text-center py-6">No reminders match the selected filters.</p>
           ) : (
