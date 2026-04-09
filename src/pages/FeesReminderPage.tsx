@@ -122,7 +122,7 @@ const FeesReminderPage = () => {
 
   const fetchSchoolQR = async () => {
     if (!schoolId) return;
-    const { data } = await supabase.from("schools").select("id, payment_qr_url").eq("id", schoolId).single();
+    const { data } = await (supabase.from("schools") as any).select("id, payment_qr_url").eq("id", schoolId).single();
     if (data) {
       setSchoolDbId(data.id);
       setQrUrl(data.payment_qr_url || null);
@@ -176,8 +176,7 @@ const FeesReminderPage = () => {
     const publicUrl = urlData.publicUrl;
 
     // schools table mein save karo
-    const { error: updateError } = await supabase
-      .from("schools")
+    const { error: updateError } = await (supabase.from("schools") as any)
       .update({ payment_qr_url: publicUrl })
       .eq("id", schoolId);
 
@@ -194,7 +193,7 @@ const FeesReminderPage = () => {
 
   const handleRemoveQR = async () => {
     if (!schoolId) return;
-    await supabase.from("schools").update({ payment_qr_url: null }).eq("id", schoolId);
+    await (supabase.from("schools") as any).update({ payment_qr_url: null }).eq("id", schoolId);
     setQrUrl(null);
     toast({ title: "QR Removed", description: "Payment QR hata diya gaya." });
   };
