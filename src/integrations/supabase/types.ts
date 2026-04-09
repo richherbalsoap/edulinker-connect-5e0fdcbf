@@ -393,6 +393,7 @@ export type Database = {
           created_at: string
           id: string
           owner_user_id: string | null
+          payment_qr_url: string | null
           pin_hash: string | null
           pin_set: boolean | null
           school_code: string
@@ -403,6 +404,7 @@ export type Database = {
           created_at?: string
           id?: string
           owner_user_id?: string | null
+          payment_qr_url?: string | null
           pin_hash?: string | null
           pin_set?: boolean | null
           school_code: string
@@ -413,6 +415,7 @@ export type Database = {
           created_at?: string
           id?: string
           owner_user_id?: string | null
+          payment_qr_url?: string | null
           pin_hash?: string | null
           pin_set?: boolean | null
           school_code?: string
