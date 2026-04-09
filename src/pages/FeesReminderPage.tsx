@@ -371,6 +371,7 @@ const FeesReminderPage = () => {
                   </div>
                 </div>
                 <input
+                  ref={qrInputRef}
                   type="file"
                   accept="image/*"
                   onChange={handleQRUpload}
