@@ -147,20 +147,52 @@ const FeesReminderPage = () => {
     });
   }, [reminders, filterStandard, filterSection, filterName]);
 
+  const qrInputRef = useRef<HTMLInputElement>(null);
+
+  const validateQRCode = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { resolve(false); return; }
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        resolve(!!code);
+      };
+      img.onerror = () => resolve(false);
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !schoolId) return;
 
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+      if (qrInputRef.current) qrInputRef.current.value = "";
+      return;
+    }
+
+    // Validate QR code
+    const isValidQR = await validateQRCode(file);
+    if (!isValidQR) {
+      toast({ title: "Not a QR Code ❌", description: "Yeh image QR code nahi hai. Sirf real QR code upload karo (GPay/PhonePe/Bank QR).", variant: "destructive" });
+      if (qrInputRef.current) qrInputRef.current.value = "";
       return;
     }
 
     setQrUploading(true);
 
-    // School-specific path — purana QR overwrite ho jayega
-    const ext = file.name.split(".").pop();
-    const filePath = `payment-qr/${schoolId}/qr.${ext}`;
+    // Fixed path so upsert always overwrites
+    const filePath = `payment-qr/${schoolId}/qr.png`;
+
+    // Delete old file first to avoid cache issues
+    await supabase.storage.from("edulinker-files").remove([filePath]);
 
     const { error: uploadError } = await supabase.storage
       .from("edulinker-files")
@@ -169,14 +201,14 @@ const FeesReminderPage = () => {
     if (uploadError) {
       toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
       setQrUploading(false);
+      if (qrInputRef.current) qrInputRef.current.value = "";
       return;
     }
 
     const { data: urlData } = supabase.storage.from("edulinker-files").getPublicUrl(filePath);
+    // Add cache-buster so new image shows immediately
+    const publicUrl = urlData.publicUrl + "?t=" + Date.now();
 
-    const publicUrl = urlData.publicUrl;
-
-    // schools table mein save karo
     const { error: updateError } = await (supabase.from("schools") as any)
       .update({ payment_qr_url: publicUrl })
       .eq("id", schoolId);
@@ -184,18 +216,24 @@ const FeesReminderPage = () => {
     if (updateError) {
       toast({ title: "Save failed", description: updateError.message, variant: "destructive" });
       setQrUploading(false);
+      if (qrInputRef.current) qrInputRef.current.value = "";
       return;
     }
 
     setQrUrl(publicUrl);
     setQrUploading(false);
-    toast({ title: "QR Saved! ✅", description: "Students fees page mein 'Pay Now' button dikhega." });
+    if (qrInputRef.current) qrInputRef.current.value = "";
+    toast({ title: "QR Saved! ✅", description: "Real QR code verified aur save ho gaya." });
   };
 
   const handleRemoveQR = async () => {
     if (!schoolId) return;
+    // Remove from storage
+    await supabase.storage.from("edulinker-files").remove([`payment-qr/${schoolId}/qr.png`]);
+    // Remove from DB
     await (supabase.from("schools") as any).update({ payment_qr_url: null }).eq("id", schoolId);
     setQrUrl(null);
+    if (qrInputRef.current) qrInputRef.current.value = "";
     toast({ title: "QR Removed", description: "Payment QR hata diya gaya." });
   };
 
