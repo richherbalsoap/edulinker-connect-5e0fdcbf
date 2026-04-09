@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Trash2, AlertTriangle, Filter, Upload, QrCode, CheckCircle } from "lucide-react";
+import { DollarSign, Trash2, AlertTriangle, Filter, Upload, QrCode, CheckCircle, X } from "lucide-react";
+import jsQR from "jsqr";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
