@@ -147,11 +147,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
         <div onClick={toggleSidebar} className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-200" />
       )}
       <aside className={`
-        fixed top-0 left-0 h-screen w-[280px] z-50
+        fixed top-0 left-0 h-[100dvh] w-[280px] z-50
         bg-background/95 border-r border-primary/20
         flex flex-col transition-transform duration-200 ease-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      `} style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="p-5 border-b border-primary/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={edulinkerLogo} alt="EDULinker" className="w-9 h-9 rounded-lg object-contain" />

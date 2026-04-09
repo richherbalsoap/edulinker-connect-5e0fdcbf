@@ -14,7 +14,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-primary/20">
+    <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-primary/20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button

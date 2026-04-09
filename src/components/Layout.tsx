@@ -10,7 +10,7 @@ const Layout = () => {
   const toggleSidebar = useCallback(() => setSidebarOpen(prev => !prev), []);
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-[100dvh] bg-background">
       <GoldenBackground />
       <PinModal />
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
