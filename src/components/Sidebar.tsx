@@ -117,13 +117,8 @@ const CollapsibleSection = ({ title, icon: Icon, items, onClick, protected: isPr
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const schoolName = localStorage.getItem('schoolName') || 'My School';
   const { signOut } = useAuth();
-  const { pinSet, lock, requestAccess } = usePin();
+  const { requestAccess } = usePin();
   const navigate = useNavigate();
-
-  const handleLock = () => {
-    toggleSidebar();
-    lock();
-  };
 
   const handleSettingsClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -184,15 +179,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
               </a>
             </li>
           </ul>
-          {pinSet && (
-            <button
-              onClick={handleLock}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-primary/70 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-colors duration-200 mt-1"
-            >
-              <LockKeyhole size={20} />
-              <span className="font-medium text-sm">Lock App</span>
-            </button>
-          )}
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-colors duration-200 mt-1"

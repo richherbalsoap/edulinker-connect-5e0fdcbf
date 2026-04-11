@@ -2,14 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
-const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-
 interface PinContextType {
   pinSet: boolean;
-  principalUnlocked: boolean;
   loading: boolean;
   requestAccess: () => Promise<boolean>;
-  lock: () => void;
   // Modal state
   modalOpen: boolean;
   modalMode: 'setup' | 'verify';
@@ -30,11 +26,9 @@ const hashPin = async (pin: string): Promise<string> => {
 export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, schoolId } = useAuth();
   const [pinSet, setPinSet] = useState(false);
-  const [principalUnlocked, setPrincipalUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'setup' | 'verify'>('verify');
-  const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
   useEffect(() => {
@@ -47,39 +41,19 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .eq('id', schoolId)
         .maybeSingle();
       setPinSet(data?.pin_set || false);
-      setPrincipalUnlocked(false);
       setLoading(false);
     };
     fetchPinStatus();
   }, [schoolId]);
 
-  const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-    inactivityTimer.current = setTimeout(() => {
-      setPrincipalUnlocked(false);
-    }, INACTIVITY_TIMEOUT);
-  }, []);
-
-  useEffect(() => {
-    if (!pinSet || !principalUnlocked) return;
-    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
-    events.forEach(e => window.addEventListener(e, resetInactivityTimer, { passive: true }));
-    resetInactivityTimer();
-    return () => {
-      events.forEach(e => window.removeEventListener(e, resetInactivityTimer));
-      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-    };
-  }, [pinSet, principalUnlocked, resetInactivityTimer]);
-
+  // Always ask for PIN — no session caching
   const requestAccess = useCallback((): Promise<boolean> => {
-    if (principalUnlocked && pinSet) return Promise.resolve(true);
-
     return new Promise((resolve) => {
       resolveRef.current = resolve;
       setModalMode(pinSet ? 'verify' : 'setup');
       setModalOpen(true);
     });
-  }, [principalUnlocked, pinSet]);
+  }, [pinSet]);
 
   const handleModalSubmit = async (pin: string): Promise<boolean> => {
     if (!schoolId) return false;
@@ -92,8 +66,6 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .eq('id', schoolId);
       if (error) return false;
       setPinSet(true);
-      setPrincipalUnlocked(true);
-      resetInactivityTimer();
       setModalOpen(false);
       resolveRef.current?.(true);
       resolveRef.current = null;
@@ -108,8 +80,6 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const hash = await hashPin(pin);
       const correct = hash === data.pin_hash;
       if (correct) {
-        setPrincipalUnlocked(true);
-        resetInactivityTimer();
         setModalOpen(false);
         resolveRef.current?.(true);
         resolveRef.current = null;
@@ -124,14 +94,9 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     resolveRef.current = null;
   }, []);
 
-  const lock = useCallback(() => {
-    setPrincipalUnlocked(false);
-    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-  }, []);
-
   return (
     <PinContext.Provider value={{
-      pinSet, principalUnlocked, loading, requestAccess, lock,
+      pinSet, loading, requestAccess,
       modalOpen, modalMode, handleModalSubmit, closeModal
     }}>
       {children}
