@@ -56,38 +56,47 @@ const escapeHtml = (str: string) =>
 const ReportPage = () => {
   const schoolId = useSchoolId();
   const schoolName = localStorage.getItem("schoolName") || "MySchool";
-  const [range, setRange] = useState<DateRange>("1m");
+  const [range, setRange] = useState<DateRange>("full-year");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ReportData | null>(null);
 
   const { startDate, endDate } = useMemo(() => {
-    const now = new Date();
+    const year = currentYear;
     let start: Date | null = null;
-    const end = endOfDay(now);
+    let end: Date | null = endOfDay(new Date());
     switch (range) {
-      case "1m":
-        start = startOfDay(subMonths(now, 1));
+      case "jan-mar":
+        start = new Date(year, 0, 1);
+        end = endOfDay(new Date(year, 2, 31));
         break;
-      case "3m":
-        start = startOfDay(subMonths(now, 3));
+      case "apr-jun":
+        start = new Date(year, 3, 1);
+        end = endOfDay(new Date(year, 5, 30));
         break;
-      case "6m":
-        start = startOfDay(subMonths(now, 6));
+      case "jul-sep":
+        start = new Date(year, 6, 1);
+        end = endOfDay(new Date(year, 8, 30));
         break;
-      case "1y":
-        start = startOfDay(subYears(now, 1));
+      case "oct-dec":
+        start = new Date(year, 9, 1);
+        end = endOfDay(new Date(year, 11, 31));
+        break;
+      case "full-year":
+        start = new Date(year, 0, 1);
+        end = endOfDay(new Date(year, 11, 31));
         break;
       case "all":
         start = null;
+        end = null;
         break;
       case "custom":
         start = customFrom ? startOfDay(customFrom) : null;
+        end = customTo ? endOfDay(customTo) : null;
         break;
     }
-    const finalEnd = range === "custom" && customTo ? endOfDay(customTo) : end;
-    return normalizeDateRange(start, finalEnd);
+    return normalizeDateRange(start, end);
   }, [range, customFrom, customTo]);
 
   // FIX #4: Only fetch when custom range has both dates selected (or non-custom range)
