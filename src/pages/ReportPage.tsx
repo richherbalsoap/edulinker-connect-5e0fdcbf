@@ -22,13 +22,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { normalizeDateRange } from "@/utils/reportFilters";
 
-type DateRange = "1m" | "3m" | "6m" | "1y" | "all" | "custom";
+type DateRange = "jan-mar" | "apr-jun" | "jul-sep" | "oct-dec" | "full-year" | "all" | "custom";
+
+const currentYear = new Date().getFullYear();
 
 const rangeOptions: { value: DateRange; label: string }[] = [
-  { value: "1m", label: "Last 1 Month" },
-  { value: "3m", label: "Last 3 Months" },
-  { value: "6m", label: "Last 6 Months" },
-  { value: "1y", label: "Last 1 Year" },
+  { value: "jan-mar", label: `Jan–Mar ${currentYear}` },
+  { value: "apr-jun", label: `Apr–Jun ${currentYear}` },
+  { value: "jul-sep", label: `Jul–Sep ${currentYear}` },
+  { value: "oct-dec", label: `Oct–Dec ${currentYear}` },
+  { value: "full-year", label: `Full Year ${currentYear}` },
   { value: "all", label: "All Time" },
   { value: "custom", label: "Custom Range" },
 ];
