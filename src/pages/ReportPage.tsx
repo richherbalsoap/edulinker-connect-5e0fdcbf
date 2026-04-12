@@ -22,16 +22,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { normalizeDateRange } from "@/utils/reportFilters";
 
-type DateRange = "jan-mar" | "apr-jun" | "jul-sep" | "oct-dec" | "full-year" | "all" | "custom";
-
-const currentYear = new Date().getFullYear();
+type DateRange = "last-week" | "last-month" | "last-3-months" | "last-6-months" | "last-year" | "all" | "custom";
 
 const rangeOptions: { value: DateRange; label: string }[] = [
-  { value: "jan-mar", label: `Jan–Mar ${currentYear}` },
-  { value: "apr-jun", label: `Apr–Jun ${currentYear}` },
-  { value: "jul-sep", label: `Jul–Sep ${currentYear}` },
-  { value: "oct-dec", label: `Oct–Dec ${currentYear}` },
-  { value: "full-year", label: `Full Year ${currentYear}` },
+  { value: "last-week", label: "Last Week" },
+  { value: "last-month", label: "Last Month" },
+  { value: "last-3-months", label: "Last 3 Months" },
+  { value: "last-6-months", label: "Last 6 Months" },
+  { value: "last-year", label: "Last 1 Year" },
   { value: "all", label: "All Time" },
   { value: "custom", label: "Custom Range" },
 ];
@@ -56,36 +54,41 @@ const escapeHtml = (str: string) =>
 const ReportPage = () => {
   const schoolId = useSchoolId();
   const schoolName = localStorage.getItem("schoolName") || "MySchool";
-  const [range, setRange] = useState<DateRange>("full-year");
+  const [range, setRange] = useState<DateRange>("last-month");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ReportData | null>(null);
 
   const { startDate, endDate } = useMemo(() => {
-    const year = currentYear;
     let start: Date | null = null;
     let end: Date | null = endOfDay(new Date());
+    const now = new Date();
     switch (range) {
-      case "jan-mar":
-        start = new Date(year, 0, 1);
-        end = endOfDay(new Date(year, 2, 31));
+      case "last-week":
+        start = new Date(now);
+        start.setDate(now.getDate() - 7);
+        start = startOfDay(start);
         break;
-      case "apr-jun":
-        start = new Date(year, 3, 1);
-        end = endOfDay(new Date(year, 5, 30));
+      case "last-month":
+        start = new Date(now);
+        start.setMonth(now.getMonth() - 1);
+        start = startOfDay(start);
         break;
-      case "jul-sep":
-        start = new Date(year, 6, 1);
-        end = endOfDay(new Date(year, 8, 30));
+      case "last-3-months":
+        start = new Date(now);
+        start.setMonth(now.getMonth() - 3);
+        start = startOfDay(start);
         break;
-      case "oct-dec":
-        start = new Date(year, 9, 1);
-        end = endOfDay(new Date(year, 11, 31));
+      case "last-6-months":
+        start = new Date(now);
+        start.setMonth(now.getMonth() - 6);
+        start = startOfDay(start);
         break;
-      case "full-year":
-        start = new Date(year, 0, 1);
-        end = endOfDay(new Date(year, 11, 31));
+      case "last-year":
+        start = new Date(now);
+        start.setFullYear(now.getFullYear() - 1);
+        start = startOfDay(start);
         break;
       case "all":
         start = null;
