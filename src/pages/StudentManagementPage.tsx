@@ -1,7 +1,21 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, X, Upload, User, Phone, Key, FileUp, DollarSign, ShieldAlert } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Upload,
+  User,
+  Phone,
+  Key,
+  FileUp,
+  DollarSign,
+  ShieldAlert,
+  Copy,
+  Check,
+} from "lucide-react";
 import ImportStudentsModal from "@/components/ImportStudentsModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
@@ -91,7 +105,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     // Try multiple formats: as-is, with dashes added (EDU-XXXXX-XXXXX), and without dashes
     const keyNoDashes = key.replace(/-/g, "");
     const candidates = [key];
-    
+
     // If key has no dashes and starts with EDU, try adding dashes in EDU-XXXXX-XXXXX format
     if (!key.includes("-") && keyNoDashes.startsWith("EDU") && keyNoDashes.length >= 13) {
       const formatted = `EDU-${keyNoDashes.slice(3, 8)}-${keyNoDashes.slice(8, 13)}`;
@@ -106,8 +120,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     let matchedKey = key;
 
     for (const candidate of candidates) {
-      const { data } = await supabase
-        .rpc("lookup_student_by_secret_id", { _secret_id: candidate });
+      const { data } = await supabase.rpc("lookup_student_by_secret_id", { _secret_id: candidate });
       if (data && (data as any[]).length > 0) {
         found = (data as any[])[0];
         matchedKey = candidate;
@@ -128,7 +141,10 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       });
       setKeyFound(true);
       setKeyError("");
-      toast({ title: "Student Found! ✅", description: `"${found.name}" — Class ${found.standard}-${found.section}. Details auto-filled.` });
+      toast({
+        title: "Student Found! ✅",
+        description: `"${found.name}" — Class ${found.standard}-${found.section}. Details auto-filled.`,
+      });
     } else {
       setKeyFound(false);
       setKeyError("No student found with this key. You can add as a new student.");
@@ -149,11 +165,12 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       }
       if (!keyFound) {
         // Use RPC to check across all schools, then only block same-school duplicates
-        const { data: lookupData } = await supabase
-          .rpc("lookup_student_by_secret_id", { _secret_id: manualKey });
+        const { data: lookupData } = await supabase.rpc("lookup_student_by_secret_id", { _secret_id: manualKey });
         const existing = lookupData && (lookupData as any[]).length > 0 ? (lookupData as any[])[0] : null;
         if (existing && existing.school_id === schoolId) {
-          setKeyError(`This key is already assigned to "${existing.name}" in Class ${existing.standard}-${existing.section}. Use a different key.`);
+          setKeyError(
+            `This key is already assigned to "${existing.name}" in Class ${existing.standard}-${existing.section}. Use a different key.`,
+          );
           return;
         }
         // Archive check: only block if archived by THIS school
@@ -329,7 +346,9 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
                     </Button>
                   </div>
                   {keyFound && (
-                    <p className="text-xs text-green-400 mt-1 font-semibold">✓ Student found! Details auto-filled below.</p>
+                    <p className="text-xs text-green-400 mt-1 font-semibold">
+                      ✓ Student found! Details auto-filled below.
+                    </p>
                   )}
                   {keyError && <p className="text-xs text-destructive mt-1">{keyError}</p>}
                   <p className="text-xs text-foreground/40 mt-1">
@@ -369,6 +388,28 @@ const StudentManagementPage = () => {
   const { toast } = useToast();
 
   const [feeReminders, setFeeReminders] = useState<Record<string, { message: string; created_at: string }[]>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopySecretId = async (secretId: string, studentId: string) => {
+    try {
+      await navigator.clipboard.writeText(secretId);
+      setCopiedId(studentId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Fallback for older browsers / PWA
+      const el = document.createElement("textarea");
+      el.value = secretId;
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopiedId(studentId);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
 
   useEffect(() => {
     if (schoolId) {
@@ -564,7 +605,18 @@ const StudentManagementPage = () => {
                     <div className="bg-black/40 p-3 sm:p-4 rounded-lg space-y-2 text-foreground/80 text-sm border border-primary/10">
                       <div className="flex items-center gap-3">
                         <Key size={16} className="text-primary/50 flex-shrink-0" />
-                        <span className="font-mono text-primary text-xs truncate">{student.secret_id}</span>
+                        <span className="font-mono text-primary text-xs truncate flex-1">{student.secret_id}</span>
+                        <button
+                          onClick={() => handleCopySecretId(student.secret_id, student.id)}
+                          className="flex-shrink-0 p-1 rounded hover:bg-primary/20 transition-colors"
+                          title="Copy Secret ID"
+                        >
+                          {copiedId === student.id ? (
+                            <Check size={14} className="text-green-400" />
+                          ) : (
+                            <Copy size={14} className="text-primary/50 hover:text-primary" />
+                          )}
+                        </button>
                       </div>
                       <div className="flex items-center gap-3">
                         <User size={16} className="text-primary/50 flex-shrink-0" />
@@ -681,4 +733,3 @@ const StudentManagementPage = () => {
 };
 
 export default StudentManagementPage;
-
