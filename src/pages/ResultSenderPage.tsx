@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Send, Upload, Trash2, ChevronDown } from "lucide-react";
+import { Send, Upload, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
@@ -203,57 +203,58 @@ const ResultSenderPage = () => {
         className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto space-y-6"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="relative">
+          <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>
-            <select
-              value={standard}
-              onChange={(e) => setStandard(e.target.value)}
-              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <option value="" disabled>
-                Select Standard
-              </option>
-              {standards.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
+            <Select value={standard} onValueChange={setStandard}>
+              <SelectTrigger className="w-full p-3 bg-black/40 border border-primary/20 rounded-lg text-foreground">
+                <SelectValue placeholder="Select Standard" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                {standards.map((s) => (
+                  <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="relative">
+          <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">CLASS SECTION</label>
-            <select
-              value={section}
-              onChange={(e) => setSection(e.target.value)}
-              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <option value="" disabled>
-                Select Section
-              </option>
-              {["A", "B", "C", "D", "E"].map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
+            <Select value={section} onValueChange={setSection}>
+              <SelectTrigger className="w-full p-3 bg-black/40 border border-primary/20 rounded-lg text-foreground">
+                <SelectValue placeholder="Select Section" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                {["A", "B", "C", "D", "E"].map((s) => (
+                  <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary">
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-        <div className="relative">
+        <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">EXAM TYPE</label>
-          <select
-            value={examName}
-            onChange={(e) => setExamName(e.target.value)}
-            className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-          >
-            <option value="">Select Exam (Optional)</option>
-            <option value="Unit Test">Unit Test</option>
-            <option value="Mid Term">Mid Term</option>
-            <option value="Final Exam">Final Exam</option>
-            <option value="Weekly Test">Weekly Test</option>
-          </select>
-          <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
+          <Select value={examName} onValueChange={setExamName}>
+            <SelectTrigger className="w-full p-3 bg-black/40 border border-primary/20 rounded-lg text-foreground">
+              <SelectValue placeholder="Select Exam (Optional)" />
+            </SelectTrigger>
+            <SelectContent className="bg-black border border-primary/20">
+              <SelectItem value="Unit Test" className="text-foreground focus:bg-primary/10 focus:text-primary">
+                Unit Test
+              </SelectItem>
+              <SelectItem value="Mid Term" className="text-foreground focus:bg-primary/10 focus:text-primary">
+                Mid Term
+              </SelectItem>
+              <SelectItem value="Final Exam" className="text-foreground focus:bg-primary/10 focus:text-primary">
+                Final Exam
+              </SelectItem>
+              <SelectItem value="Weekly Test" className="text-foreground focus:bg-primary/10 focus:text-primary">
+                Weekly Test
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SELECT STUDENT</label>
@@ -275,7 +276,7 @@ const ResultSenderPage = () => {
               </SelectContent>
             </Select>
           ) : (
-            <p className="text-foreground/40 text-sm py-3">No students found. Add students first.</p>
+            <p className="text-foreground/40 text-sm py-3">No students found. Select standard & section first.</p>
           )}
         </div>
         <div className="space-y-3">
@@ -310,25 +311,29 @@ const ResultSenderPage = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex-1 min-w-0 relative">
-                    <select
-                      value={subject.name}
-                      onChange={(e) => handleSubjectSelect(index, e.target.value)}
-                      className="w-full appearance-none p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                    >
-                      <option value="" disabled className="bg-black text-white">
-                        Select Subject
-                      </option>
-                      {availableSubjects.map((s) => (
-                        <option key={s} value={s} className="bg-black text-white">
-                          {s}
-                        </option>
-                      ))}
-                      <option value="ADD_NEW" className="bg-black text-primary font-bold">
-                        + Add Subject Name
-                      </option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 pointer-events-none" />
+                  <div className="flex-1 min-w-0">
+                    <Select value={subject.name} onValueChange={(value) => handleSubjectSelect(index, value)}>
+                      <SelectTrigger className="w-full p-3 bg-black/40 border border-primary/20 rounded-lg text-foreground">
+                        <SelectValue placeholder="Select Subject" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                        {availableSubjects.map((s) => (
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            className="text-foreground focus:bg-primary/10 focus:text-primary"
+                          >
+                            {s}
+                          </SelectItem>
+                        ))}
+                        <SelectItem
+                          value="ADD_NEW"
+                          className="text-primary font-bold focus:bg-primary/10 focus:text-primary"
+                        >
+                          + Add Subject Name
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
                 <input
