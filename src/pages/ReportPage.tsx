@@ -65,31 +65,48 @@ const ReportPage = () => {
     let end: Date | null = endOfDay(new Date());
     const now = new Date();
     switch (range) {
-      case "last-week":
-        start = new Date(now);
-        start.setDate(now.getDate() - 7);
-        start = startOfDay(start);
+      case "last-week": {
+        // Last full week: Mon to Sun of previous week
+        const day = now.getDay(); // 0=Sun, 1=Mon...
+        const lastSun = new Date(now);
+        lastSun.setDate(now.getDate() - day);
+        const lastMon = new Date(lastSun);
+        lastMon.setDate(lastSun.getDate() - 6);
+        start = startOfDay(lastMon);
+        end = endOfDay(lastSun);
         break;
-      case "last-month":
-        start = new Date(now);
-        start.setMonth(now.getMonth() - 1);
-        start = startOfDay(start);
+      }
+      case "last-month": {
+        // Full previous calendar month: e.g. if now=Apr, then Mar 1 – Mar 31
+        const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastOfPrevMonth = new Date(firstOfThisMonth.getTime() - 1);
+        start = startOfDay(new Date(lastOfPrevMonth.getFullYear(), lastOfPrevMonth.getMonth(), 1));
+        end = endOfDay(lastOfPrevMonth);
         break;
-      case "last-3-months":
-        start = new Date(now);
-        start.setMonth(now.getMonth() - 3);
-        start = startOfDay(start);
+      }
+      case "last-3-months": {
+        // 1st of (currentMonth - 3) to end of last month
+        const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastOfPrevMonth = new Date(firstOfThisMonth.getTime() - 1);
+        start = startOfDay(new Date(now.getFullYear(), now.getMonth() - 3, 1));
+        end = endOfDay(lastOfPrevMonth);
         break;
-      case "last-6-months":
-        start = new Date(now);
-        start.setMonth(now.getMonth() - 6);
-        start = startOfDay(start);
+      }
+      case "last-6-months": {
+        // 1st of (currentMonth - 6) to end of last month
+        const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastOfPrevMonth = new Date(firstOfThisMonth.getTime() - 1);
+        start = startOfDay(new Date(now.getFullYear(), now.getMonth() - 6, 1));
+        end = endOfDay(lastOfPrevMonth);
         break;
-      case "last-year":
-        start = new Date(now);
-        start.setFullYear(now.getFullYear() - 1);
-        start = startOfDay(start);
+      }
+      case "last-year": {
+        // Full previous calendar year: Jan 1 – Dec 31 of last year
+        const lastYear = now.getFullYear() - 1;
+        start = startOfDay(new Date(lastYear, 0, 1));
+        end = endOfDay(new Date(lastYear, 11, 31));
         break;
+      }
       case "all":
         start = null;
         end = null;
