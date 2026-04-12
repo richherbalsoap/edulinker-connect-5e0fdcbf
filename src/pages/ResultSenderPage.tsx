@@ -285,30 +285,32 @@ const ResultSenderPage = () => {
             <div key={index} className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 {showCustomSubject === index ? (
-                  <div className="flex-1 flex gap-2 min-w-0">
+                  <div className="w-full flex flex-col gap-2 mb-2">
                     <input
                       type="text"
                       value={customSubject}
                       onChange={(e) => setCustomSubject(e.target.value)}
                       placeholder="Enter subject name..."
-                      className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                       autoFocus
                     />
-                    <Button
-                      type="button"
-                      onClick={() => handleAddCustomSubject(index)}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-                    >
-                      Add
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setShowCustomSubject(null)}
-                      variant="ghost"
-                      className="text-foreground/60"
-                    >
-                      Cancel
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => handleAddCustomSubject(index)}
+                        className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => setShowCustomSubject(null)}
+                        variant="ghost"
+                        className="flex-1 text-foreground/60"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex-1 min-w-0">
