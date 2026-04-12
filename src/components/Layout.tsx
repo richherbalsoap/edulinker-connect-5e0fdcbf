@@ -4,10 +4,14 @@ import Header from './Header';
 import { Outlet } from 'react-router-dom';
 import GoldenBackground from './GoldenBackground';
 import PinModal from './PinModal';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { useSchoolId } from '@/hooks/useSchoolId';
 
 const Layout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = useCallback(() => setSidebarOpen(prev => !prev), []);
+  const schoolId = useSchoolId();
+  useRealtimeSync(schoolId);
 
   return (
     <div className="flex h-[100dvh] bg-background">
