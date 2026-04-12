@@ -180,21 +180,23 @@ const HomeworkSenderPage = () => {
               </SelectContent>
             </Select>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <input
                 type="text"
                 value={customSubject}
                 onChange={(e) => setCustomSubject(e.target.value)}
                 placeholder="Enter new subject name..."
-                className="flex-1 px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40"
                 autoFocus
               />
-              <Button type="button" onClick={handleAddCustomSubject} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
-                Add
-              </Button>
-              <Button type="button" onClick={() => setShowCustomSubject(false)} variant="ghost" className="text-foreground/60">
-                Cancel
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" onClick={handleAddCustomSubject} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
+                  Add
+                </Button>
+                <Button type="button" onClick={() => setShowCustomSubject(false)} variant="ghost" className="flex-1 text-foreground/60">
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
         </div>
