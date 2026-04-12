@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronDown, Upload, X } from "lucide-react";
+import { Send, Upload, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -28,11 +29,7 @@ const HomeworkSenderPage = () => {
     if (!selectedFile) return;
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(selectedFile.type)) {
-      toast({
-        title: "File Error",
-        description: "Only PDF, JPEG, PNG, and WebP files are allowed.",
-        variant: "destructive",
-      });
+      toast({ title: "File Error", description: "Only PDF, JPEG, PNG, and WebP files are allowed.", variant: "destructive" });
       return;
     }
     if (selectedFile.size > 7 * 1024 * 1024) {
@@ -43,9 +40,7 @@ const HomeworkSenderPage = () => {
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    const {
-      data: { user: currentUser },
-    } = await supabase.auth.getUser();
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) return null;
     const ext = file.name.split(".").pop();
     const filePath = `${currentUser.id}/homework/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
@@ -61,19 +56,11 @@ const HomeworkSenderPage = () => {
     e.preventDefault();
     const finalSubject = showCustomSubject ? customSubject : formData.subject;
     if (!formData.standard || !formData.section || !finalSubject || !formData.homework) {
-      toast({
-        title: "Incomplete Information",
-        description: "Please fill out all the fields before sending.",
-        variant: "destructive",
-      });
+      toast({ title: "Incomplete Information", description: "Please fill out all the fields before sending.", variant: "destructive" });
       return;
     }
     if (!schoolId) {
-      toast({
-        title: "School identity missing",
-        description: "Please logout and login again.",
-        variant: "destructive",
-      });
+      toast({ title: "School identity missing", description: "Please logout and login again.", variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -91,7 +78,6 @@ const HomeworkSenderPage = () => {
       });
       await fetchHomework(schoolId);
 
-      // Notification bhejo
       await sendNotification("homework", {
         school_id: schoolId,
         standard: formData.standard,
@@ -110,23 +96,19 @@ const HomeworkSenderPage = () => {
       setFile(null);
     } catch (error: any) {
       console.error("Homework send error:", error);
-      toast({
-        title: "Homework Send Failed",
-        description: error?.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Homework Send Failed", description: error?.message || "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    if (field === "subject" && value === "ADD_NEW") {
+  const handleSubjectChange = (value: string) => {
+    if (value === "ADD_NEW") {
       setShowCustomSubject(true);
       setFormData((prev) => ({ ...prev, subject: "" }));
       return;
     }
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, subject: value }));
   };
 
   const handleAddCustomSubject = () => {
@@ -147,66 +129,56 @@ const HomeworkSenderPage = () => {
         className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto space-y-6"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="relative">
+          <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>
-            <select
-              value={formData.standard}
-              onChange={(e) => handleInputChange("standard", e.target.value)}
-              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <option value="" disabled className="bg-black text-white">
-                Select Standard
-              </option>
-              {standards.map((s) => (
-                <option key={s} value={s} className="bg-black text-white">
-                  {s}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
+            <Select value={formData.standard} onValueChange={(value) => setFormData((prev) => ({ ...prev, standard: value }))}>
+              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground text-base">
+                <SelectValue placeholder="Select Standard" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                {standards.map((s) => (
+                  <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary text-base py-2">
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="relative">
+          <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">CLASS SECTION</label>
-            <select
-              value={formData.section}
-              onChange={(e) => handleInputChange("section", e.target.value)}
-              className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <option value="" disabled className="bg-black text-white">
-                Select Section
-              </option>
-              {sections.map((s) => (
-                <option key={s} value={s} className="bg-black text-white">
-                  {s}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
+            <Select value={formData.section} onValueChange={(value) => setFormData((prev) => ({ ...prev, section: value }))}>
+              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground text-base">
+                <SelectValue placeholder="Select Section" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
+                {sections.map((s) => (
+                  <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary text-base py-2">
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-        <div className="relative">
+
+        <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">SUBJECT</label>
           {!showCustomSubject ? (
-            <div className="relative">
-              <select
-                value={formData.subject}
-                onChange={(e) => handleInputChange("subject", e.target.value)}
-                className="w-full appearance-none p-3 bg-black border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              >
-                <option value="" disabled className="bg-black text-white">
-                  Select Subject
-                </option>
+            <Select value={formData.subject} onValueChange={handleSubjectChange}>
+              <SelectTrigger className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground text-base">
+                <SelectValue placeholder="Select Subject" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border border-primary/20 max-h-60 overflow-y-auto">
                 {subjects.map((s) => (
-                  <option key={s} value={s} className="bg-black text-white">
+                  <SelectItem key={s} value={s} className="text-foreground focus:bg-primary/10 focus:text-primary text-base py-2">
                     {s}
-                  </option>
+                  </SelectItem>
                 ))}
-                <option value="ADD_NEW" className="bg-black text-primary font-bold">
+                <SelectItem value="ADD_NEW" className="text-primary font-bold focus:bg-primary/10 focus:text-primary text-base py-2">
                   + Add Subject Name
-                </option>
-              </select>
-              <ChevronDown className="absolute right-3 bottom-3 w-5 h-5 text-primary/50 pointer-events-none" />
-            </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           ) : (
             <div className="flex gap-2">
               <input
@@ -214,36 +186,29 @@ const HomeworkSenderPage = () => {
                 value={customSubject}
                 onChange={(e) => setCustomSubject(e.target.value)}
                 placeholder="Enter new subject name..."
-                className="flex-1 p-3 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="flex-1 px-4 py-3 bg-black/40 border-primary/20 border rounded-lg text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40"
                 autoFocus
               />
-              <Button
-                type="button"
-                onClick={handleAddCustomSubject}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-              >
+              <Button type="button" onClick={handleAddCustomSubject} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                 Add
               </Button>
-              <Button
-                type="button"
-                onClick={() => setShowCustomSubject(false)}
-                variant="ghost"
-                className="text-foreground/60"
-              >
+              <Button type="button" onClick={() => setShowCustomSubject(false)} variant="ghost" className="text-foreground/60">
                 Cancel
               </Button>
             </div>
           )}
         </div>
+
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">HOMEWORK DETAILS</label>
           <textarea
             value={formData.homework}
-            onChange={(e) => handleInputChange("homework", e.target.value)}
+            onChange={(e) => setFormData((prev) => ({ ...prev, homework: e.target.value }))}
             placeholder="Enter homework description..."
-            className="w-full p-3 h-32 bg-black/40 border-primary/20 border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
+            className="w-full px-4 py-3 h-36 bg-black/40 border-primary/20 border rounded-lg text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
           />
         </div>
+
         <div>
           <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">ATTACH FILE (OPTIONAL)</label>
           <div className="relative border-2 border-dashed border-primary/20 rounded-lg p-6 text-center cursor-pointer hover:border-primary/40 transition-colors">
@@ -260,10 +225,7 @@ const HomeworkSenderPage = () => {
                   <p className="text-foreground">{file.name}</p>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFile(null);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); setFile(null); }}
                     className="text-destructive hover:text-destructive/80"
                   >
                     <X size={16} />
@@ -275,14 +237,13 @@ const HomeworkSenderPage = () => {
             </div>
           </div>
         </div>
+
         <Button
           type="submit"
           disabled={isSubmitting}
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
         >
-          {isSubmitting ? (
-            "Sending..."
-          ) : (
+          {isSubmitting ? "Sending..." : (
             <>
               <Send size={20} className="mr-2" /> Send Homework
             </>
