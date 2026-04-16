@@ -21,7 +21,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { normalizeDateRange } from "@/utils/reportFilters";
-
 type DateRange = "last-week" | "last-month" | "last-3-months" | "last-6-months" | "last-year" | "all" | "custom";
 
 const rangeOptions: { value: DateRange; label: string }[] = [
@@ -53,7 +52,19 @@ const escapeHtml = (str: string) =>
 
 const ReportPage = () => {
   const schoolId = useSchoolId();
-  const schoolName = localStorage.getItem("schoolName") || "MySchool";
+  const [schoolName, setSchoolName] = useState<string>("MySchool");
+
+  useEffect(() => {
+    if (!schoolId) return;
+    supabase
+      .from("schools")
+      .select("name")
+      .eq("id", schoolId)
+      .single()
+      .then(({ data }) => {
+        if (data?.name) setSchoolName(data.name);
+      });
+  }, [schoolId]);
   const [range, setRange] = useState<DateRange>("last-month");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
@@ -161,8 +172,8 @@ const ReportPage = () => {
         applyDateFilterSimple(
           supabase.from("fees_reminders").select("*, student:students(name, standard, section)"),
         ).order("created_at", { ascending: false }),
-        // FIX #2: Removed duplicate .eq('school_id', schoolId) — applyDateFilterSimple already adds it
-        applyDateFilterSimple(supabase.from("students").select("*")).order("created_at", { ascending: false }),
+        // Students are permanent entities — never date-filtered, always fetch all for school
+        supabase.from("students").select("*").eq("school_id", schoolId).order("created_at", { ascending: false }),
       ]);
 
       const [resResults, resHomework, resAnnouncements, resComplaints, resFees, resStudents] = responses;
@@ -415,7 +426,7 @@ const ReportPage = () => {
 
     printWindow.document.write(html);
     printWindow.document.close();
-    setTimeout(() => printWindow.print(), 500);
+    printWindow.onload = () => printWindow.print();
   };
 
   const counts = useMemo(() => {
