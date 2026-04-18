@@ -58,11 +58,11 @@ const ReportPage = () => {
     if (!schoolId) return;
     supabase
       .from("schools")
-      .select("name")
+      .select("school_name")
       .eq("id", schoolId)
       .single()
       .then(({ data }) => {
-        if (data?.name) setSchoolName(data.name);
+        if (data?.school_name) setSchoolName(data.school_name);
       });
   }, [schoolId]);
   const [range, setRange] = useState<DateRange>("last-month");
