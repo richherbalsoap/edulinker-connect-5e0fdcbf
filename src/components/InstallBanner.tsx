@@ -24,31 +24,40 @@ const InstallBanner = () => {
   const [visible, setVisible] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const isIOS = useRef(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream);
+  const isMobileBrowser = useRef(/android|iphone|ipad|ipod/i.test(navigator.userAgent));
 
   useEffect(() => {
-    // Don't show if already installed as standalone
     if (window.matchMedia("(display-mode: standalone)").matches) return;
-    // Don't show if dismissed this session
     if (sessionStorage.getItem("edulinker_install_banner_dismissed")) return;
 
-    // If we already have the cached prompt (captured before mount), show banner immediately
-    if (_cachedPrompt || isIOS.current) {
+    if (_cachedPrompt || isIOS.current || isMobileBrowser.current) {
       setVisible(true);
     }
 
-    // Also listen for future prompt-ready events (e.g. if component mounts very early)
     const onPromptReady = () => {
       setDeferredPrompt(_cachedPrompt);
       if (!sessionStorage.getItem("edulinker_install_banner_dismissed")) {
         setVisible(true);
       }
     };
+
+    const onInstalled = () => {
+      setDeferredPrompt(null);
+      setVisible(false);
+      setShowGuide(false);
+      sessionStorage.removeItem("edulinker_install_banner_dismissed");
+    };
+
     window.addEventListener("pwa-prompt-ready", onPromptReady);
-    return () => window.removeEventListener("pwa-prompt-ready", onPromptReady);
+    window.addEventListener("appinstalled", onInstalled);
+
+    return () => {
+      window.removeEventListener("pwa-prompt-ready", onPromptReady);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
 
   const handleInstall = async () => {
-    // Always try the latest cached prompt in case state is stale
     const prompt = deferredPrompt || _cachedPrompt;
     if (prompt) {
       await prompt.prompt();
@@ -57,7 +66,6 @@ const InstallBanner = () => {
       setDeferredPrompt(null);
       if (outcome === "accepted") handleClose();
     } else {
-      // Fallback: show manual guide for iOS or browsers that don't support prompt
       setShowGuide(true);
     }
   };
