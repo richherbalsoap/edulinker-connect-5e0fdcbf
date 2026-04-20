@@ -123,7 +123,15 @@ const DashboardPage = () => {
     <div className="space-y-6 relative z-10 w-full max-w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-6">
       <div className="relative flex flex-col sm:flex-row sm:justify-center items-center w-full gap-4 sm:gap-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Dashboard</h1>
-        <div className="sm:absolute sm:right-0">
+        <div className="sm:absolute sm:right-0 flex items-center gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            aria-label="Refresh data"
+            className="p-2 bg-black/40 backdrop-blur-md border border-primary/30 rounded-lg text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+          </button>
           <select
             value={selectedYear}
             onChange={e => setSelectedYear(e.target.value)}
