@@ -29,6 +29,20 @@ const DashboardPage = () => {
   const academicYears = useMemo(() => getYears(), []);
   const defaultYear = `${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (!schoolId || refreshing) return;
+    setRefreshing(true);
+    try {
+      await fetchAll(schoolId);
+      toast.success('Data refreshed');
+    } catch {
+      toast.error('Refresh failed');
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (schoolId) fetchAll(schoolId);
