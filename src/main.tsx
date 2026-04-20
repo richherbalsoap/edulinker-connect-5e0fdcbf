@@ -2,6 +2,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+declare const __APP_BUILD_ID__: string;
+
 const rootElement = document.getElementById("root")!;
 
 const isInIframe = (() => {
@@ -54,7 +56,7 @@ const registerServiceWorker = async () => {
     void forceRefresh();
   });
 
-  const registration = await navigator.serviceWorker.register("/sw.js", {
+  const registration = await navigator.serviceWorker.register(`/sw.js?v=${__APP_BUILD_ID__}`, {
     scope: "/",
     updateViaCache: "none",
   });
