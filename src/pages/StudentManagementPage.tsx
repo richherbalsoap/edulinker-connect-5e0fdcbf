@@ -580,7 +580,7 @@ const StudentManagementPage = () => {
                     key={student.id}
                     className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-4 sm:p-5 space-y-4 flex flex-col hover:border-primary/40 hover:shadow-[0_0_20px_hsl(51,100%,50%,0.15)] transition-all duration-300"
                   >
-                    <div className="flex items-center gap-4 flex-grow">
+                    <div className="flex items-center gap-4">
                       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/40 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden flex-shrink-0 border border-primary/20">
                         {student.avatar_url ? (
                           <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
