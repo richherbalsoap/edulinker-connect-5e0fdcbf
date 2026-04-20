@@ -4,7 +4,10 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const buildId = `${Date.now()}`;
+
+  return {
   server: {
     host: "::",
     port: 8080,
@@ -60,4 +63,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-}));
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(buildId),
+  },
+};
+});
