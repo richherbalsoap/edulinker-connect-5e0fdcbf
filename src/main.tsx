@@ -2,25 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-declare const __APP_BUILD_ID__: string;
-
 const rootElement = document.getElementById("root")!;
-
-const isInIframe = (() => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true;
-  }
-})();
-
-const isPreviewHost =
-  window.location.hostname.includes("id-preview--") ||
-  window.location.hostname.includes("preview--") ||
-  window.location.hostname.endsWith("lovable.app") ||
-  window.location.hostname.includes("lovableproject.com");
-
-const shouldDisablePwa = isInIframe || isPreviewHost;
 
 const unregisterAllServiceWorkers = async () => {
   if (!("serviceWorker" in navigator)) return;
@@ -40,67 +22,15 @@ const clearRuntimeCaches = async () => {
   await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
 };
 
-const registerServiceWorker = async () => {
-  if (!("serviceWorker" in navigator)) return;
-
-  let isRefreshing = false;
-
-  const forceRefresh = async () => {
-    if (isRefreshing) return;
-    isRefreshing = true;
-    await clearRuntimeCaches();
-    window.location.reload();
-  };
-
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    void forceRefresh();
-  });
-
-  const registration = await navigator.serviceWorker.register(`/sw.js?v=${__APP_BUILD_ID__}`, {
-    scope: "/",
-    updateViaCache: "none",
-  });
-
-  const triggerUpdateCheck = () => {
-    void registration.update().catch(() => undefined);
-  };
-
-  if (registration.waiting) {
-    registration.waiting.postMessage({ type: "SKIP_WAITING" });
-  }
-
-  registration.addEventListener("updatefound", () => {
-    const installingWorker = registration.installing;
-    if (!installingWorker) return;
-
-    installingWorker.addEventListener("statechange", () => {
-      if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
-        registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-      }
-    });
-  });
-
-  window.addEventListener("focus", triggerUpdateCheck);
-  window.addEventListener("online", triggerUpdateCheck);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      triggerUpdateCheck();
-    }
-  });
-
-  window.setInterval(triggerUpdateCheck, 60_000);
-  triggerUpdateCheck();
-};
-
 const bootstrapApp = async () => {
-  if (shouldDisablePwa) {
-    await unregisterAllServiceWorkers();
-    mountApp();
-    return;
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      window.location.reload();
+    });
   }
 
-  await registerServiceWorker();
-
+  await unregisterAllServiceWorkers();
+  await clearRuntimeCaches();
   mountApp();
 };
 
