@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Send, Upload, X } from "lucide-react";
@@ -17,12 +17,47 @@ const HomeworkSenderPage = () => {
   const { schoolId } = useAuth();
   const addHomework = useAppStore((state) => state.addHomework);
   const fetchHomework = useAppStore((state) => state.fetchHomework);
-  const [subjects, setSubjects] = useState(initialSubjects);
+  const subjectsStorageKey = schoolId ? `edulinker_subjects_${schoolId}` : "edulinker_subjects_global";
+  const [subjects, setSubjects] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(subjectsStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return initialSubjects;
+  });
   const [showCustomSubject, setShowCustomSubject] = useState(false);
   const [customSubject, setCustomSubject] = useState("");
   const [formData, setFormData] = useState({ standard: "", section: "", subject: "", homework: "" });
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Reload subjects when schoolId changes (login switch)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(subjectsStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSubjects(parsed);
+          return;
+        }
+      }
+      setSubjects(initialSubjects);
+    } catch {
+      setSubjects(initialSubjects);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schoolId]);
+
+  // Persist subjects whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(subjectsStorageKey, JSON.stringify(subjects));
+    } catch {}
+  }, [subjects, subjectsStorageKey]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];

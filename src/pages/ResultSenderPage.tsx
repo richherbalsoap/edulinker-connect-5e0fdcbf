@@ -26,13 +26,48 @@ const ResultSenderPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [subjects, setSubjects] = useState([{ name: "", marks_obtained: "", total_marks: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [availableSubjects, setAvailableSubjects] = useState(initialSubjects);
+  const subjectsStorageKey = schoolId ? `edulinker_subjects_${schoolId}` : "edulinker_subjects_global";
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(subjectsStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return initialSubjects;
+  });
   const [showCustomSubject, setShowCustomSubject] = useState<number | null>(null);
   const [customSubject, setCustomSubject] = useState("");
 
   useEffect(() => {
     if (schoolId) fetchStudents(schoolId);
   }, [schoolId]);
+
+  // Reload subjects when schoolId changes
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(subjectsStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAvailableSubjects(parsed);
+          return;
+        }
+      }
+      setAvailableSubjects(initialSubjects);
+    } catch {
+      setAvailableSubjects(initialSubjects);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schoolId]);
+
+  // Persist on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(subjectsStorageKey, JSON.stringify(availableSubjects));
+    } catch {}
+  }, [availableSubjects, subjectsStorageKey]);
 
   const filteredStudents = useMemo(() => {
     return allStudents.filter((s) => {
