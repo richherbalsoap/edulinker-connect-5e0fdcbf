@@ -32,14 +32,17 @@ const DashboardPage = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
-    if (!schoolId || refreshing) return;
+    if (refreshing) return;
     setRefreshing(true);
     try {
-      await fetchAll(schoolId);
-      toast.success('Data refreshed');
+      if (schoolId) await fetchAll(schoolId);
+      toast.success('Refreshing entire panel...');
+      // Hard reload to refresh ALL pages/data across the app
+      setTimeout(() => {
+        window.location.reload();
+      }, 400);
     } catch {
       toast.error('Refresh failed');
-    } finally {
       setRefreshing(false);
     }
   };
