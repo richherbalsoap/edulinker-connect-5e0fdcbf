@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import { supabase, setClerkTokenGetter } from "@/integrations/supabase/client";
+import { useAuth as useClerkAuth, useUser as useClerkUser } from "@clerk/clerk-react";
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: { id: string; email?: string | null } | null;
+  session: { user: { id: string; email?: string | null } } | null;
   loading: boolean;
   schoolId: string | null;
   signOut: () => Promise<void>;
@@ -21,10 +21,28 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
   const [schoolId, setSchoolId] = useState<string | null>(null);
+  const { isLoaded: clerkAuthLoaded, isSignedIn, getToken, signOut: clerkSignOut } = useClerkAuth();
+  const { isLoaded: clerkUserLoaded, user: clerkUser } = useClerkUser();
+
+  const loading = !clerkAuthLoaded || !clerkUserLoaded;
+
+  const user = isSignedIn && clerkUser
+    ? { id: clerkUser.id, email: clerkUser.primaryEmailAddress?.emailAddress ?? null }
+    : null;
+  const session = user ? { user } : null;
+
+  // Wire Clerk's getToken into the Supabase client so every query carries a fresh Clerk JWT.
+  useEffect(() => {
+    setClerkTokenGetter(async () => {
+      try {
+        return await getToken({ template: "supabase" });
+      } catch {
+        return null;
+      }
+    });
+    return () => setClerkTokenGetter(null);
+  }, [getToken]);
 
   const ensureSchoolExists = async (userId: string) => {
     try {
@@ -53,65 +71,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    let mounted = true;
-
-    // Safety timeout - never stay loading forever
-    const timeout = setTimeout(() => {
-      if (mounted) {
-        console.warn("Auth initialization timed out, forcing load");
-        setLoading(false);
-      }
-    }, 5000);
-
-    // First restore session from storage
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        try {
-          await ensureSchoolExists(session.user.id);
-        } catch (e) {
-          console.error("ensureSchoolExists failed:", e);
-        }
-      }
-      if (mounted) {
-        setLoading(false);
-        clearTimeout(timeout);
-      }
-    }).catch((err) => {
-      console.error("getSession failed:", err);
-      if (mounted) {
-        setLoading(false);
-        clearTimeout(timeout);
-      }
-    });
-
-    // Then listen for subsequent auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        ensureSchoolExists(session.user.id).catch(console.error);
-      } else {
-        setSchoolId(null);
-      }
-    });
-
-    return () => {
-      mounted = false;
-      clearTimeout(timeout);
-      subscription.unsubscribe();
-    };
-  }, []);
+    if (loading) return;
+    if (user) {
+      ensureSchoolExists(user.id).catch(console.error);
+    } else {
+      setSchoolId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, user?.id]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    try {
+      await clerkSignOut();
+    } catch (e) {
+      console.error("signOut failed:", e);
+    }
+    setSchoolId(null);
   };
 
   return <AuthContext.Provider value={{ user, session, loading, schoolId, signOut }}>{children}</AuthContext.Provider>;
