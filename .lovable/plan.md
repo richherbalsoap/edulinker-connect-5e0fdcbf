@@ -1,75 +1,98 @@
 
 
-## Plan: Complete Login Authentication System with Supabase Auth
+# Clerk Authentication Integration Plan
 
-### Problem
-The database has **no tables** yet (types.ts shows empty Tables), causing all `supabase.from('tablename')` calls to fail with TypeScript errors (`'students' is not assignable to type 'never'`). Additionally, no auth system exists after the previous removal.
+Goal: Replace the existing Supabase email/password Login & Signup UI with **Clerk-hosted authentication** (Email + Password, Google, Phone Number), while keeping the **entire backend, RLS, schools, students, edge functions, realtime sync** running on Supabase exactly as they are today.
 
-### What Will Be Done
+This is achieved using **Clerk → Supabase Native Third-Party Auth Integration** (officially supported by both Clerk and Supabase since 2024). Clerk issues the JWT, Supabase trusts it, and `auth.uid()` returns the Clerk user ID inside RLS policies — so all your existing RLS, `school_id` isolation, profiles, `useRealtimeSync`, edge functions etc. keep working without any logic rewrite.
 
-#### 1. Create Auth Context and Protected Route
-- **`src/context/AuthContext.tsx`** -- Auth provider using `supabase.auth.onAuthStateChange` and `getSession`. Exposes `user`, `session`, `loading`, `signOut`.
-- **`src/components/ProtectedRoute.tsx`** -- Wraps dashboard routes; redirects to `/login` if no session.
+---
 
-#### 2. Create 4 Auth Pages
-- **`src/pages/LoginPage.tsx`** -- Email + password form. Uses `signInWithPassword`. On success redirects to `/dashboard`. On failure shows toast. Links to signup and forgot password.
-- **`src/pages/SignupPage.tsx`** -- Email + password + confirm password. Uses `signUp` with `emailRedirectTo: window.location.origin`. On success redirects to `/login`. No email verification.
-- **`src/pages/ForgotPasswordPage.tsx`** -- Email input. Uses `resetPasswordForEmail` with `redirectTo: origin + '/reset-password'`. Shows success toast.
-- **`src/pages/ResetPasswordPage.tsx`** -- New password + confirm. Uses `updateUser({ password })`. On success redirects to `/login`.
+## What I Need From You (Pre-requisites)
 
-#### 3. Update Routing in `App.tsx`
-- Add auth pages as public routes: `/login`, `/signup`, `/forgot-password`, `/reset-password`
-- Wrap the `<Layout />` route in `<ProtectedRoute>` so all dashboard pages require auth
-- Root `/` redirects to `/dashboard` (ProtectedRoute will handle redirect to login if not authed)
+Before I write any code, please prepare these in **Clerk Dashboard** and **Supabase Dashboard**:
 
-#### 4. Update Header and Sidebar
-- **`Header.tsx`** -- Add logout button that calls `signOut` from auth context
-- **`Sidebar.tsx`** -- Add logout option at bottom
+### 1. Clerk Dashboard
+- Create the application (you already have it: **EDULINKER / Development**).
+- In **User & Authentication → Email, Phone, Username**, enable:
+  - Email address (with password)
+  - Phone number (SMS verification)
+- In **User & Authentication → Social Connections**, enable **Google**.
+- In **JWT Templates**, create a new template named exactly **`supabase`** (Clerk has a built-in preset for this — one click).
+- Copy two values and share them with me:
+  - **Publishable Key** (starts with `pk_test_...` or `pk_live_...`)
+  - **Frontend API URL / Issuer URL** (looks like `https://xxx-xx.clerk.accounts.dev` for dev, or your custom domain for prod)
 
-#### 5. Fix TypeScript Build Errors
-- **`src/store/appStore.ts`** -- Cast supabase client to `any` for table calls since the database has no tables defined in types yet. This is the only way to fix the `'never'` type errors without creating tables. Pattern: `(supabase as any).from('students')`.
-- **`src/hooks/useSchoolId.ts`** -- Same `any` cast fix.
-- **`src/pages/StudentManagementPage.tsx`** -- Same `any` cast fix.
+### 2. Supabase Dashboard
+- Go to **Authentication → Sign In / Up → Third Party Auth**.
+- Click **Add provider → Clerk**.
+- Paste the Clerk **Issuer URL** from above and save.
+  (This makes Supabase accept Clerk JWTs natively — no custom JWT secret swapping required.)
 
-#### 6. UI Styling
-All auth pages will match the existing dark theme with gold/primary accent (HSL 51,100%,50%). Clean card-based layout centered on screen.
+Once these are ready, I'll do everything else in code.
 
-### Technical Details
+---
 
-**Supabase client** -- already configured at `src/integrations/supabase/client.ts` pointing to `qoqncyvyjzbvlwjvdhtg`. No changes needed there.
+## What I'll Build (Code Changes)
 
-**Type casting approach** for empty database:
-```typescript
-// Before (fails):
-supabase.from('students').select('*')
-// After (works):
-(supabase as any).from('students').select('*')
-```
+### A. Install & Wire Up Clerk
+- Add `@clerk/clerk-react` dependency.
+- Add `VITE_CLERK_PUBLISHABLE_KEY` to environment.
+- Wrap `<App />` in `<ClerkProvider>` inside `src/main.tsx`.
 
-**Auth state listener pattern:**
-```typescript
-const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-  setSession(session);
-  setUser(session?.user ?? null);
-});
-// Set up BEFORE getSession() per Supabase best practices
-```
+### B. New Auth Pages (replace existing Supabase forms)
+- **`src/pages/LoginPage.tsx`** — replace the current email/password form with Clerk's `<SignIn />` component, themed in EDULinker's golden/dark glassmorphism (preserves logo, GoldenBackground, InstallBanner). Three sign-in tabs auto-render: **Email + Password**, **Phone**, **Google** — based on what you enabled in Clerk Dashboard.
+- **`src/pages/SignupPage.tsx`** — replace with Clerk's `<SignUp />` component, same theming.
+- **`src/pages/ForgotPasswordPage.tsx`** & **`ResetPasswordPage.tsx`** — handled natively by Clerk's flows (one less thing for us to maintain). Old custom pages will redirect to Clerk.
+- Keep `/gmail-confirmation` route intact (no change — that was a separate magic-link flow).
 
-**No SQL, no RLS changes, no edge functions** -- pure client-side Supabase Auth SDK calls only.
+### C. Bridge Clerk → Supabase (the core of this integration)
+- Update **`src/integrations/supabase/client.ts`** to fetch a fresh Clerk-issued JWT (with the `supabase` template) on every request via the `accessToken` async option. This is the official Supabase + Clerk pattern.
+- This means **every Supabase query (students, results, fees, homework, RLS-protected tables, edge functions, storage) automatically gets authenticated as the Clerk user** with zero changes elsewhere in the codebase.
 
-### Files Created
-- `src/context/AuthContext.tsx`
-- `src/components/ProtectedRoute.tsx`
-- `src/pages/LoginPage.tsx`
-- `src/pages/SignupPage.tsx`
-- `src/pages/ForgotPasswordPage.tsx`
-- `src/pages/ResetPasswordPage.tsx`
+### D. Replace `AuthContext` Internals (keep the same public API)
+- `useAuth()` will continue to expose `{ user, session, loading, schoolId, signOut }` exactly as before — so `ProtectedRoute`, `Sidebar`, `SettingsPage`, `useRealtimeSync`, and every page using `useAuth()` keep working unchanged.
+- Internally it will read from Clerk (`useUser`, `useAuth` from Clerk) instead of `supabase.auth.onAuthStateChange`, and `user.id` will be the Clerk user ID (which RLS treats as `auth.uid()`).
+- `ensureSchoolExists()` logic stays — first login still auto-creates "My School".
+- `signOut()` calls Clerk's `signOut()`.
 
-### Files Modified
-- `src/App.tsx` -- add auth routes + ProtectedRoute wrapper
-- `src/components/Header.tsx` -- add logout
-- `src/components/Sidebar.tsx` -- add logout
-- `src/store/appStore.ts` -- fix type errors with `any` cast
-- `src/hooks/useSchoolId.ts` -- fix type errors
-- `src/pages/StudentManagementPage.tsx` -- fix type errors
+### E. Database Migration (one-time, small)
+- Existing rows in `schools`, `students`, `user_roles` etc. are tied to old Supabase `auth.users` UUIDs. Since you're moving to fresh Clerk auth, **existing test users will need to sign up again** (their Clerk `user.id` will differ). This will trigger `ensureSchoolExists` and create their school cleanly.
+- **Important**: If you have real production data tied to specific users you must keep, tell me — we'd need a manual user-mapping migration. Otherwise we proceed clean.
+- No RLS policy changes are needed — `auth.uid()` continues to return the JWT subject (now Clerk's user ID).
+
+### F. Files Removed/Updated
+- `LoginPage.tsx`, `SignupPage.tsx`, `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx` → updated to use Clerk components.
+- `AuthContext.tsx` → internals rewired to Clerk, public API unchanged.
+- `supabase/client.ts` → adds `accessToken` callback.
+- `main.tsx` → adds `<ClerkProvider>`.
+- `.env` → add `VITE_CLERK_PUBLISHABLE_KEY`.
+
+### G. What Stays Untouched
+- All Supabase tables, RLS policies, triggers, edge functions, storage bucket.
+- `useRealtimeSync`, Zustand store, all dashboard / student / homework / fees / results / announcements pages.
+- PIN protection, PWA service worker, auto-update logic.
+- Custom domain `main.agentraai.space`.
+
+---
+
+## Visual / UX Notes
+
+- Clerk's `<SignIn />` and `<SignUp />` will be themed using `appearance` prop to match EDULinker's dark + golden palette (primary `hsl(51, 100%, 50%)`, glass card `bg-card/80 backdrop-blur-xl border-primary/20`, golden glow shadow on the submit button, EDULinker logo on top). User won't notice it's a third-party widget.
+
+---
+
+## Risks & Caveats
+
+1. **Existing users must re-sign-up** unless we run a user-mapping migration (let me know if you have important users).
+2. **Phone OTP costs**: Clerk charges for SMS after free tier — Email + Google have generous free limits, Phone is the costlier one.
+3. **Custom domain for Clerk in production** is optional but recommended later (so users see `accounts.agentraai.space` instead of `xxx.clerk.accounts.dev`). Not required now.
+
+---
+
+## Summary — Just Tell Me
+
+> "Clerk Dashboard ready, Supabase third-party Clerk provider added. Yeh raha **Publishable Key** = `pk_...` aur **Issuer URL** = `https://...clerk.accounts.dev`"
+
+…and I'll implement the entire integration in one go.
 
