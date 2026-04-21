@@ -15,7 +15,9 @@ const unregisterAllServiceWorkers = async () => {
   if (!("serviceWorker" in navigator)) return;
 
   const registrations = await navigator.serviceWorker.getRegistrations();
+  if (registrations.length === 0) return false;
   await Promise.all(registrations.map((registration) => registration.unregister()));
+  return true;
 };
 
 const mountApp = () => {
@@ -48,14 +50,21 @@ const clearRuntimeCaches = async () => {
 };
 
 const bootstrapApp = async () => {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      window.location.reload();
-    });
+  // Self-destruct any leftover service workers from previous deployments.
+  // We do NOT add a `controllerchange` reload listener — that creates
+  // infinite reload loops when the SW unregisters itself.
+  const hadServiceWorker = await unregisterAllServiceWorkers();
+  await clearRuntimeCaches();
+
+  // If we just killed an old service worker, do ONE forced reload so the
+  // user immediately gets the latest deployed assets (no more stale cache).
+  // Use a sessionStorage flag to avoid loops.
+  if (hadServiceWorker && !sessionStorage.getItem("__sw_purged__")) {
+    sessionStorage.setItem("__sw_purged__", "1");
+    window.location.reload();
+    return;
   }
 
-  await unregisterAllServiceWorkers();
-  await clearRuntimeCaches();
   mountApp();
 };
 
