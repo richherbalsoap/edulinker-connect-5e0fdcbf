@@ -11,15 +11,6 @@ if (!CLERK_PUBLISHABLE_KEY) {
 
 const rootElement = document.getElementById("root")!;
 
-const unregisterAllServiceWorkers = async () => {
-  if (!("serviceWorker" in navigator)) return;
-
-  const registrations = await navigator.serviceWorker.getRegistrations();
-  if (registrations.length === 0) return false;
-  await Promise.all(registrations.map((registration) => registration.unregister()));
-  return true;
-};
-
 const mountApp = () => {
   createRoot(rootElement).render(
     <ClerkProvider
@@ -42,33 +33,126 @@ const mountApp = () => {
   );
 };
 
-const clearRuntimeCaches = async () => {
-  if (!("caches" in window)) return;
+// Detect preview/iframe — vahan SW register na karein
+const isInIframe = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
 
-  const cacheKeys = await caches.keys();
-  await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+const isPreviewHost =
+  typeof window !== "undefined" &&
+  (window.location.hostname.includes("id-preview--") ||
+    window.location.hostname.includes("lovableproject.com") ||
+    window.location.hostname === "localhost");
+
+const showUpdateToast = (registration: ServiceWorkerRegistration) => {
+  // Agar pehle se popup hai to skip
+  if (document.getElementById("__app_update_toast__")) return;
+
+  const toast = document.createElement("div");
+  toast.id = "__app_update_toast__";
+  toast.setAttribute("role", "alert");
+  toast.style.cssText = [
+    "position:fixed",
+    "bottom:20px",
+    "left:50%",
+    "transform:translateX(-50%)",
+    "z-index:2147483647",
+    "background:hsl(0,0%,10%)",
+    "color:hsl(51,100%,50%)",
+    "border:1px solid hsl(51,100%,50%)",
+    "border-radius:12px",
+    "padding:12px 16px",
+    "font-family:inherit",
+    "font-size:14px",
+    "box-shadow:0 10px 30px rgba(0,0,0,0.4)",
+    "display:flex",
+    "gap:12px",
+    "align-items:center",
+    "max-width:92vw",
+  ].join(";");
+
+  const text = document.createElement("span");
+  text.textContent = "New update available";
+  text.style.color = "hsl(0,0%,95%)";
+
+  const btn = document.createElement("button");
+  btn.textContent = "Refresh";
+  btn.style.cssText = [
+    "background:hsl(51,100%,50%)",
+    "color:hsl(0,0%,7%)",
+    "border:none",
+    "border-radius:8px",
+    "padding:6px 12px",
+    "font-weight:600",
+    "cursor:pointer",
+  ].join(";");
+  btn.onclick = () => {
+    const waiting = registration.waiting;
+    if (waiting) {
+      waiting.postMessage({ type: "SKIP_WAITING" });
+    } else {
+      window.location.reload();
+    }
+  };
+
+  toast.appendChild(text);
+  toast.appendChild(btn);
+  document.body.appendChild(toast);
 };
 
-const bootstrapApp = async () => {
-  // Self-destruct any leftover service workers from previous deployments.
-  // We do NOT add a `controllerchange` reload listener — that creates
-  // infinite reload loops when the SW unregisters itself.
-  const hadServiceWorker = await unregisterAllServiceWorkers();
-  await clearRuntimeCaches();
+const setupServiceWorker = () => {
+  if (!("serviceWorker" in navigator)) return;
 
-  // If we just killed an old service worker, do ONE forced reload so the
-  // user immediately gets the latest deployed assets (no more stale cache).
-  // Use a sessionStorage flag to avoid loops.
-  if (hadServiceWorker && !sessionStorage.getItem("__sw_purged__")) {
-    sessionStorage.setItem("__sw_purged__", "1");
-    window.location.reload();
+  // Preview/iframe me purane SW unregister karo, register mat karo
+  if (isPreviewHost || isInIframe) {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister());
+    });
     return;
   }
 
-  mountApp();
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
+
+  navigator.serviceWorker
+    .register("/sw.js", { updateViaCache: "none" })
+    .then((registration) => {
+      // Agar already waiting SW hai to popup dikhao
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        showUpdateToast(registration);
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            // New version ready — popup
+            showUpdateToast(registration);
+          }
+        });
+      });
+
+      // Periodically check for updates (har 60s)
+      setInterval(() => {
+        registration.update().catch(() => {});
+      }, 60_000);
+    })
+    .catch((err) => {
+      console.error("SW registration failed:", err);
+    });
 };
 
-bootstrapApp().catch((error) => {
-  console.error("Bootstrap error:", error);
-  mountApp();
-});
+mountApp();
+setupServiceWorker();
