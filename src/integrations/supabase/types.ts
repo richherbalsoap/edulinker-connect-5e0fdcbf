@@ -390,6 +390,7 @@ export type Database = {
       }
       schools: {
         Row: {
+          clerk_user_id: string | null
           created_at: string
           id: string
           owner_user_id: string | null
@@ -401,6 +402,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          clerk_user_id?: string | null
           created_at?: string
           id?: string
           owner_user_id?: string | null
@@ -412,6 +414,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          clerk_user_id?: string | null
           created_at?: string
           id?: string
           owner_user_id?: string | null
@@ -731,6 +734,8 @@ export type Database = {
           unit: string
         }[]
       }
+      get_clerk_user_id: { Args: never; Returns: string }
+      get_school_id_for_clerk_user: { Args: never; Returns: string }
       get_user_school_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -752,6 +757,10 @@ export type Database = {
           section: string
           standard: string
         }[]
+      }
+      upsert_school_for_clerk_user: {
+        Args: { p_clerk_user_id: string; p_school_name?: string }
+        Returns: string
       }
     }
     Enums: {
