@@ -159,11 +159,11 @@
 
 /* Mobile-specific improvements */
 @media (max-width: 767px) {
-  .golden-falling-line, .falling-line {
+  .falling-line {
     opacity: 0 !important;
     animation: none !important;
   }
-  .golden-horizon-ring, .horizon-ring {
+  .horizon-ring {
     display: none;
   }
 }
