@@ -112,6 +112,30 @@ const LoginPage = () => {
         .cl-formFieldLabel { color: hsl(0 0% 98%) !important; font-weight: 600 !important; }
         .cl-headerTitle  { color: hsl(51 100% 50%) !important; }
         .cl-headerSubtitle { color: hsl(0 0% 64%) !important; }
+
+        /* Prevent text/field overlap & smooth view transitions */
+        .cl-formField { margin-bottom: 14px !important; }
+        .cl-formFieldRow { gap: 10px !important; }
+        .cl-formFieldInput,
+        .cl-input {
+          height: 44px !important;
+          padding: 10px 12px !important;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
+        }
+        .cl-formFieldLabelRow { margin-bottom: 6px !important; }
+        .cl-header { margin-bottom: 16px !important; }
+        .cl-footer { margin-top: 12px !important; }
+        .cl-form { gap: 0 !important; }
+
+        /* Disable Clerk's slow internal slide/scale transitions on view changes */
+        .cl-rootBox *,
+        .cl-rootBox *::before,
+        .cl-rootBox *::after {
+          transition-duration: 0.15s !important;
+          animation-duration: 0.2s !important;
+        }
+        .cl-cardBox, .cl-card { transition: none !important; animation: none !important; }
       `}</style>
 
       {/* GoldenBackground — strictly behind, clipped to viewport */}
@@ -151,11 +175,7 @@ const LoginPage = () => {
           className="w-full rounded-2xl border border-primary/20 bg-card/70 backdrop-blur-xl shadow-[0_0_40px_hsl(51,100%,50%,0.13)]"
           style={{ padding: "24px" }}
         >
-          {!clerkReady ? (
-            <LoginSkeleton />
-          ) : (
-            <div className="clerk-wrap">
-              <SignIn
+          <SignIn
                 routing="path"
                 path="/login"
                 signUpUrl="/signup"
@@ -188,8 +208,6 @@ const LoginPage = () => {
                   },
                 }}
               />
-            </div>
-          )}
         </div>
       </div>
     </div>
