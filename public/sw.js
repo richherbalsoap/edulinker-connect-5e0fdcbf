@@ -1,8 +1,11 @@
 // Smart versioning — har deploy pe naya cache name
+self.skipWaiting();
+
 const CACHE_NAME = "app-v" + Date.now();
 
 self.addEventListener("install", (event) => {
   // Naya SW turant waiting state se nikle
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))));
   self.skipWaiting();
 });
 
@@ -30,20 +33,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  event.respondWith(
-    (async () => {
-      try {
-        const networkResponse = await fetch(request, { cache: "no-store" });
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(request, networkResponse.clone()).catch(() => {});
-        return networkResponse;
-      } catch (err) {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-        throw err;
-      }
-    })(),
-  );
+  event.respondWith(fetch(request, { cache: "no-store" }));
 });
 
 // Page se SKIP_WAITING message aaye to turant activate
