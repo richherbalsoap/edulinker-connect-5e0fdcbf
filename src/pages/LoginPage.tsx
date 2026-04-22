@@ -1,55 +1,18 @@
 import { SignIn } from "@clerk/clerk-react";
-import { useState, useEffect } from "react";
 import GoldenBackground from "@/components/GoldenBackground";
 import InstallBanner from "@/components/InstallBanner";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
 
-/* ─── Skeleton ─── */
-const LoginSkeleton = () => (
-  <div className="w-full space-y-5" style={{ animation: "skeletonFade 1.5s ease-in-out infinite alternate" }}>
-    <div className="space-y-2 text-center">
-      <div className="h-5 w-40 mx-auto rounded-full bg-primary/20" />
-      <div className="h-3 w-56 mx-auto rounded-full bg-white/8" />
-    </div>
-    <div className="h-11 rounded-lg bg-white/6 border border-white/10" />
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-px bg-white/10" />
-      <div className="h-3 w-4 rounded bg-white/10" />
-      <div className="flex-1 h-px bg-white/10" />
-    </div>
-    <div className="space-y-2">
-      <div className="h-3 w-24 rounded-full bg-white/10" />
-      <div className="h-11 rounded-lg bg-white/6 border border-white/10" />
-    </div>
-    <div className="h-11 rounded-lg bg-primary/40" />
-  </div>
-);
-
 const LoginPage = () => {
-  const [clerkReady, setClerkReady] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setClerkReady(true), 300);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden"
       style={{ padding: "env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px)" }}
     >
       <style>{`
-        @keyframes skeletonFade {
-          from { opacity: 0.4; }
-          to   { opacity: 1; }
-        }
         @keyframes pageFadeIn {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes clerkReveal {
-          from { opacity: 0; transform: scale(0.97); }
-          to   { opacity: 1; transform: scale(1); }
         }
         @keyframes logoPulse {
           0%, 100% { box-shadow: 0 0 0 0 hsl(51 100% 50% / 0), 0 0 20px hsl(51 100% 50% / 0.2); }
@@ -65,39 +28,44 @@ const LoginPage = () => {
         }
 
         .page-container { animation: pageFadeIn 0.5s ease both; }
-        .clerk-wrap     { animation: clerkReveal 0.4s ease both; }
 
         /* Logo wrapper */
         .logo-wrapper {
           position: relative;
-          width: 88px;
-          height: 88px;
+          width: 96px;
+          height: 96px;
           flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .logo-img {
-          width: 88px;
-          height: 88px;
-          border-radius: 20px;
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
           object-fit: contain;
+          background: hsl(0 0% 6%);
+          padding: 8px;
+          border: 2px solid hsl(51 100% 50% / 0.55);
           animation: logoPulse 3s ease-in-out infinite;
           position: relative;
-          z-index: 1;
+          z-index: 2;
           display: block;
         }
-        /* Rings match the logo's rounded-xl shape — NOT circular */
+        /* Circular rings around logo */
         .logo-ring-inner {
           position: absolute;
-          inset: -7px;
-          border-radius: 26px;
+          inset: 0;
+          border-radius: 50%;
           border: 1.5px dashed hsl(51 100% 50% / 0.45);
           animation: ringRotate 9s linear infinite;
           pointer-events: none;
-          z-index: 0;
+          z-index: 1;
         }
         .logo-ring-outer {
           position: absolute;
-          inset: -14px;
-          border-radius: 32px;
+          inset: -8px;
+          border-radius: 50%;
           border: 1px solid hsl(51 100% 50% / 0.15);
           animation: ringRotateReverse 16s linear infinite;
           pointer-events: none;
@@ -144,6 +112,30 @@ const LoginPage = () => {
         .cl-formFieldLabel { color: hsl(0 0% 98%) !important; font-weight: 600 !important; }
         .cl-headerTitle  { color: hsl(51 100% 50%) !important; }
         .cl-headerSubtitle { color: hsl(0 0% 64%) !important; }
+
+        /* Prevent text/field overlap & smooth view transitions */
+        .cl-formField { margin-bottom: 14px !important; }
+        .cl-formFieldRow { gap: 10px !important; }
+        .cl-formFieldInput,
+        .cl-input {
+          height: 44px !important;
+          padding: 10px 12px !important;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
+        }
+        .cl-formFieldLabelRow { margin-bottom: 6px !important; }
+        .cl-header { margin-bottom: 16px !important; }
+        .cl-footer { margin-top: 12px !important; }
+        .cl-form { gap: 0 !important; }
+
+        /* Disable Clerk's slow internal slide/scale transitions on view changes */
+        .cl-rootBox *,
+        .cl-rootBox *::before,
+        .cl-rootBox *::after {
+          transition-duration: 0.15s !important;
+          animation-duration: 0.2s !important;
+        }
+        .cl-cardBox, .cl-card { transition: none !important; animation: none !important; }
       `}</style>
 
       {/* GoldenBackground — strictly behind, clipped to viewport */}
@@ -183,11 +175,7 @@ const LoginPage = () => {
           className="w-full rounded-2xl border border-primary/20 bg-card/70 backdrop-blur-xl shadow-[0_0_40px_hsl(51,100%,50%,0.13)]"
           style={{ padding: "24px" }}
         >
-          {!clerkReady ? (
-            <LoginSkeleton />
-          ) : (
-            <div className="clerk-wrap">
-              <SignIn
+          <SignIn
                 routing="path"
                 path="/login"
                 signUpUrl="/signup"
@@ -220,8 +208,6 @@ const LoginPage = () => {
                   },
                 }}
               />
-            </div>
-          )}
         </div>
       </div>
     </div>
