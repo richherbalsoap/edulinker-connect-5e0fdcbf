@@ -4,6 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => {
+  const buildId = Date.now().toString();
+
   return {
   server: {
     host: "::",
@@ -20,6 +22,9 @@ export default defineConfig(({ mode }) => {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(buildId),
   },
 };
 });
