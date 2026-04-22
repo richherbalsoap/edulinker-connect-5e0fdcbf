@@ -7,24 +7,24 @@ export default defineConfig(({ mode }) => {
   const buildId = Date.now().toString();
 
   return {
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: false,
+    server: {
+      host: "::",
+      port: 8080,
+      hmr: {
+        overlay: false,
+      },
     },
-  },
-  plugins: [
-    react(),
-    mode === "development" && componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
-  },
-  define: {
-    __APP_BUILD_ID__: JSON.stringify(buildId),
-  },
-};
+    define: {
+      // React app ke liye
+      __APP_BUILD_ID__: JSON.stringify(buildId),
+      // Service Worker ke liye (sw.js mein use hoga)
+      "self.__APP_BUILD_ID__": JSON.stringify(buildId),
+    },
+  };
 });
