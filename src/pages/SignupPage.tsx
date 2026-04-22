@@ -4,14 +4,37 @@ import edulinkerLogo from "@/assets/edulinker-logo.png";
 
 const SignupPage = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden p-4">
-      <GoldenBackground />
+    <div
+      className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden"
+      style={{ padding: "env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px)" }}
+    >
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <GoldenBackground />
+      </div>
       <style>{`
+        @keyframes ringRotate { from {transform: rotate(0)} to {transform: rotate(360deg)} }
+        @keyframes ringRotateReverse { from {transform: rotate(0)} to {transform: rotate(-360deg)} }
+        @keyframes logoPulse {
+          0%,100% { box-shadow: 0 0 20px hsl(51 100% 50% / 0.2); }
+          50%     { box-shadow: 0 0 36px hsl(51 100% 50% / 0.4); }
+        }
+        .signup-logo-wrapper { position: relative; width: 96px; height: 96px; display:flex; align-items:center; justify-content:center; }
+        .signup-logo-img {
+          width: 80px; height: 80px; border-radius: 50%; object-fit: contain;
+          background: hsl(0 0% 6%); padding: 8px;
+          border: 2px solid hsl(51 100% 50% / 0.55);
+          animation: logoPulse 3s ease-in-out infinite; position: relative; z-index: 2;
+        }
+        .signup-ring-inner { position:absolute; inset:0; border-radius:50%; border:1.5px dashed hsl(51 100% 50% / 0.45); animation: ringRotate 9s linear infinite; }
+        .signup-ring-outer { position:absolute; inset:-8px; border-radius:50%; border:1px solid hsl(51 100% 50% / 0.15); animation: ringRotateReverse 16s linear infinite; }
+
         .cl-internal-1dauvpw, .cl-badge,
         [data-localization-key="badge__developmentMode"] { display: none !important; }
+        .cl-card { background: transparent !important; box-shadow:none !important; border:none !important; padding:0 !important; }
         .cl-socialButtonsBlockButton {
           color: hsl(0 0% 98%) !important;
-          background: hsl(0 0% 8%) !important;
+          background: hsl(0 0% 9%) !important;
+          border: 1px solid hsl(51 100% 50% / 0.25) !important;
         }
         .cl-socialButtonsBlockButtonText { color: hsl(0 0% 98%) !important; font-weight: 600 !important; }
         .cl-formFieldAction {
@@ -24,10 +47,31 @@ const SignupPage = () => {
           font-size: 0.75rem !important;
         }
         .cl-dividerText { color: hsl(0 0% 64%) !important; }
+        .cl-formField { margin-bottom: 14px !important; }
+        .cl-formFieldRow { gap: 10px !important; }
+        .cl-formFieldInput, .cl-input {
+          height: 44px !important; padding: 10px 12px !important; font-size: 14px !important;
+        }
+        .cl-formFieldLabelRow { margin-bottom: 6px !important; }
+        .cl-rootBox *, .cl-rootBox *::before, .cl-rootBox *::after {
+          transition-duration: 0.15s !important; animation-duration: 0.2s !important;
+        }
+        .cl-cardBox, .cl-card { transition: none !important; animation: none !important; }
       `}</style>
-      <div className="relative z-10 flex flex-col items-center space-y-4">
-        <img src={edulinkerLogo} alt="EDULinker Logo" className="w-20 h-20 rounded-xl object-contain" />
-        <h1 className="text-2xl font-bold text-primary">EDULinker</h1>
+      <div className="relative z-10 flex flex-col items-center w-full" style={{ maxWidth: "400px", gap: "20px" }}>
+        <div className="signup-logo-wrapper">
+          <div className="signup-ring-outer" />
+          <div className="signup-ring-inner" />
+          <img src={edulinkerLogo} alt="EDULinker Logo" className="signup-logo-img" />
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-primary tracking-tight">EDULinker</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">School Management Platform</p>
+        </div>
+        <div
+          className="w-full rounded-2xl border border-primary/20 bg-card/70 backdrop-blur-xl shadow-[0_0_40px_hsl(51,100%,50%,0.13)]"
+          style={{ padding: "24px" }}
+        >
         <SignUp
           routing="path"
           path="/signup"
@@ -37,7 +81,7 @@ const SignupPage = () => {
             layout: { logoPlacement: "none" },
             elements: {
               rootBox: "w-full",
-              card: "bg-card/80 backdrop-blur-xl border border-primary/20 shadow-[0_0_40px_hsl(51,100%,50%,0.15)]",
+              card: "bg-transparent shadow-none border-none p-0 m-0",
               headerTitle: "text-primary",
               headerSubtitle: "text-muted-foreground",
               socialButtonsBlockButton:
@@ -60,6 +104,7 @@ const SignupPage = () => {
             },
           }}
         />
+        </div>
       </div>
     </div>
   );
