@@ -4,6 +4,8 @@ import "./index.css";
 import { ClerkProvider } from "@clerk/clerk-react";
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const APP_BUILD_ID = __APP_BUILD_ID__;
+const BUILD_STORAGE_KEY = "edulinker_build_id";
 
 if (!CLERK_PUBLISHABLE_KEY) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
@@ -104,6 +106,36 @@ const showUpdateToast = (registration: ServiceWorkerRegistration) => {
   document.body.appendChild(toast);
 };
 
+const clearAllCaches = async () => {
+  if (typeof window === "undefined" || !("caches" in window)) return;
+
+  const cacheKeys = await caches.keys();
+  await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+};
+
+const bustOncePerBuild = () => {
+  const lastBuild = localStorage.getItem(BUILD_STORAGE_KEY);
+  const url = new URL(window.location.href);
+  const hasBuildParam = url.searchParams.get("build") === APP_BUILD_ID;
+
+  if (lastBuild !== APP_BUILD_ID) {
+    localStorage.setItem(BUILD_STORAGE_KEY, APP_BUILD_ID);
+
+    if (!hasBuildParam && !document.hidden) {
+      url.searchParams.set("build", APP_BUILD_ID);
+      window.location.replace(url.toString());
+      return true;
+    }
+  }
+
+  if (hasBuildParam) {
+    url.searchParams.delete("build");
+    window.history.replaceState({}, "", url.toString());
+  }
+
+  return false;
+};
+
 const setupServiceWorker = () => {
   if (!("serviceWorker" in navigator)) return;
 
@@ -112,8 +144,11 @@ const setupServiceWorker = () => {
     navigator.serviceWorker.getRegistrations().then((regs) => {
       regs.forEach((r) => r.unregister());
     });
+    clearAllCaches().catch(() => {});
     return;
   }
+
+  if (bustOncePerBuild()) return;
 
   let reloading = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -122,8 +157,15 @@ const setupServiceWorker = () => {
     window.location.reload();
   });
 
-  navigator.serviceWorker
-    .register("/sw.js", { updateViaCache: "none" })
+  clearAllCaches()
+    .catch(() => {})
+    .then(() => navigator.serviceWorker.getRegistrations())
+    .then((regs) => Promise.all(regs.map((r) => r.update().catch(() => undefined))))
+    .then(() =>
+      navigator.serviceWorker.register(`/sw.js?build=${APP_BUILD_ID}`, {
+        updateViaCache: "none",
+      }),
+    )
     .then((registration) => {
       // Agar already waiting SW hai to popup dikhao
       if (registration.waiting && navigator.serviceWorker.controller) {
@@ -144,10 +186,18 @@ const setupServiceWorker = () => {
         });
       });
 
-      // Periodically check for updates (har 60s)
-      setInterval(() => {
+      const forceUpdateCheck = () => {
         registration.update().catch(() => {});
-      }, 60_000);
+      };
+
+      window.addEventListener("focus", forceUpdateCheck);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          forceUpdateCheck();
+        }
+      });
+
+      setInterval(forceUpdateCheck, 20_000);
     })
     .catch((err) => {
       console.error("SW registration failed:", err);

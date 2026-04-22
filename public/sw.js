@@ -19,7 +19,6 @@ self.addEventListener("activate", (event) => {
           .filter((key) => key !== CACHE_NAME)
           .map((key) => caches.delete(key)),
       );
-      await self.registration.unregister().catch(() => false);
       // Sabhi open tabs ko turant control karo
       await self.clients.claim();
     })(),
@@ -34,7 +33,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  event.respondWith(fetch(request, { cache: "reload" }));
+  event.respondWith(fetch(request, { cache: "no-store" }));
 });
 
 // Page se SKIP_WAITING message aaye to turant activate
