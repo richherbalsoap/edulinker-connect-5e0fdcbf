@@ -114,19 +114,27 @@ const LoginPage = () => {
         .cl-headerSubtitle { color: hsl(0 0% 64%) !important; }
 
         /* Prevent text/field overlap & smooth view transitions */
-        .cl-formField { margin-bottom: 14px !important; }
+        .cl-rootBox, .cl-cardBox, .cl-card { width: 100% !important; max-width: 100% !important; }
+        .cl-main { gap: 18px !important; }
+        .cl-form { gap: 16px !important; }
+        .cl-formField { margin-bottom: 0 !important; width: 100% !important; }
         .cl-formFieldRow { gap: 10px !important; }
-        .cl-formFieldInput,
-        .cl-input {
-          height: 44px !important;
-          padding: 10px 12px !important;
-          font-size: 14px !important;
+        .cl-formFieldInput, .cl-input {
+          height: 48px !important;
+          padding: 12px 14px !important;
+          font-size: 15px !important;
           line-height: 1.4 !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
         }
-        .cl-formFieldLabelRow { margin-bottom: 6px !important; }
-        .cl-header { margin-bottom: 16px !important; }
-        .cl-footer { margin-top: 12px !important; }
-        .cl-form { gap: 0 !important; }
+        .cl-formFieldLabelRow { margin-bottom: 8px !important; }
+        .cl-header { margin-bottom: 20px !important; padding: 0 !important; }
+        .cl-headerTitle { font-size: 1.25rem !important; line-height: 1.3 !important; }
+        .cl-headerSubtitle { font-size: 0.875rem !important; line-height: 1.4 !important; margin-top: 6px !important; }
+        .cl-footer { margin-top: 16px !important; padding: 0 !important; }
+        .cl-socialButtonsBlockButton { height: 48px !important; padding: 12px !important; }
+        .cl-divider { margin: 8px 0 !important; }
+        .cl-formButtonPrimary { height: 48px !important; margin-top: 4px !important; }
 
         /* Disable Clerk's slow internal slide/scale transitions on view changes */
         .cl-rootBox *,
@@ -173,7 +181,7 @@ const LoginPage = () => {
         {/* Clerk card */}
         <div
           className="w-full rounded-2xl border border-primary/20 bg-card/70 backdrop-blur-xl shadow-[0_0_40px_hsl(51,100%,50%,0.13)]"
-          style={{ padding: "24px" }}
+          style={{ padding: "28px 22px" }}
         >
           <SignIn
                 routing="path"
