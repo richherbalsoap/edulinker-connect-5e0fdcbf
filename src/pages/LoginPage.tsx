@@ -10,17 +10,9 @@ const LoginPage = () => {
       style={{ padding: "env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px)" }}
     >
       <style>{`
-        @keyframes skeletonFade {
-          from { opacity: 0.4; }
-          to   { opacity: 1; }
-        }
         @keyframes pageFadeIn {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes clerkReveal {
-          from { opacity: 0; transform: scale(0.97); }
-          to   { opacity: 1; transform: scale(1); }
         }
         @keyframes logoPulse {
           0%, 100% { box-shadow: 0 0 0 0 hsl(51 100% 50% / 0), 0 0 20px hsl(51 100% 50% / 0.2); }
@@ -36,39 +28,44 @@ const LoginPage = () => {
         }
 
         .page-container { animation: pageFadeIn 0.5s ease both; }
-        .clerk-wrap     { animation: clerkReveal 0.4s ease both; }
 
         /* Logo wrapper */
         .logo-wrapper {
           position: relative;
-          width: 88px;
-          height: 88px;
+          width: 96px;
+          height: 96px;
           flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .logo-img {
-          width: 88px;
-          height: 88px;
-          border-radius: 20px;
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
           object-fit: contain;
+          background: hsl(0 0% 6%);
+          padding: 8px;
+          border: 2px solid hsl(51 100% 50% / 0.55);
           animation: logoPulse 3s ease-in-out infinite;
           position: relative;
-          z-index: 1;
+          z-index: 2;
           display: block;
         }
-        /* Rings match the logo's rounded-xl shape — NOT circular */
+        /* Circular rings around logo */
         .logo-ring-inner {
           position: absolute;
-          inset: -7px;
-          border-radius: 26px;
+          inset: 0;
+          border-radius: 50%;
           border: 1.5px dashed hsl(51 100% 50% / 0.45);
           animation: ringRotate 9s linear infinite;
           pointer-events: none;
-          z-index: 0;
+          z-index: 1;
         }
         .logo-ring-outer {
           position: absolute;
-          inset: -14px;
-          border-radius: 32px;
+          inset: -8px;
+          border-radius: 50%;
           border: 1px solid hsl(51 100% 50% / 0.15);
           animation: ringRotateReverse 16s linear infinite;
           pointer-events: none;
