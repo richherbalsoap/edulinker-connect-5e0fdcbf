@@ -10,10 +10,6 @@ const LoginPage = () => {
       style={{ padding: "env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px)" }}
     >
       <style>{`
-        @keyframes pageFadeIn {
-          from { opacity: 0; transform: translateY(14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
         @keyframes logoPulse {
           0%, 100% { box-shadow: 0 0 0 0 hsl(51 100% 50% / 0), 0 0 20px hsl(51 100% 50% / 0.2); }
           50%       { box-shadow: 0 0 0 4px hsl(51 100% 50% / 0.07), 0 0 36px hsl(51 100% 50% / 0.4); }
@@ -26,8 +22,6 @@ const LoginPage = () => {
           from { transform: rotate(0deg); }
           to   { transform: rotate(-360deg); }
         }
-
-        .page-container { animation: pageFadeIn 0.5s ease both; }
 
         /* Logo wrapper */
         .logo-wrapper {
