@@ -10,6 +10,15 @@ const LoginPage = () => {
       style={{ padding: "env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px)" }}
     >
       <style>{`
+        /* Kill any white flash from Clerk during mount/route transition */
+        html, body, #root { background: hsl(0 0% 6%) !important; }
+        .cl-rootBox, .cl-cardBox, .cl-card, .cl-main, .cl-form,
+        .cl-pageScrollBox, .cl-modalBackdrop, .cl-modalContent,
+        .cl-component, .cl-internal-1hp5nqm, .cl-internal-b3fm6y {
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+
         @keyframes logoPulse {
           0%, 100% { box-shadow: 0 0 0 0 hsl(51 100% 50% / 0), 0 0 20px hsl(51 100% 50% / 0.2); }
           50%       { box-shadow: 0 0 0 4px hsl(51 100% 50% / 0.07), 0 0 36px hsl(51 100% 50% / 0.4); }

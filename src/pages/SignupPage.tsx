@@ -12,6 +12,15 @@ const SignupPage = () => {
         <GoldenBackground />
       </div>
       <style>{`
+        /* Kill any white flash from Clerk during mount/route transition */
+        html, body, #root { background: hsl(0 0% 6%) !important; }
+        .cl-rootBox, .cl-cardBox, .cl-card, .cl-main, .cl-form,
+        .cl-pageScrollBox, .cl-modalBackdrop, .cl-modalContent,
+        .cl-component, .cl-internal-1hp5nqm, .cl-internal-b3fm6y {
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+
         @keyframes ringRotate { from {transform: rotate(0)} to {transform: rotate(360deg)} }
         @keyframes ringRotateReverse { from {transform: rotate(0)} to {transform: rotate(-360deg)} }
         @keyframes logoPulse {
