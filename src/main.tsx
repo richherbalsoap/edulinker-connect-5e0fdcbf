@@ -31,7 +31,7 @@ const mountApp = () => {
       }}
     >
       <App />
-    </ClerkProvider>
+    </ClerkProvider>,
   );
 };
 
@@ -50,87 +50,36 @@ const isPreviewHost =
     window.location.hostname.includes("lovableproject.com") ||
     window.location.hostname === "localhost");
 
-const showUpdateToast = (registration: ServiceWorkerRegistration) => {
-  // Agar pehle se popup hai to skip
-  if (document.getElementById("__app_update_toast__")) return;
-
-  const toast = document.createElement("div");
-  toast.id = "__app_update_toast__";
-  toast.setAttribute("role", "alert");
-  toast.style.cssText = [
-    "position:fixed",
-    "bottom:20px",
-    "left:50%",
-    "transform:translateX(-50%)",
-    "z-index:2147483647",
-    "background:hsl(0,0%,10%)",
-    "color:hsl(51,100%,50%)",
-    "border:1px solid hsl(51,100%,50%)",
-    "border-radius:12px",
-    "padding:12px 16px",
-    "font-family:inherit",
-    "font-size:14px",
-    "box-shadow:0 10px 30px rgba(0,0,0,0.4)",
-    "display:flex",
-    "gap:12px",
-    "align-items:center",
-    "max-width:92vw",
-  ].join(";");
-
-  const text = document.createElement("span");
-  text.textContent = "New update available";
-  text.style.color = "hsl(0,0%,95%)";
-
-  const btn = document.createElement("button");
-  btn.textContent = "Refresh";
-  btn.style.cssText = [
-    "background:hsl(51,100%,50%)",
-    "color:hsl(0,0%,7%)",
-    "border:none",
-    "border-radius:8px",
-    "padding:6px 12px",
-    "font-weight:600",
-    "cursor:pointer",
-  ].join(";");
-  btn.onclick = () => {
-    const waiting = registration.waiting;
-    if (waiting) {
-      waiting.postMessage({ type: "SKIP_WAITING" });
-    } else {
-      window.location.reload();
-    }
-  };
-
-  toast.appendChild(text);
-  toast.appendChild(btn);
-  document.body.appendChild(toast);
-};
-
 const clearAllCaches = async () => {
   if (typeof window === "undefined" || !("caches" in window)) return;
-
   const cacheKeys = await caches.keys();
   await Promise.all(cacheKeys.map((key) => caches.delete(key)));
 };
 
-const bustOncePerBuild = () => {
-  const lastBuild = localStorage.getItem(BUILD_STORAGE_KEY);
-  const url = new URL(window.location.href);
-  const hasBuildParam = url.searchParams.get("build") === APP_BUILD_ID;
+// Build ID change hone pe ek baar redirect karo — loop safe hai
+const bustOncePerBuild = (): boolean => {
+  try {
+    const lastBuild = localStorage.getItem(BUILD_STORAGE_KEY);
+    const url = new URL(window.location.href);
+    const hasBuildParam = url.searchParams.get("build") === APP_BUILD_ID;
 
-  if (lastBuild !== APP_BUILD_ID) {
-    localStorage.setItem(BUILD_STORAGE_KEY, APP_BUILD_ID);
+    if (lastBuild !== APP_BUILD_ID) {
+      localStorage.setItem(BUILD_STORAGE_KEY, APP_BUILD_ID);
 
-    if (!hasBuildParam && !document.hidden) {
-      url.searchParams.set("build", APP_BUILD_ID);
-      window.location.replace(url.toString());
-      return true;
+      if (!hasBuildParam && !document.hidden) {
+        url.searchParams.set("build", APP_BUILD_ID);
+        window.location.replace(url.toString());
+        return true; // Redirect ho raha hai, app mount mat karo abhi
+      }
     }
-  }
 
-  if (hasBuildParam) {
-    url.searchParams.delete("build");
-    window.history.replaceState({}, "", url.toString());
+    // ?build param URL se clean karo
+    if (hasBuildParam) {
+      url.searchParams.delete("build");
+      window.history.replaceState({}, "", url.toString());
+    }
+  } catch {
+    // localStorage block ho toh ignore
   }
 
   return false;
@@ -148,44 +97,48 @@ const setupServiceWorker = () => {
     return;
   }
 
+  // Build change detect hone pe hard refresh
   if (bustOncePerBuild()) return;
 
   let reloading = false;
+
+  // Jab bhi new SW activate ho aur control le — turant auto reload
+  // User se poochne ki zarurat nahi, silently update ho jao
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (reloading) return;
     reloading = true;
     window.location.reload();
   });
 
+  // Pehle caches clear karo, phir SW register karo
   clearAllCaches()
     .catch(() => {})
     .then(() => navigator.serviceWorker.getRegistrations())
     .then((regs) => Promise.all(regs.map((r) => r.update().catch(() => undefined))))
     .then(() =>
       navigator.serviceWorker.register(`/sw.js?build=${APP_BUILD_ID}`, {
-        updateViaCache: "none",
+        updateViaCache: "none", // SW file kabhi cache mat karo
       }),
     )
     .then((registration) => {
-      // Agar already waiting SW hai to popup dikhao
-      if (registration.waiting && navigator.serviceWorker.controller) {
-        showUpdateToast(registration);
+      // Agar pehle se waiting SW hai — turant skip karo (auto reload trigger hoga)
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
       }
 
       registration.addEventListener("updatefound", () => {
         const newWorker = registration.installing;
         if (!newWorker) return;
+
         newWorker.addEventListener("statechange", () => {
-          if (
-            newWorker.state === "installed" &&
-            navigator.serviceWorker.controller
-          ) {
-            // New version ready — popup
-            showUpdateToast(registration);
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            // New version installed — turant activate karo, no popup
+            newWorker.postMessage({ type: "SKIP_WAITING" });
           }
         });
       });
 
+      // Har baar app focus aaye ya visible ho — update check karo
       const forceUpdateCheck = () => {
         registration.update().catch(() => {});
       };
@@ -197,6 +150,7 @@ const setupServiceWorker = () => {
         }
       });
 
+      // Har 20 second mein bhi check karo
       setInterval(forceUpdateCheck, 20_000);
     })
     .catch((err) => {
