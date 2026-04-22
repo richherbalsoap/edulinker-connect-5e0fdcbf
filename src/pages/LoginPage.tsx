@@ -1,38 +1,9 @@
 import { SignIn } from "@clerk/clerk-react";
-import { useState, useEffect } from "react";
 import GoldenBackground from "@/components/GoldenBackground";
 import InstallBanner from "@/components/InstallBanner";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
 
-/* ─── Skeleton ─── */
-const LoginSkeleton = () => (
-  <div className="w-full space-y-5" style={{ animation: "skeletonFade 1.5s ease-in-out infinite alternate" }}>
-    <div className="space-y-2 text-center">
-      <div className="h-5 w-40 mx-auto rounded-full bg-primary/20" />
-      <div className="h-3 w-56 mx-auto rounded-full bg-white/8" />
-    </div>
-    <div className="h-11 rounded-lg bg-white/6 border border-white/10" />
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-px bg-white/10" />
-      <div className="h-3 w-4 rounded bg-white/10" />
-      <div className="flex-1 h-px bg-white/10" />
-    </div>
-    <div className="space-y-2">
-      <div className="h-3 w-24 rounded-full bg-white/10" />
-      <div className="h-11 rounded-lg bg-white/6 border border-white/10" />
-    </div>
-    <div className="h-11 rounded-lg bg-primary/40" />
-  </div>
-);
-
 const LoginPage = () => {
-  const [clerkReady, setClerkReady] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setClerkReady(true), 300);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden"
