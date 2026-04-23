@@ -81,9 +81,19 @@ const PinModal = () => {
 
   const handleSetup = async (enteredPin: string) => {
     setLoading(true);
-    await handleModalSubmit(enteredPin);
+    const ok = await handleModalSubmit(enteredPin);
     setLoading(false);
-    toast.success('PIN set successfully!');
+    if (ok) {
+      toast.success('PIN set successfully!');
+    } else {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      setPin('');
+      setStep('enter');
+      setFirstPin('');
+      processingRef.current = false;
+      toast.error('Failed to set PIN. Please try again.');
+    }
   };
 
   const handleNumpad = (num: string) => {
