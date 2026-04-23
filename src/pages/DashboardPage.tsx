@@ -28,46 +28,6 @@ const DashboardPage = () => {
   const academicYears = useMemo(() => getYears(), []);
   const defaultYear = `${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const handleRefresh = async () => {
-    if (refreshing) return;
-    setRefreshing(true);
-    try {
-      // 1) Fetch latest data from backend
-      if (schoolId) await fetchAll(schoolId);
-      toast.success("Fetching latest version...");
-
-      // 2) Service worker: update + tell any waiting SW to skipWaiting + clear caches
-      try {
-        if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          for (const reg of regs) {
-            // Trigger update check
-            await reg.update().catch(() => undefined);
-            // If a new SW is waiting, tell it to activate immediately
-            if (reg.waiting) {
-              reg.waiting.postMessage({ type: "SKIP_WAITING" });
-            }
-          }
-        }
-        if ("caches" in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map((k) => caches.delete(k)));
-        }
-      } catch (e) {
-        console.warn("Cache clear during refresh failed:", e);
-      }
-
-      // 3) Hard reload after SW activates (gives SW time to skipWaiting & claim clients)
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
-    } catch {
-      toast.error("Refresh failed");
-      setRefreshing(false);
-    }
-  };
 
   useEffect(() => {
     if (schoolId) fetchAll(schoolId);
