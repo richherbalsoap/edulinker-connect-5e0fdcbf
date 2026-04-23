@@ -80,7 +80,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .maybeSingle();
 
       if (error || !data?.id || !data.pin_set || data.pin_hash !== hash) {
-        console.error('PIN setup failed:', error);
+        console.error('PIN setup failed:', error ?? new Error('PIN row update was not persisted'));
         return false;
       }
 
@@ -95,6 +95,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .select('pin_hash')
         .eq('id', schoolId)
         .maybeSingle();
+
       if (!data?.pin_hash) return false;
       const hash = await hashPin(pin);
       const correct = hash === data.pin_hash;
