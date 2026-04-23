@@ -68,6 +68,34 @@ const SignupPage = () => {
           line-height: 1.4 !important;
           width: 100% !important;
           box-sizing: border-box !important;
+          color: hsl(0 0% 98%) !important;
+          background: hsl(0 0% 12%) !important;
+          border: 1px solid hsl(51 100% 50% / 0.35) !important;
+        }
+        .cl-formFieldInput::placeholder,
+        .cl-input::placeholder {
+          color: hsl(0 0% 75%) !important;
+          opacity: 1 !important;
+        }
+        .cl-alternativeMethodsBlockButton,
+        .cl-alternativeMethods .cl-button,
+        button[data-localization-key^="userVerificationAlternativeMethods"],
+        .cl-alternativeMethodsBlockButton__emailCode,
+        .cl-alternativeMethodsBlockButton__phoneCode,
+        .cl-alternativeMethodsBlockButton__password {
+          background: hsl(0 0% 12%) !important;
+          color: hsl(0 0% 98%) !important;
+          border: 1px solid hsl(51 100% 50% / 0.35) !important;
+          font-weight: 600 !important;
+        }
+        .cl-alternativeMethodsBlockButton:hover,
+        .cl-alternativeMethods .cl-button:hover {
+          background: hsl(51 100% 50% / 0.1) !important;
+          border-color: hsl(51 100% 50% / 0.6) !important;
+        }
+        .cl-alternativeMethodsBlockButtonText,
+        .cl-alternativeMethodsBlockButtonArrow {
+          color: hsl(0 0% 98%) !important;
         }
         .cl-formFieldLabelRow { margin-bottom: 8px !important; }
         .cl-header { margin-bottom: 20px !important; padding: 0 !important; }
