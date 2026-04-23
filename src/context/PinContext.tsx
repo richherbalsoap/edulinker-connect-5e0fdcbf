@@ -24,29 +24,12 @@ const hashPin = async (pin: string): Promise<string> => {
 };
 
 export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, schoolId } = useAuth();
+  const { schoolId } = useAuth();
   const [pinSet, setPinSet] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'setup' | 'verify'>('verify');
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
-
-  const resolveEffectiveSchoolId = useCallback(async () => {
-    if (schoolId) return schoolId;
-    if (!user?.id) return null;
-
-    const { data, error } = await supabase.rpc('upsert_school_for_clerk_user', {
-      p_clerk_user_id: user.id,
-      p_school_name: 'My School',
-    });
-
-    if (error) {
-      console.error('Failed to resolve school for PIN flow:', error);
-      return null;
-    }
-
-    return data ?? null;
-  }, [schoolId, user?.id]);
 
   useEffect(() => {
     if (!schoolId) {
@@ -77,15 +60,14 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [pinSet]);
 
   const handleModalSubmit = async (pin: string): Promise<boolean> => {
-    const effectiveSchoolId = await resolveEffectiveSchoolId();
-    if (!effectiveSchoolId) return false;
+    if (!schoolId) return false;
 
     if (modalMode === 'setup') {
       const hash = await hashPin(pin);
       const { error } = await supabase
         .from('schools')
         .update({ pin_hash: hash, pin_set: true } as any)
-        .eq('id', effectiveSchoolId);
+        .eq('id', schoolId);
       if (error) {
         console.error('PIN setup failed:', error);
         return false;
@@ -99,7 +81,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { data } = await supabase
         .from('schools')
         .select('pin_hash')
-        .eq('id', effectiveSchoolId)
+        .eq('id', schoolId)
         .maybeSingle();
       if (!data?.pin_hash) return false;
       const hash = await hashPin(pin);
