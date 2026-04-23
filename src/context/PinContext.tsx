@@ -39,12 +39,20 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const fetchPinStatus = async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('schools')
-        .select('pin_set')
+        .select('pin_set, pin_hash')
         .eq('id', schoolId)
         .maybeSingle();
-      setPinSet(data?.pin_set || false);
+
+      if (error) {
+        console.error('Failed to fetch PIN status:', error);
+        setPinSet(false);
+        setLoading(false);
+        return;
+      }
+
+      setPinSet(Boolean(data?.pin_set && data?.pin_hash));
       setLoading(false);
     };
     fetchPinStatus();
@@ -64,14 +72,18 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (modalMode === 'setup') {
       const hash = await hashPin(pin);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('schools')
         .update({ pin_hash: hash, pin_set: true } as any)
-        .eq('id', schoolId);
-      if (error) {
+        .eq('id', schoolId)
+        .select('id, pin_set, pin_hash')
+        .maybeSingle();
+
+      if (error || !data?.id || !data.pin_set || data.pin_hash !== hash) {
         console.error('PIN setup failed:', error);
         return false;
       }
+
       setPinSet(true);
       setModalOpen(false);
       resolveRef.current?.(true);
