@@ -138,7 +138,7 @@ const LoginPage = () => {
           color: hsl(0 0% 75%) !important;
           opacity: 1 !important;
         }
-        /* "Use another method" alternative buttons (email code, phone code, etc.) */
+        /* "Use another method" alternative buttons */
         .cl-alternativeMethodsBlockButton,
         .cl-alternativeMethods .cl-button,
         button[data-localization-key^="userVerificationAlternativeMethods"],
@@ -194,14 +194,7 @@ const LoginPage = () => {
         <div className="logo-wrapper">
           <div className="logo-ring-inner" />
           <div className="logo-ring-outer" />
-          <img
-            src={edulinkerLogo}
-            alt="EDULinker Logo"
-            className="logo-img"
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
-          />
+          <img src={edulinkerLogo} alt="EDULinker Logo" className="logo-img" loading="eager" decoding="sync" />
         </div>
 
         {/* Title */}
@@ -216,38 +209,38 @@ const LoginPage = () => {
           style={{ padding: "28px 22px" }}
         >
           <SignIn
-                routing="path"
-                path="/login"
-                signUpUrl="/signup"
-                forceRedirectUrl="/dashboard"
-                appearance={{
-                  layout: { logoPlacement: "none", showOptionalFields: true },
-                  elements: {
-                    rootBox: "w-full",
-                    card: "bg-transparent shadow-none border-none p-0 m-0",
-                    headerTitle: "text-primary",
-                    headerSubtitle: "text-muted-foreground",
-                    socialButtonsBlockButton:
-                      "border border-primary/30 bg-background/60 hover:bg-primary/10 text-foreground transition-colors",
-                    socialButtonsBlockButtonText: "text-foreground font-semibold",
-                    formButtonPrimary:
-                      "bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)] transition-all",
-                    footerActionLink: "text-primary hover:text-primary/80",
-                    formFieldInput:
-                      "bg-background/60 border-primary/30 text-foreground placeholder:text-muted-foreground focus:border-primary/70 transition-colors",
-                    formFieldLabel: "text-foreground font-semibold",
-                    badge: "hidden",
-                  },
-                  variables: {
-                    colorPrimary: "hsl(51 100% 50%)",
-                    colorText: "hsl(0 0% 98%)",
-                    colorTextSecondary: "hsl(0 0% 64%)",
-                    colorBackground: "hsl(0 0% 6%)",
-                    colorInputBackground: "hsl(0 0% 8%)",
-                    colorInputText: "hsl(0 0% 98%)",
-                  },
-                }}
-              />
+            routing="path"
+            path="/login"
+            signUpUrl="/signup"
+            forceRedirectUrl="/dashboard"
+            appearance={{
+              layout: { logoPlacement: "none", showOptionalFields: true },
+              elements: {
+                rootBox: "w-full",
+                card: "bg-transparent shadow-none border-none p-0 m-0",
+                headerTitle: "text-primary",
+                headerSubtitle: "text-muted-foreground",
+                socialButtonsBlockButton:
+                  "border border-primary/30 bg-background/60 hover:bg-primary/10 text-foreground transition-colors",
+                socialButtonsBlockButtonText: "text-foreground font-semibold",
+                formButtonPrimary:
+                  "bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)] transition-all",
+                footerActionLink: "text-primary hover:text-primary/80",
+                formFieldInput:
+                  "bg-background/60 border-primary/30 text-foreground placeholder:text-muted-foreground focus:border-primary/70 transition-colors",
+                formFieldLabel: "text-foreground font-semibold",
+                badge: "hidden",
+              },
+              variables: {
+                colorPrimary: "hsl(51 100% 50%)",
+                colorText: "hsl(0 0% 98%)",
+                colorTextSecondary: "hsl(0 0% 64%)",
+                colorBackground: "hsl(0 0% 6%)",
+                colorInputBackground: "hsl(0 0% 8%)",
+                colorInputText: "hsl(0 0% 98%)",
+              },
+            }}
+          />
         </div>
       </div>
     </div>
