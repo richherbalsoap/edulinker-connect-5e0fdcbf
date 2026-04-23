@@ -37,8 +37,9 @@ const AppContent = () => {
         <PinProvider>
           <ScrollToTop />
           <Routes>
-            <Route path="/login/*" element={<LoginPage />} />
-            <Route path="/signup/*" element={<SignupPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/gmail-confirmation" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
