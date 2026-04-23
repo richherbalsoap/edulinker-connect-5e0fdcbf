@@ -24,12 +24,29 @@ const hashPin = async (pin: string): Promise<string> => {
 };
 
 export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { schoolId } = useAuth();
+  const { user, schoolId } = useAuth();
   const [pinSet, setPinSet] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'setup' | 'verify'>('verify');
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
+
+  const resolveEffectiveSchoolId = useCallback(async () => {
+    if (schoolId) return schoolId;
+    if (!user?.id) return null;
+
+    const { data, error } = await supabase.rpc('upsert_school_for_clerk_user', {
+      p_clerk_user_id: user.id,
+      p_school_name: 'My School',
+    });
+
+    if (error) {
+      console.error('Failed to resolve school for PIN flow:', error);
+      return null;
+    }
+
+    return data ?? null;
+  }, [schoolId, user?.id]);
 
   useEffect(() => {
     if (!schoolId) {
@@ -39,12 +56,20 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const fetchPinStatus = async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('schools')
-        .select('pin_set')
+        .select('pin_set, pin_hash')
         .eq('id', schoolId)
         .maybeSingle();
-      setPinSet(data?.pin_set || false);
+
+      if (error) {
+        console.error('Failed to fetch PIN status:', error);
+        setPinSet(false);
+        setLoading(false);
+        return;
+      }
+
+      setPinSet(Boolean(data?.pin_set && data?.pin_hash));
       setLoading(false);
     };
     fetchPinStatus();
@@ -60,18 +85,23 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [pinSet]);
 
   const handleModalSubmit = async (pin: string): Promise<boolean> => {
-    if (!schoolId) return false;
+    const effectiveSchoolId = await resolveEffectiveSchoolId();
+    if (!effectiveSchoolId) return false;
 
     if (modalMode === 'setup') {
       const hash = await hashPin(pin);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('schools')
         .update({ pin_hash: hash, pin_set: true } as any)
-        .eq('id', schoolId);
-      if (error) {
-        console.error('PIN setup failed:', error);
+        .eq('id', effectiveSchoolId)
+        .select('id, pin_set, pin_hash')
+        .maybeSingle();
+
+      if (error || !data?.id || !data.pin_set || data.pin_hash !== hash) {
+        console.error('PIN setup failed:', error ?? new Error('PIN row update was not persisted'));
         return false;
       }
+
       setPinSet(true);
       setModalOpen(false);
       resolveRef.current?.(true);
@@ -81,8 +111,9 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { data } = await supabase
         .from('schools')
         .select('pin_hash')
-        .eq('id', schoolId)
+        .eq('id', effectiveSchoolId)
         .maybeSingle();
+
       if (!data?.pin_hash) return false;
       const hash = await hashPin(pin);
       const correct = hash === data.pin_hash;

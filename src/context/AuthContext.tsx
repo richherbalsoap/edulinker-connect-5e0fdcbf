@@ -36,7 +36,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setClerkTokenGetter(async () => {
       try {
-        return await getToken({ template: "supabase" });
+        const supabaseToken = await getToken({ template: "supabase" });
+        if (supabaseToken) return supabaseToken;
+
+        return await getToken();
       } catch {
         return null;
       }
