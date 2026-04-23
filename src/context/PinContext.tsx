@@ -64,7 +64,10 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .from('schools')
         .update({ pin_hash: hash, pin_set: true } as any)
         .eq('id', schoolId);
-      if (error) return false;
+      if (error) {
+        console.error('PIN setup failed:', error);
+        return false;
+      }
       setPinSet(true);
       setModalOpen(false);
       resolveRef.current?.(true);
