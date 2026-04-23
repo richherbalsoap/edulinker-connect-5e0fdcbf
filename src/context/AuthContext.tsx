@@ -46,27 +46,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const ensureSchoolExists = async (userId: string) => {
     try {
-      const { data } = await supabase.from("schools").select("id").eq("owner_user_id", userId).maybeSingle();
-      if (data) {
-        setSchoolId(data.id);
-      } else {
-        const code = Array.from({ length: 8 }, () =>
-          "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36)),
-        ).join("");
-        const { data: newSchool } = await supabase
-          .from("schools")
-          .insert({
-            school_name: "My School",
-            school_code: code,
-            owner_user_id: userId,
-            user_id: userId,
-          })
-          .select("id")
-          .single();
-        if (newSchool) setSchoolId(newSchool.id);
+      const { data, error } = await supabase.rpc("upsert_school_for_clerk_user", {
+        p_clerk_user_id: userId,
+        p_school_name: "My School",
+      });
+
+      if (error) {
+        console.error("Failed to upsert school for Clerk user:", error);
+        setSchoolId(null);
+        return;
       }
+
+      setSchoolId(data ?? null);
     } catch (e) {
       console.error("Failed to ensure school exists:", e);
+      setSchoolId(null);
     }
   };
 
