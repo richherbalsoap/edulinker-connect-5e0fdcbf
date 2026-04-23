@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { BookOpen, MessageSquare, FileText, Calendar, Users, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
+import { BookOpen, MessageSquare, FileText, Calendar, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useAppStore from "@/store/appStore";
 import { useSchoolId } from "@/hooks/useSchoolId";
@@ -29,46 +28,6 @@ const DashboardPage = () => {
   const academicYears = useMemo(() => getYears(), []);
   const defaultYear = `${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const handleRefresh = async () => {
-    if (refreshing) return;
-    setRefreshing(true);
-    try {
-      // 1) Fetch latest data from backend
-      if (schoolId) await fetchAll(schoolId);
-      toast.success("Fetching latest version...");
-
-      // 2) Service worker: update + tell any waiting SW to skipWaiting + clear caches
-      try {
-        if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          for (const reg of regs) {
-            // Trigger update check
-            await reg.update().catch(() => undefined);
-            // If a new SW is waiting, tell it to activate immediately
-            if (reg.waiting) {
-              reg.waiting.postMessage({ type: "SKIP_WAITING" });
-            }
-          }
-        }
-        if ("caches" in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map((k) => caches.delete(k)));
-        }
-      } catch (e) {
-        console.warn("Cache clear during refresh failed:", e);
-      }
-
-      // 3) Hard reload after SW activates (gives SW time to skipWaiting & claim clients)
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
-    } catch {
-      toast.error("Refresh failed");
-      setRefreshing(false);
-    }
-  };
 
   useEffect(() => {
     if (schoolId) fetchAll(schoolId);
@@ -193,14 +152,6 @@ const DashboardPage = () => {
       <div className="relative flex flex-col sm:flex-row sm:justify-center items-center w-full gap-4 sm:gap-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Dashboard</h1>
         <div className="sm:absolute sm:right-0 flex items-center gap-2">
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            aria-label="Refresh data"
-            className="p-2 bg-black/40 backdrop-blur-md border border-primary/30 rounded-lg text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
-          </button>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
