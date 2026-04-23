@@ -36,10 +36,27 @@ const DashboardPage = () => {
     setRefreshing(true);
     try {
       if (schoolId) await fetchAll(schoolId);
-      toast.success('Refreshing entire panel...');
-      // Hard reload to refresh ALL pages/data across the app
+      toast.success('Fetching latest version...');
+
+      // 1) Service worker update + clear all caches → ensures latest frontend code
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.update().catch(() => undefined)));
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        }
+      } catch (e) {
+        console.warn('Cache clear during refresh failed:', e);
+      }
+
+      // 2) Hard reload bypassing browser HTTP cache (cache-bust query param)
       setTimeout(() => {
-        window.location.reload();
+        const url = new URL(window.location.href);
+        url.searchParams.set('_r', Date.now().toString());
+        window.location.replace(url.toString());
       }, 400);
     } catch {
       toast.error('Refresh failed');
@@ -224,7 +241,11 @@ const DashboardPage = () => {
                 >
                   {day}
                   {hasActivity && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                    <span
+                      className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${
+                        isSelected ? 'bg-primary-foreground' : 'bg-primary shadow-[0_0_6px_hsl(51,100%,50%,0.8)]'
+                      }`}
+                    />
                   )}
                 </div>
               );
