@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase, setClerkTokenGetter } from "@/integrations/supabase/client";
-import { useAuth as useClerkAuth, useUser as useClerkUser } from "@clerk/clerk-react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
-  user: { id: string; email?: string | null } | null;
-  session: { user: { id: string; email?: string | null } } | null;
+  user: User | null;
+  session: Session | null;
   loading: boolean;
   schoolId: string | null;
   signOut: () => Promise<void>;
@@ -21,31 +21,27 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [schoolId, setSchoolId] = useState<string | null>(null);
-  const { isLoaded: clerkAuthLoaded, isSignedIn, getToken, signOut: clerkSignOut } = useClerkAuth();
-  const { isLoaded: clerkUserLoaded, user: clerkUser } = useClerkUser();
 
-  const loading = !clerkAuthLoaded || !clerkUserLoaded;
-
-  const user = isSignedIn && clerkUser
-    ? { id: clerkUser.id, email: clerkUser.primaryEmailAddress?.emailAddress ?? null }
-    : null;
-  const session = user ? { user } : null;
-
-  // Wire Clerk's getToken into the Supabase client so every query carries a fresh Clerk JWT.
   useEffect(() => {
-    setClerkTokenGetter(async () => {
-      try {
-        const supabaseToken = await getToken({ template: "supabase" });
-        if (supabaseToken) return supabaseToken;
-
-        return await getToken();
-      } catch {
-        return null;
-      }
+    // Set up listener FIRST, then read existing session.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      setLoading(false);
     });
-    return () => setClerkTokenGetter(null);
-  }, [getToken]);
+
+    supabase.auth.getSession().then(({ data: { session: existing } }) => {
+      setSession(existing);
+      setUser(existing?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const ensureSchoolExists = async (userId: string) => {
     try {
@@ -79,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await clerkSignOut();
+      await supabase.auth.signOut();
     } catch (e) {
       console.error("signOut failed:", e);
     }
