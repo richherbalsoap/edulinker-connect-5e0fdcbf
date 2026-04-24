@@ -18,24 +18,26 @@ interface NavItemType {
 }
 
 const teacherTools: NavItemType[] = [
-  { path: '/homework', icon: BookOpen, label: 'Homework Sender' },
-  { path: '/complaints', icon: MessageSquare, label: 'Complaint Sender' },
-  { path: '/results', icon: FileText, label: 'Result Sender' },
+  { path: '/homework', icon: BookOpen, label: 'nav.homework' },
+  { path: '/complaints', icon: MessageSquare, label: 'nav.complaints' },
+  { path: '/results', icon: FileText, label: 'nav.results' },
 ];
 
 const principalTools: NavItemType[] = [
-  { path: '/students', icon: Users, label: 'Student Management' },
-  { path: '/announcements', icon: Bell, label: 'Announcements' },
-  { path: '/analytics', icon: BarChart3, label: 'Analytics' },
-  { path: '/ai-chatbot', icon: Bot, label: 'AI Insight Chatbot' },
-  { path: '/promotion', icon: TrendingUp, label: 'Promotion Panel' },
-  { path: '/fees', icon: DollarSign, label: 'Fees Reminder' },
+  { path: '/students', icon: Users, label: 'nav.students' },
+  { path: '/announcements', icon: Bell, label: 'nav.announcements' },
+  { path: '/analytics', icon: BarChart3, label: 'nav.analytics' },
+  { path: '/ai-chatbot', icon: Bot, label: 'nav.ai_chatbot' },
+  { path: '/promotion', icon: TrendingUp, label: 'nav.promotion' },
+  { path: '/fees', icon: DollarSign, label: 'nav.fees' },
   // { path: '/impact-dashboard', icon: Award, label: 'Impact Dashboard' }, // Hidden for now — feature planned for future
 ];
 
 const principalPaths = new Set(principalTools.map(t => t.path));
 
-const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) => (
+const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) => {
+  const { t } = useTranslation();
+  return (
   <li>
     <NavLink
       to={item.path}
@@ -50,14 +52,16 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
       `}
     >
       <item.icon size={20} />
-      <span className="font-medium text-sm">{item.label}</span>
+      <span className="font-medium text-sm">{t(item.label)}</span>
     </NavLink>
   </li>
-);
+  );
+};
 
 // PIN-protected nav item — intercepts click, asks for PIN first
 const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType; onClick: () => void; requestAccess: () => Promise<boolean> }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -83,24 +87,25 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
         `}
       >
         <item.icon size={20} />
-        <span className="font-medium text-sm">{item.label}</span>
+        <span className="font-medium text-sm">{t(item.label)}</span>
       </NavLink>
     </li>
   );
 };
 
-const CollapsibleSection = ({ title, icon: Icon, items, onClick, protected: isProtected, requestAccess }: {
-  title: string; icon: React.ElementType; items: NavItemType[]; onClick: () => void;
+const CollapsibleSection = ({ titleKey, icon: Icon, items, onClick, protected: isProtected, requestAccess }: {
+  titleKey: string; icon: React.ElementType; items: NavItemType[]; onClick: () => void;
   protected?: boolean; requestAccess?: () => Promise<boolean>;
 }) => {
   const [isOpen, setIsOpen] = React.useState(true);
+  const { t } = useTranslation();
   return (
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-primary/50 hover:text-primary/80 transition-colors duration-200 uppercase tracking-wider"
       >
-        <span className="flex items-center gap-2"><Icon size={14} />{title}</span>
+        <span className="flex items-center gap-2"><Icon size={14} />{t(titleKey)}</span>
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
@@ -121,6 +126,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
   const { signOut } = useAuth();
   const { requestAccess } = usePin();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSettingsClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -164,11 +170,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
 
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-3">
           <ul className="space-y-1">
-            <NavItem item={{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' }} onClick={toggleSidebar} />
-            <NavItem item={{ path: '/report', icon: FileSpreadsheet, label: 'Download Report' }} onClick={toggleSidebar} />
+            <NavItem item={{ path: '/dashboard', icon: LayoutDashboard, label: 'nav.dashboard' }} onClick={toggleSidebar} />
+            <NavItem item={{ path: '/report', icon: FileSpreadsheet, label: 'nav.report' }} onClick={toggleSidebar} />
           </ul>
-          <CollapsibleSection title="TEACHER TOOLS" icon={BookOpen} items={teacherTools} onClick={toggleSidebar} />
-          <CollapsibleSection title="PRINCIPAL TOOLS" icon={Users} items={principalTools} onClick={toggleSidebar} protected requestAccess={requestAccess} />
+          <CollapsibleSection titleKey="nav.teacher_tools" icon={BookOpen} items={teacherTools} onClick={toggleSidebar} />
+          <CollapsibleSection titleKey="nav.principal_tools" icon={Users} items={principalTools} onClick={toggleSidebar} protected requestAccess={requestAccess} />
           <ul className="space-y-1 pt-3 border-t border-primary/10">
             <li>
               <a
@@ -177,7 +183,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent transition-colors duration-200"
               >
                 <Settings size={20} />
-                <span className="font-medium text-sm">Settings</span>
+                <span className="font-medium text-sm">{t('nav.settings')}</span>
               </a>
             </li>
           </ul>
@@ -186,8 +192,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-colors duration-200 mt-1"
           >
             <LogOut size={20} />
-            <span className="font-medium text-sm">Logout</span>
+            <span className="font-medium text-sm">{t('nav.logout')}</span>
           </button>
+          <div className="pt-3 mt-3 border-t border-primary/10 px-1">
+            <p className="px-3 pb-2 text-xs font-semibold text-primary/50 uppercase tracking-wider">{t('common.language')}</p>
+            <LanguageSelector variant="compact" className="px-1" />
+          </div>
         </nav>
       </aside>
     </>
