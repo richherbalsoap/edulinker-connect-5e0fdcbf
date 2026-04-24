@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "ᱮᱰᱩᱞᱤᱝᱠᱟᱨ"
+  },
+  "auth": {
+    "signin": "ᱟᱢᱟᱜ ᱮᱠᱟᱣᱩᱱᱴ ᱨᱮ ᱥᱟᱭᱤᱱ ᱤᱱ ᱢᱮ",
+    "email": "ᱤᱢᱮᱞ",
+    "password": "ᱯᱟᱥᱣᱟᱨᱰ",
+    "login": "ᱞᱚᱜᱤᱱ",
+    "signing_in": "ᱥᱟᱭᱤᱱ ᱤᱱ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ...",
+    "create_account": "ᱮᱠᱟᱣᱩᱱᱴ ᱛᱮᱭᱟᱨ ᱢᱮ",
+    "forgot_password": "ᱯᱟᱥᱣᱟᱨᱰ ᱦᱤᱲᱤᱧ ᱮᱱᱟ?"
+  },
+  "nav": {
+    "dashboard": "ᱰᱮᱥᱵᱚᱨᱰ",
+    "report": "ᱨᱤᱯᱚᱨᱴ ᱰᱟᱣᱩᱱᱞᱳᱰ ᱢᱮ",
+    "teacher_tools": "ᱫᱷᱚᱨᱢ ᱜᱟᱨᱩ ᱢᱮᱱᱚᱛ",
+    "principal_tools": "ᱯᱨᱤᱱᱥᱤᱯᱟᱞ ᱢᱮᱱᱚᱛ",
+    "homework": "ᱚᱲᱟᱜ ᱠᱟᱢᱤ ᱠᱩᱞᱤᱭᱟᱹ",
+    "complaints": "ᱢᱟᱢᱞᱟ ᱠᱩᱞᱤᱭᱟᱹ",
+    "results": "ᱯᱷᱚᱞ ᱠᱩᱞᱤᱭᱟᱹ",
+    "students": "ᱪᱮᱫᱚᱜᱤᱭᱟᱹ ᱯᱟᱭᱟᱜᱢᱟ",
+    "announcements": "ᱯᱷᱟᱨᱪᱟᱹᱞᱟᱹ",
+    "analytics": "ᱵᱤᱪᱟᱨ",
+    "ai_chatbot": "AI ᱤᱱᱥᱟᱭᱤᱴ ᱪᱟᱴᱵᱚᱴ",
+    "promotion": "ᱪᱷᱟᱴ ᱨᱮ ᱪᱷᱟᱴᱟᱣ",
+    "fees": "ᱪᱟᱸᱫᱟ ᱯᱟᱸᱦᱟᱴᱟᱣ",
+    "settings": "ᱥᱟᱡᱟᱣ",
+    "logout": "ᱞᱚᱜ ᱟᱣᱴ"
+  },
+  "common": {
+    "language": "ᱯᱟᱹᱨᱥᱤ",
+    "select_language": "ᱯᱟᱹᱨᱥᱤ ᱵᱟᱪᱷᱟᱣ ᱢᱮ"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "एडुलिंकर"
+  },
+  "auth": {
+    "signin": "आफ्नो खातामा साइन इन गर्नुहोस्",
+    "email": "इमेल",
+    "password": "पासवर्ड",
+    "login": "लग - इन",
+    "signing_in": "साइन इन गर्दै...",
+    "create_account": "खाता सिर्जना गर्नुहोस्",
+    "forgot_password": "पासवर्ड बिर्सनुभयो?"
+  },
+  "nav": {
+    "dashboard": "ड्यासबोर्ड",
+    "report": "रिपोर्ट डाउनलोड गर्नुहोस्",
+    "teacher_tools": "शिक्षक उपकरण",
+    "principal_tools": "प्रधानाध्यापक उपकरण",
+    "homework": "गृहकार्य प्रेषक",
+    "complaints": "उजुरी प्रेषक",
+    "results": "नतिजा प्रेषक",
+    "students": "विद्यार्थी व्यवस्थापन",
+    "announcements": "घोषणा",
+    "analytics": "विश्लेषण",
+    "ai_chatbot": "एआई इनसाइट च्याटबोट",
+    "promotion": "बढुवा प्यानल",
+    "fees": "शुल्क सम्झना",
+    "settings": "सेटिङहरू",
+    "logout": "लग - आउट"
+  },
+  "common": {
+    "language": "भाषा",
+    "select_language": "भाषा छान्नुहोस्"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "एडुलिंकर"
+  },
+  "auth": {
+    "signin": "नोंथांनि एकाउन्टआव साइन इन खालाम",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "login": "लग इन",
+    "signing_in": "साइन इन जायगासिनो...",
+    "create_account": "एकाउन्ट बानाय",
+    "forgot_password": "पासवर्ड बेइखर्बाय?"
+  },
+  "nav": {
+    "dashboard": "देशबर्ड",
+    "report": "रिपर्ट डाउनलड खालाम",
+    "teacher_tools": "मास्टार जाहोनथाय",
+    "principal_tools": "प्रिन्सिपाल जाहोनथाय",
+    "homework": "होमवर्क दैथाय",
+    "complaints": "गोरोबथाय दैथाय",
+    "results": "जायगा दैथाय",
+    "students": "फरायसा सलाय",
+    "announcements": "बुङना",
+    "analytics": "बिफाव",
+    "ai_chatbot": "एआइ इनसाइट चेटबट",
+    "promotion": "गोदान पेनेल",
+    "fees": "फि गोनांथि",
+    "settings": "सेटिं",
+    "logout": "लग आउट"
+  },
+  "common": {
+    "language": "राव",
+    "select_language": "राव सायख"
+  }
+}

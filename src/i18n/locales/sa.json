@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "एडुलिङ्करः"
+  },
+  "auth": {
+    "signin": "स्वकीये खाते प्रविशतु",
+    "email": "विद्युत्पत्रम्",
+    "password": "गुप्तपदम्",
+    "login": "प्रवेशः",
+    "signing_in": "प्रवेशः क्रियते...",
+    "create_account": "खातं रचयतु",
+    "forgot_password": "गुप्तपदं विस्मृतम्?"
+  },
+  "nav": {
+    "dashboard": "मुख्यपटलम्",
+    "report": "प्रतिवेदनं अवतारयतु",
+    "teacher_tools": "अध्यापकोपकरणानि",
+    "principal_tools": "प्रधानाध्यापकोपकरणानि",
+    "homework": "गृहकार्यप्रेषकः",
+    "complaints": "अभियोगप्रेषकः",
+    "results": "परिणामप्रेषकः",
+    "students": "छात्रप्रबन्धनम्",
+    "announcements": "घोषणाः",
+    "analytics": "विश्लेषणम्",
+    "ai_chatbot": "AI अन्तर्दृष्टि सम्भाषबोट्",
+    "promotion": "उन्नतिः पटलम्",
+    "fees": "शुल्कस्मारकम्",
+    "settings": "सेट्टिङ्ग्स्",
+    "logout": "निर्गमनम्"
+  },
+  "common": {
+    "language": "भाषा",
+    "select_language": "भाषां चिनुत"
+  }
+}

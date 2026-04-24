@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "એડુલિંકર"
+  },
+  "auth": {
+    "signin": "તમારા ખાતામાં સાઇન ઇન કરો",
+    "email": "ઇમેઇલ",
+    "password": "પાસવર્ડ",
+    "login": "લોગિન",
+    "signing_in": "સાઇન ઇન થઈ રહ્યું છે...",
+    "create_account": "ખાતું બનાવો",
+    "forgot_password": "પાસવર્ડ ભૂલી ગયા?"
+  },
+  "nav": {
+    "dashboard": "ડેશબોર્ડ",
+    "report": "રિપોર્ટ ડાઉનલોડ કરો",
+    "teacher_tools": "શિક્ષક સાધનો",
+    "principal_tools": "આચાર્ય સાધનો",
+    "homework": "હોમવર્ક પ્રેષક",
+    "complaints": "ફરિયાદ પ્રેષક",
+    "results": "પરિણામ પ્રેષક",
+    "students": "વિદ્યાર્થી વ્યવસ્થાપન",
+    "announcements": "જાહેરાતો",
+    "analytics": "વિશ્લેષણ",
+    "ai_chatbot": "એઆઇ ઇનસાઇટ ચેટબોટ",
+    "promotion": "પ્રમોશન પેનલ",
+    "fees": "ફી રિમાઇન્ડર",
+    "settings": "સેટિંગ્સ",
+    "logout": "લોગઆઉટ"
+  },
+  "common": {
+    "language": "ભાષા",
+    "select_language": "ભાષા પસંદ કરો"
+  }
+}

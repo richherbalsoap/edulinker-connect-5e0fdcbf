@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "EDULinker"
+  },
+  "auth": {
+    "signin": "Sign in to your account",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "signing_in": "Signing in...",
+    "create_account": "Create Account",
+    "forgot_password": "Forgot Password?"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "report": "Download Report",
+    "teacher_tools": "TEACHER TOOLS",
+    "principal_tools": "PRINCIPAL TOOLS",
+    "homework": "Homework Sender",
+    "complaints": "Complaint Sender",
+    "results": "Result Sender",
+    "students": "Student Management",
+    "announcements": "Announcements",
+    "analytics": "Analytics",
+    "ai_chatbot": "AI Insight Chatbot",
+    "promotion": "Promotion Panel",
+    "fees": "Fees Reminder",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "common": {
+    "language": "Language",
+    "select_language": "Select Language"
+  }
+}

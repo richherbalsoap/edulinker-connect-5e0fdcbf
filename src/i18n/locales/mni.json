@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "এডুলিংকর"
+  },
+  "auth": {
+    "signin": "নহাক্কী একাউন্টদা সাইন ইন তৌবিয়ু",
+    "email": "ইমেইল",
+    "password": "পাসৱার্দ",
+    "login": "লগ ইন",
+    "signing_in": "সাইন ইন তৌরি...",
+    "create_account": "একাউন্ট সেমগৎপীয়ু",
+    "forgot_password": "পাসৱার্দ কাওবিরবরা?"
+  },
+  "nav": {
+    "dashboard": "দেশবোর্দ",
+    "report": "রিপোর্ত দাউনলোদ তৌবিয়ু",
+    "teacher_tools": "ওজা শিজিন্নবা পোৎ",
+    "principal_tools": "প্রিন্সিপাল শিজিন্নবা পোৎ",
+    "homework": "হোমৱার্ক থাবিরিবা",
+    "complaints": "ৱাকৎ থাবিরিবা",
+    "results": "ফল থাবিরিবা",
+    "students": "মহৈরোয় খুদুম মঙা",
+    "announcements": "লাওথোকপা",
+    "analytics": "অনালাইতিক্স",
+    "ai_chatbot": "AI ইনসাইৎ চেতবোৎ",
+    "promotion": "প্রমোসন পানেল",
+    "fees": "ফী নীংসিংলিবা",
+    "settings": "সেতিংস",
+    "logout": "লগ আউত"
+  },
+  "common": {
+    "language": "লোন",
+    "select_language": "লোন খনবিয়ু"
+  }
+}

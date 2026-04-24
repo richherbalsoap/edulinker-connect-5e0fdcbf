@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { LogIn } from "lucide-react";
 import GoldenBackground from "@/components/GoldenBackground";
 import InstallBanner from "@/components/InstallBanner";
+import LanguageSelector from "@/components/LanguageSelector";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
 
 const LoginPage = () => {
@@ -16,6 +18,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,14 +56,17 @@ const LoginPage = () => {
             fetchPriority="high"
             decoding="sync"
           />
-          <CardTitle className="text-2xl text-primary">EDULinker</CardTitle>
-          <CardDescription className="text-muted-foreground">Sign in to your account</CardDescription>
+          <CardTitle className="text-2xl text-primary">{t("app.name")}</CardTitle>
+          <CardDescription className="text-muted-foreground">{t("auth.signin")}</CardDescription>
+          <div className="pt-2">
+            <LanguageSelector />
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="email"
-              placeholder="Email"
+              placeholder={t("auth.email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -69,7 +75,7 @@ const LoginPage = () => {
 
             <Input
               type="password"
-              placeholder="Password"
+              placeholder={t("auth.password")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -81,14 +87,14 @@ const LoginPage = () => {
               disabled={loading}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
             >
-              <LogIn size={18} className="mr-2" /> {loading ? "Signing in..." : "Login"}
+              <LogIn size={18} className="mr-2" /> {loading ? t("auth.signing_in") : t("auth.login")}
             </Button>
             <div className="flex justify-between text-sm">
               <Link to="/signup" className="text-primary/80 hover:text-primary transition-colors">
-                Create Account
+                {t("auth.create_account")}
               </Link>
               <Link to="/forgot-password" className="transition-colors text-primary font-sans">
-                Forgot Password?
+                {t("auth.forgot_password")}
               </Link>
             </div>
           </form>
