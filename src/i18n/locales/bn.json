@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "এডুলিংকার"
+  },
+  "auth": {
+    "signin": "আপনার অ্যাকাউন্টে সাইন ইন করুন",
+    "email": "ইমেইল",
+    "password": "পাসওয়ার্ড",
+    "login": "লগইন",
+    "signing_in": "সাইন ইন হচ্ছে...",
+    "create_account": "অ্যাকাউন্ট তৈরি করুন",
+    "forgot_password": "পাসওয়ার্ড ভুলে গেছেন?"
+  },
+  "nav": {
+    "dashboard": "ড্যাশবোর্ড",
+    "report": "রিপোর্ট ডাউনলোড করুন",
+    "teacher_tools": "শিক্ষক সরঞ্জাম",
+    "principal_tools": "প্রিন্সিপাল সরঞ্জাম",
+    "homework": "হোমওয়ার্ক প্রেরক",
+    "complaints": "অভিযোগ প্রেরক",
+    "results": "ফলাফল প্রেরক",
+    "students": "ছাত্র ব্যবস্থাপনা",
+    "announcements": "ঘোষণা",
+    "analytics": "বিশ্লেষণ",
+    "ai_chatbot": "এআই ইনসাইট চ্যাটবট",
+    "promotion": "প্রমোশন প্যানেল",
+    "fees": "ফি রিমাইন্ডার",
+    "settings": "সেটিংস",
+    "logout": "লগআউট"
+  },
+  "common": {
+    "language": "ভাষা",
+    "select_language": "ভাষা নির্বাচন করুন"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "ايڊولنڪر"
+  },
+  "auth": {
+    "signin": "پنهنجي اڪائونٽ ۾ سائن ان ڪريو",
+    "email": "اي ميل",
+    "password": "پاسورڊ",
+    "login": "لاگ ان",
+    "signing_in": "سائن ان ٿي رهيو آهي...",
+    "create_account": "اڪائونٽ ٺاهيو",
+    "forgot_password": "پاسورڊ وساري ڇڏيو؟"
+  },
+  "nav": {
+    "dashboard": "ڊيش بورڊ",
+    "report": "رپورٽ ڊائونلوڊ ڪريو",
+    "teacher_tools": "استاد جا اوزار",
+    "principal_tools": "پرنسپل جا اوزار",
+    "homework": "هوم ورڪ موڪليندڙ",
+    "complaints": "شڪايت موڪليندڙ",
+    "results": "نتيجو موڪليندڙ",
+    "students": "شاگرد انتظام",
+    "announcements": "اعلان",
+    "analytics": "تجزيا",
+    "ai_chatbot": "اي آءِ انسائيٽ چيٽ بوٽ",
+    "promotion": "ترقي پينل",
+    "fees": "فيس ياد ڏياريندڙ",
+    "settings": "سيٽنگون",
+    "logout": "لاگ آئوٽ"
+  },
+  "common": {
+    "language": "ٻولي",
+    "select_language": "ٻولي چونڊيو"
+  }
+}

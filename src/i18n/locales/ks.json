@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "ایڈولنکر"
+  },
+  "auth": {
+    "signin": "پنہٕ اکاوُنٹس مَنٛز سائن اِن کَرِو",
+    "email": "ای میٚل",
+    "password": "پاسوُرڈ",
+    "login": "لاگ اِن",
+    "signing_in": "سائن اِن گَژھان...",
+    "create_account": "اکاوُنٹ بناوِو",
+    "forgot_password": "پاسوُرڈ بِسرِو؟"
+  },
+  "nav": {
+    "dashboard": "ڈَیش بورڈ",
+    "report": "رپورٹ ڈاوُنلوڈ کَرِو",
+    "teacher_tools": "اُستاد ہنٛد ساٹھ",
+    "principal_tools": "پرنسپل ہنٛد ساٹھ",
+    "homework": "ہوم وَرک سؠنڈ کَرَن وول",
+    "complaints": "شِکایَت سؠنڈ کَرَن وول",
+    "results": "نَتیٖجہٕ سؠنڈ کَرَن وول",
+    "students": "طٔلِبہٕ ہُنٛد اِنتظام",
+    "announcements": "اِعلانات",
+    "analytics": "تجزیہ",
+    "ai_chatbot": "AI اِنسایٹ چَیٹ بوٹ",
+    "promotion": "پرَموشَن پؠنَل",
+    "fees": "فیٖس یاد",
+    "settings": "ترتیٖبات",
+    "logout": "لاگ آوُٹ"
+  },
+  "common": {
+    "language": "زَبان",
+    "select_language": "زَبان ژأرِو"
+  }
+}

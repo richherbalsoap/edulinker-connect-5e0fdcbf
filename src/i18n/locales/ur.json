@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "ایڈولنکر"
+  },
+  "auth": {
+    "signin": "اپنے اکاؤنٹ میں سائن ان کریں",
+    "email": "ای میل",
+    "password": "پاس ورڈ",
+    "login": "لاگ ان",
+    "signing_in": "سائن ان ہو رہا ہے...",
+    "create_account": "اکاؤنٹ بنائیں",
+    "forgot_password": "پاس ورڈ بھول گئے؟"
+  },
+  "nav": {
+    "dashboard": "ڈیش بورڈ",
+    "report": "رپورٹ ڈاؤن لوڈ کریں",
+    "teacher_tools": "اساتذہ کے اوزار",
+    "principal_tools": "پرنسپل کے اوزار",
+    "homework": "ہوم ورک بھیجنے والا",
+    "complaints": "شکایت بھیجنے والا",
+    "results": "نتیجہ بھیجنے والا",
+    "students": "طلباء کا انتظام",
+    "announcements": "اعلانات",
+    "analytics": "تجزیات",
+    "ai_chatbot": "اے آئی انسائٹ چیٹ بوٹ",
+    "promotion": "پروموشن پینل",
+    "fees": "فیس یاد دہانی",
+    "settings": "ترتیبات",
+    "logout": "لاگ آؤٹ"
+  },
+  "common": {
+    "language": "زبان",
+    "select_language": "زبان منتخب کریں"
+  }
+}

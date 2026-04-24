@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "এডুলিংকাৰ"
+  },
+  "auth": {
+    "signin": "আপোনাৰ একাউণ্টত ছাইন ইন কৰক",
+    "email": "ইমেইল",
+    "password": "পাছৱৰ্ড",
+    "login": "লগ ইন",
+    "signing_in": "ছাইন ইন হৈ আছে...",
+    "create_account": "একাউণ্ট সৃষ্টি কৰক",
+    "forgot_password": "পাছৱৰ্ড পাহৰিলে?"
+  },
+  "nav": {
+    "dashboard": "ডেচবৰ্ড",
+    "report": "প্ৰতিবেদন ডাউনলোড কৰক",
+    "teacher_tools": "শিক্ষকৰ সঁজুলি",
+    "principal_tools": "অধ্যক্ষৰ সঁজুলি",
+    "homework": "গৃহকাৰ্য প্ৰেৰক",
+    "complaints": "অভিযোগ প্ৰেৰক",
+    "results": "ফলাফল প্ৰেৰক",
+    "students": "ছাত্ৰ ব্যৱস্থাপনা",
+    "announcements": "ঘোষণা",
+    "analytics": "বিশ্লেষণ",
+    "ai_chatbot": "AI ইনচাইট চেটবট",
+    "promotion": "প্ৰমোচন পেনেল",
+    "fees": "মাচুল সোঁৱৰণী",
+    "settings": "ছেটিংছ",
+    "logout": "লগ আউট"
+  },
+  "common": {
+    "language": "ভাষা",
+    "select_language": "ভাষা বাছনি কৰক"
+  }
+}

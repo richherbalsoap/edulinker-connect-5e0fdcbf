@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "ଏଡୁଲିଙ୍କର"
+  },
+  "auth": {
+    "signin": "ଆପଣଙ୍କ ଆକାଉଣ୍ଟରେ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
+    "email": "ଇମେଲ୍",
+    "password": "ପାସୱାର୍ଡ",
+    "login": "ଲଗଇନ୍",
+    "signing_in": "ସାଇନ୍ ଇନ୍ ହେଉଛି...",
+    "create_account": "ଆକାଉଣ୍ଟ୍ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "forgot_password": "ପାସୱାର୍ଡ ଭୁଲିଗଲେ?"
+  },
+  "nav": {
+    "dashboard": "ଡ୍ୟାସବୋର୍ଡ",
+    "report": "ରିପୋର୍ଟ ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
+    "teacher_tools": "ଶିକ୍ଷକ ସାଧନ",
+    "principal_tools": "ପ୍ରଧାନଶିକ୍ଷକ ସାଧନ",
+    "homework": "ହୋମୱାର୍କ ପ୍ରେରକ",
+    "complaints": "ଅଭିଯୋଗ ପ୍ରେରକ",
+    "results": "ଫଳାଫଳ ପ୍ରେରକ",
+    "students": "ଛାତ୍ର ପରିଚାଳନା",
+    "announcements": "ଘୋଷଣା",
+    "analytics": "ବିଶ୍ଳେଷଣ",
+    "ai_chatbot": "AI ଇନସାଇଟ୍ ଚାଟବଟ୍",
+    "promotion": "ପ୍ରୋମୋସନ୍ ପ୍ୟାନେଲ୍",
+    "fees": "ଶୁଳ୍କ ସ୍ମରଣ",
+    "settings": "ସେଟିଂସ୍",
+    "logout": "ଲଗଆଉଟ୍"
+  },
+  "common": {
+    "language": "ଭାଷା",
+    "select_language": "ଭାଷା ଚୟନ କରନ୍ତୁ"
+  }
+}

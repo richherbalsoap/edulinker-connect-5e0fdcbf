@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "एडुलिंकर"
+  },
+  "auth": {
+    "signin": "अपने खाते च साइन इन करो",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "login": "लॉगिन",
+    "signing_in": "साइन इन होआ करदा...",
+    "create_account": "खाता बनाओ",
+    "forgot_password": "पासवर्ड भुल्ली गे?"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "report": "रिपोर्ट डाउनलोड करो",
+    "teacher_tools": "अध्यापक औजार",
+    "principal_tools": "प्रिंसिपल औजार",
+    "homework": "होमवर्क भेजने आला",
+    "complaints": "शकायत भेजने आला",
+    "results": "नतीजा भेजने आला",
+    "students": "विद्यार्थी प्रबंधन",
+    "announcements": "घोशणां",
+    "analytics": "विश्लेशण",
+    "ai_chatbot": "एआई इनसाइट चैटबोट",
+    "promotion": "तरक्की पैनल",
+    "fees": "फीस याद",
+    "settings": "सेटिंग्स",
+    "logout": "लॉग आउट"
+  },
+  "common": {
+    "language": "भाशा",
+    "select_language": "भाशा चुनो"
+  }
+}
