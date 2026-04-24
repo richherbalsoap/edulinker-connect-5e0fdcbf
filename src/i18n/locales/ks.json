@@ -31,5 +31,25 @@
   "common": {
     "language": "زَبان",
     "select_language": "زَبان ژأرِو"
+  },
+  "update": {
+    "title": "اپڈیٹ دستیاب",
+    "version_label": "ورژن",
+    "choose_language": "زبان ژارٕو",
+    "intro": "EDULinker ہنٛد نوو ورژن دستیاب چھ! نٔو فیچرٕ حاصل کرنہٕ خاطرٕ مہربٲنی کرتھ اکھ لٹہٕ سائٹ ڈیٹا ریسیٹ کرِو۔ پریشان مہٕ گژھِو — توہنٛد اکاؤنٹ تہٕ ڈیٹا چھ کلاوڈس پؠٹھ 100% محفوظ۔",
+    "safety_title": "توہنٛد ڈیٹا چھ 100% محفوظ",
+    "safety_desc": "یہ کرٕو فقط ایپ کیشہٕ ریفریش۔ توہنٛد اکاؤنٹ، شٲگرد، نتیجہٕ یا فایلہٕ کانٛہہ تہٕ ڈلیٹ نہٕ گژھن۔ ریسیٹ پتٕہ پھرٕ سائن اِن کرِو۔",
+    "step1_title": "Site Settings کھولِو",
+    "step1_desc": "پنُن براؤزر ہنٛد ہیور-دچھنس مینو بٹن (3 ڈاٹس) ٹیپ کرِو، پتہٕ گیئر (⚙) آئیکن ٹیپ کرتھ 'Site settings' ژارٕو۔",
+    "step1_highlight": "'Site settings' ٹیپ کرِو",
+    "step2_title": "'Delete data and reset permissions' ٹیپ کرِو",
+    "step2_desc": "Site settings صفحس بُن سکرول کرِو۔ بُن اکھ بٹن نظر اَیی — تتھ ٹیپ کرِو۔",
+    "step2_highlight": "'Delete data and reset permissions' ٹیپ کرِو",
+    "step3_title": "'Delete and reset' کنفرم کرِو",
+    "step3_desc": "اکھ کنفرمیشن پاپ اَپ یِی۔ 'Delete and reset' ٹیپ کرتھ مکمل کرِو۔ پتٕہ EDULinker پھرٕ کھولِو تہٕ سائن اِن کرِو۔",
+    "step3_highlight": "'Delete and reset' ٹیپ کرِو",
+    "footer_note": "ریسیٹ پتٕہ تمہِ ای میل تہٕ پاسورڈ سان پھرٕ لاگ اِن کرِو۔ توہنٛد سٲری ڈیٹا روزی توتہِ۔",
+    "done_button": "گو — مےۭ کور اپڈیٹ",
+    "default_notes": "بگ فکس تہٕ کارکردگی بہتری۔"
   }
 }

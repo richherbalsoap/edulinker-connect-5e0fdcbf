@@ -31,5 +31,25 @@
   "common": {
     "language": "भाशा",
     "select_language": "भाशा चुनो"
+  },
+  "update": {
+    "title": "अपडेट उपलब्ध ऐ",
+    "version_label": "संस्करण",
+    "choose_language": "भाशा चुनो",
+    "intro": "EDULinker दा नमां संस्करण उपलब्ध ऐ! नमियां सुविधां हासल करने आस्ते कृपा करियै इक बारी साइट डाटा रीसेट करो। चिंता मत करो — तुसें दा खाता ते डाटा क्लाउड पर 100% सुरक्षित ऐ।",
+    "safety_title": "तुसें दा डाटा 100% सुरक्षित ऐ",
+    "safety_desc": "एह् सिर्फ ऐप कैश रिफ्रेश करदा ऐ। तुसें दा खाता, विद्यार्थी, नतीजे जां फाइलां कुछ बी डिलीट नेईं होग। रीसेट दे बाद फिरी साइन इन करो।",
+    "step1_title": "Site Settings खोलो",
+    "step1_desc": "अपने ब्राउजर दे उप्पर-दाएं कोने पर मेनू बटन (3 बिंदियां) टैप करो, फिरी गियर (⚙) आइकन टैप करियै 'Site settings' चुनो।",
+    "step1_highlight": "'Site settings' पर टैप करो",
+    "step2_title": "'Delete data and reset permissions' टैप करो",
+    "step2_desc": "Site settings पन्ने पर हेठ स्क्रोल करो। हेठ इक बटन दिक्खग — ओह्दे पर टैप करो।",
+    "step2_highlight": "'Delete data and reset permissions' टैप करो",
+    "step3_title": "'Delete and reset' दी पुष्टि करो",
+    "step3_desc": "इक पुष्टिकरण पॉपअप औग। 'Delete and reset' टैप करियै पूरा करो। फिरी EDULinker फिरी खोलो ते साइन इन करो।",
+    "step3_highlight": "'Delete and reset' टैप करो",
+    "footer_note": "रीसेट दे बाद ओहो ईमेल ते पासवर्ड कन्नै फिरी लॉगइन करो। तुसें दा सारा डाटा उत्थें ही होग।",
+    "done_button": "होई गेआ — मैं अपडेट करी लेआ",
+    "default_notes": "बग फिक्स ते प्रदर्शन सुधार।"
   }
 }
