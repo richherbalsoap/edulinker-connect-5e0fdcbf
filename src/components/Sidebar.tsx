@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Users, BookOpen, MessageSquare, FileText,
   DollarSign, Bell, BarChart3, Bot, TrendingUp, Settings, X,
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePin } from '@/context/PinContext';
+import LanguageSelector from '@/components/LanguageSelector';
 import edulinkerLogo from '@/assets/edulinker-logo.png';
 
 interface NavItemType {
