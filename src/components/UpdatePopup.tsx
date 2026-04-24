@@ -1,15 +1,41 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Settings, ShieldCheck, Trash2, CheckCircle2, Info, RotateCw } from "lucide-react";
+import { X, Settings, ShieldCheck, Trash2, CheckCircle2, Info, RotateCw, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import LanguageSelector from "@/components/LanguageSelector";
 import { APP_VERSION, SHOW_UPDATE_POPUP, ACK_STORAGE_KEY } from "@/config/appVersion";
 import step1 from "@/assets/update-step-1-menu.jpeg";
 import step2 from "@/assets/update-step-2-permissions.jpeg";
 import step3 from "@/assets/update-step-3-confirm.jpeg";
 
+/* ─── All supported languages ───────────────────── */
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिंदी" },
+  { code: "gu", label: "ગુજરાતી" },
+  { code: "mr", label: "मराठी" },
+  { code: "bn", label: "বাংলা" },
+  { code: "ta", label: "தமிழ்" },
+  { code: "te", label: "తెలుగు" },
+  { code: "kn", label: "ಕನ್ನಡ" },
+  { code: "ml", label: "മലയാളം" },
+  { code: "pa", label: "ਪੰਜਾਬੀ" },
+  { code: "ur", label: "اردو" },
+  { code: "or", label: "ଓଡ଼ିଆ" },
+  { code: "as", label: "অসমীয়া" },
+  { code: "sa", label: "संस्कृतम्" },
+  { code: "mai", label: "मैथिली" },
+  { code: "bho", label: "भोजपुरी" },
+  { code: "raj", label: "राजस्थानी" },
+  { code: "doi", label: "डोगरी" },
+  { code: "kok", label: "कोंकणी" },
+  { code: "mni", label: "মণিপুরী" },
+  { code: "sat", label: "ᱥᱟᱱᱛᱟᱲᱤ" },
+  { code: "ne", label: "नेपाली" },
+  { code: "sd", label: "سنڌي" },
+];
+
 const UpdatePopup = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -29,6 +55,10 @@ const UpdatePopup = () => {
       /* ignore */
     }
     setOpen(false);
+  };
+
+  const handleLanguageChange = (code: string) => {
+    i18n.changeLanguage(code);
   };
 
   if (!open) return null;
@@ -57,10 +87,12 @@ const UpdatePopup = () => {
     },
   ];
 
+  const currentLang = i18n.language?.slice(0, 3) || "en";
+
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6"
-      style={{ background: "rgba(2, 8, 2, 0.85)", backdropFilter: "blur(8px)" }}
+      style={{ background: "rgba(2,8,2,0.88)", backdropFilter: "blur(8px)" }}
       role="dialog"
       aria-modal="true"
     >
@@ -69,10 +101,11 @@ const UpdatePopup = () => {
         style={{
           background: "linear-gradient(160deg, #0a1a0a 0%, #0f2010 100%)",
           border: "1px solid rgba(212,133,74,0.35)",
-          boxShadow: "0 0 0 1px rgba(212,133,74,0.1), 0 20px 60px rgba(0,0,0,0.7), 0 0 80px rgba(212,133,74,0.08) inset",
+          boxShadow:
+            "0 0 0 1px rgba(212,133,74,0.1), 0 20px 60px rgba(0,0,0,0.7), 0 0 80px rgba(212,133,74,0.08) inset",
         }}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <div
           className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-4 border-b"
           style={{
@@ -129,7 +162,7 @@ const UpdatePopup = () => {
         </div>
 
         <div className="px-5 sm:px-7 py-5 space-y-5">
-          {/* Language selector */}
+          {/* ── Language Selector (inline, always works) ── */}
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p
               style={{
@@ -140,12 +173,36 @@ const UpdatePopup = () => {
             >
               {t("update.choose_language")}
             </p>
-            <div className="min-w-[180px]">
-              <LanguageSelector variant="compact" />
-            </div>
+            <select
+              value={currentLang}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              style={{
+                background: "rgba(10,26,10,0.9)",
+                border: "1px solid rgba(74,138,122,0.45)",
+                borderRadius: 10,
+                color: "#e8f0ec",
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: "0.8rem",
+                padding: "6px 32px 6px 12px",
+                cursor: "pointer",
+                outline: "none",
+                appearance: "none",
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d4854a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 10px center",
+                minWidth: 160,
+              }}
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code} style={{ background: "#0a1a0a" }}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Safety banner */}
+          {/* ── Safety banner ── */}
           <div
             className="flex items-start gap-3 rounded-xl px-4 py-3"
             style={{
@@ -181,7 +238,7 @@ const UpdatePopup = () => {
             </div>
           </div>
 
-          {/* Intro */}
+          {/* ── Intro ── */}
           <div className="flex items-start gap-3">
             <Info size={16} style={{ color: "#d4854a", flexShrink: 0, marginTop: 3 }} />
             <p
@@ -196,7 +253,7 @@ const UpdatePopup = () => {
             </p>
           </div>
 
-          {/* Steps */}
+          {/* ── Steps ── */}
           <ol className="space-y-5">
             {steps.map((s, i) => {
               const Icon = s.icon;
@@ -209,7 +266,10 @@ const UpdatePopup = () => {
                     border: "1px solid rgba(74,138,122,0.25)",
                   }}
                 >
-                  <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: "rgba(74,138,122,0.2)" }}>
+                  <div
+                    className="flex items-center gap-3 px-4 py-3 border-b"
+                    style={{ borderColor: "rgba(74,138,122,0.2)" }}
+                  >
                     <div
                       className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full"
                       style={{
@@ -248,9 +308,10 @@ const UpdatePopup = () => {
                     >
                       {s.desc}
                     </p>
-
-                    {/* Screenshot with highlight badge */}
-                    <div className="relative rounded-lg overflow-hidden" style={{ border: "1px solid rgba(212,133,74,0.3)" }}>
+                    <div
+                      className="relative rounded-lg overflow-hidden"
+                      style={{ border: "1px solid rgba(212,133,74,0.3)" }}
+                    >
                       <img
                         src={s.img}
                         alt={s.title}
@@ -283,7 +344,73 @@ const UpdatePopup = () => {
             })}
           </ol>
 
-          {/* Footer note */}
+          {/* ── PC shortcut note ── */}
+          <div
+            className="flex items-start gap-3 rounded-xl px-4 py-3"
+            style={{
+              background: "rgba(212,133,74,0.07)",
+              border: "1px solid rgba(212,133,74,0.3)",
+            }}
+          >
+            <Monitor size={17} style={{ color: "#d4854a", flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <p
+                style={{
+                  fontFamily: "'Nunito', sans-serif",
+                  color: "#e8f0ec",
+                  fontSize: "0.82rem",
+                  fontWeight: 500,
+                  lineHeight: 1.5,
+                  marginBottom: 4,
+                }}
+              >
+                {t("update.pc_title") || "Using a Computer?"}
+              </p>
+              <p
+                style={{
+                  fontFamily: "'Nunito', sans-serif",
+                  color: "rgba(232,240,236,0.6)",
+                  fontSize: "0.75rem",
+                  fontWeight: 300,
+                  lineHeight: 1.6,
+                }}
+              >
+                {t("update.pc_desc") || "After clearing cache, press "}
+                <span
+                  style={{
+                    display: "inline-flex",
+                    gap: 4,
+                    alignItems: "center",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  {["Ctrl", "Shift", "R"].map((key) => (
+                    <kbd
+                      key={key}
+                      style={{
+                        background: "rgba(212,133,74,0.18)",
+                        border: "1px solid rgba(212,133,74,0.5)",
+                        borderRadius: 5,
+                        padding: "1px 7px",
+                        fontFamily: "monospace",
+                        fontSize: "0.78rem",
+                        color: "#d4854a",
+                        fontWeight: 600,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {key}
+                    </kbd>
+                  ))}
+                </span>{" "}
+                <span style={{ color: "rgba(232,240,236,0.6)" }}>
+                  {t("update.pc_desc_suffix") || "to do a hard refresh and load the latest version."}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* ── Footer note ── */}
           <p
             style={{
               fontFamily: "'Nunito', sans-serif",
@@ -297,7 +424,7 @@ const UpdatePopup = () => {
             {t("update.footer_note")}
           </p>
 
-          {/* Done button */}
+          {/* ── Done button ── */}
           <Button
             onClick={handleDone}
             className="w-full h-12"
