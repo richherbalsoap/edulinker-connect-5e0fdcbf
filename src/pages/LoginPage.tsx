@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { LogIn } from "lucide-react";
 import InstallBanner from "@/components/InstallBanner";
 import LanguageSelector from "@/components/LanguageSelector";
+import UpdatePopup from "@/components/UpdatePopup";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
 
 /* ─── Types ────────────────────────────────────── */
@@ -351,6 +352,7 @@ const LoginPage = () => {
         />
 
         <InstallBanner />
+        <UpdatePopup />
 
         {/* Login Card */}
         <div className="forest-card card-enter w-full max-w-sm px-8 py-10 relative" style={{ zIndex: 10 }}>

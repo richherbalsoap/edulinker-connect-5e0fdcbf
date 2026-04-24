@@ -31,5 +31,25 @@
   "common": {
     "language": "भास",
     "select_language": "भास निवडात"
+  },
+  "update": {
+    "title": "अपडेट उपलब्ध आसा",
+    "version_label": "आवृत्ती",
+    "choose_language": "भास निवडात",
+    "intro": "EDULinker ची नवी आवृत्ती उपलब्ध आसा! नव्या सुविधा मेळोवपाक उपकार करून एक फावट साइट डेटा रिसेट करात। चिंता करिनाकात — तुमचें खातें आनी डेटा क्लाउडार 100% सुरक्षीत आसा।",
+    "safety_title": "तुमचें डेटा 100% सुरक्षीत आसा",
+    "safety_desc": "हें फकत ऍप कॅश रिफ्रेश करता। तुमचें खातें, विद्यार्थी, निकाल वा फायली कांय बी डिलीट जावचेंना। रिसेट उपरांत परत साइन इन करात।",
+    "step1_title": "Site Settings उगडात",
+    "step1_desc": "तुमच्या ब्राउझराच्या वयर-उजव्या कोनार मेनू बटण (3 टिंब) टॅप करात, मागीर गिअर (⚙) आयकॉन टॅप करून 'Site settings' निवडात।",
+    "step1_highlight": "'Site settings' टॅप करात",
+    "step2_title": "'Delete data and reset permissions' टॅप करात",
+    "step2_desc": "Site settings पानार सकयल स्क्रोल करात। सकयल एक बटण दिसतलें — ताचेर टॅप करात।",
+    "step2_highlight": "'Delete data and reset permissions' टॅप करात",
+    "step3_title": "'Delete and reset' खातीर करात",
+    "step3_desc": "एक खात्रीकरण पॉपअप येतलें। 'Delete and reset' टॅप करून पुराय करात। मागीर EDULinker परत उगडात आनी साइन इन करात।",
+    "step3_highlight": "'Delete and reset' टॅप करात",
+    "footer_note": "रिसेट उपरांत त्याच ईमेल आनी पासवर्डान परत लॉगिन करात। तुमचो सगळो डेटा थंय आसतलो।",
+    "done_button": "जालें — हांवें अपडेट केलें",
+    "default_notes": "बग फिक्स आनी कामगिरी सुधारणा।"
   }
 }
