@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, X, Share, MoreVertical } from "lucide-react";
+import { Download, X, Share } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -20,54 +20,35 @@ if (typeof window !== "undefined") {
 }
 
 const InstallBanner = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(_cachedPrompt);
   const [visible, setVisible] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const isIOS = useRef(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream);
-  const isMobileBrowser = useRef(/android|iphone|ipad|ipod/i.test(navigator.userAgent));
 
   useEffect(() => {
+    // iOS-only install banner. Android users get the native APK from Play Store / direct install
+    // and receive automatic updates via the APK itself — no PWA install needed.
+    if (!isIOS.current) return;
     if (window.matchMedia("(display-mode: standalone)").matches) return;
     if (sessionStorage.getItem("edulinker_install_banner_dismissed")) return;
 
-    if (_cachedPrompt || isIOS.current || isMobileBrowser.current) {
-      setVisible(true);
-    }
-
-    const onPromptReady = () => {
-      setDeferredPrompt(_cachedPrompt);
-      if (!sessionStorage.getItem("edulinker_install_banner_dismissed")) {
-        setVisible(true);
-      }
-    };
+    setVisible(true);
 
     const onInstalled = () => {
-      setDeferredPrompt(null);
       setVisible(false);
       setShowGuide(false);
       sessionStorage.removeItem("edulinker_install_banner_dismissed");
     };
 
-    window.addEventListener("pwa-prompt-ready", onPromptReady);
     window.addEventListener("appinstalled", onInstalled);
 
     return () => {
-      window.removeEventListener("pwa-prompt-ready", onPromptReady);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
 
   const handleInstall = async () => {
-    const prompt = deferredPrompt || _cachedPrompt;
-    if (prompt) {
-      await prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      _cachedPrompt = null;
-      setDeferredPrompt(null);
-      if (outcome === "accepted") handleClose();
-    } else {
-      setShowGuide(true);
-    }
+    // iOS has no native install prompt — always show the manual Add-to-Home-Screen guide
+    setShowGuide(true);
   };
 
   const handleClose = () => {
@@ -117,8 +98,7 @@ const InstallBanner = () => {
               <X size={16} />
             </button>
             <h3 className="text-primary font-bold text-lg mb-3">Install EDULinker</h3>
-            {isIOS.current ? (
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <p className="text-foreground text-sm font-medium">iPhone / iPad pe:</p>
                 <div className="space-y-2 bg-muted/30 rounded-lg p-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -140,32 +120,7 @@ const InstallBanner = () => {
                     "Add" pe tap karo — Done!
                   </p>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-foreground text-sm font-medium">Android / Chrome pe:</p>
-                <div className="space-y-2 bg-muted/30 rounded-lg p-3">
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                      1
-                    </span>
-                    Chrome mein <MoreVertical size={12} className="text-primary inline" /> 3-dot menu dabao
-                  </p>
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                      2
-                    </span>
-                    "Install app" ya "Add to Home Screen" select karo
-                  </p>
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                      3
-                    </span>
-                    "Install" pe tap karo — Done!
-                  </p>
-                </div>
-              </div>
-            )}
+            </div>
             <Button variant="outline" onClick={() => setShowGuide(false)} className="w-full mt-4 text-sm">
               Samajh aa gaya
             </Button>
