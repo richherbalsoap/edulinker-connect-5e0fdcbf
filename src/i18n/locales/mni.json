@@ -31,5 +31,43 @@
   "common": {
     "language": "লোন",
     "select_language": "লোন খনবিয়ু"
+  },
+  "dashboard": {
+    "title": "ড্যাশবোর্ড",
+    "year_label": "চহী",
+    "overall": "অপুনবা",
+    "total_students": "অপুনবা মহৈরোয়",
+    "homework_sent": "য়ুমদা থবক থারে",
+    "complaints_sent": "ৱাকৎ থারে",
+    "results_sent": "ফলম্বা থারে",
+    "activity_on": "থবক",
+    "no_activity": "মতম অসিদা থবক অমত্তা লৈতে।",
+    "calendar": "ক্যালেন্দার",
+    "homework_tag": "য়ুমদা থবক",
+    "complaint_tag": "ৱাকৎ",
+    "result_tag": "ফলম্বা",
+    "months": {
+      "january": "জানুৱারি",
+      "february": "ফেব্রুৱারি",
+      "march": "মার্চ",
+      "april": "এপ্রিল",
+      "may": "মে",
+      "june": "জুন",
+      "july": "জুলাই",
+      "august": "আগস্ট",
+      "september": "সেপ্টেম্বর",
+      "october": "অক্টোবর",
+      "november": "নভেম্বর",
+      "december": "ডিসেম্বর"
+    },
+    "days": {
+      "sun": "নোংমাইজিং",
+      "mon": "নিংথৌকাবা",
+      "tue": "লৈবাকপোকপা",
+      "wed": "য়ুমশকেইশা",
+      "thu": "শগোলশেন",
+      "fri": "ইরাই",
+      "sat": "থাংজ"
+    }
   }
 }

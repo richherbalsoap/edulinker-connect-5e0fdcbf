@@ -31,5 +31,43 @@
   "common": {
     "language": "भास",
     "select_language": "भास निवडात"
+  },
+  "dashboard": {
+    "title": "डॅशबोर्ड",
+    "year_label": "वर्स",
+    "overall": "एकूण",
+    "total_students": "एकूण विद्यार्थी",
+    "homework_sent": "गृहकाम धाडलो",
+    "complaints_sent": "तक्रारी धाडल्यो",
+    "results_sent": "निकाल धाडले",
+    "activity_on": "कार्यावळ",
+    "no_activity": "ह्या तारकेक खंयचीच कार्यावळ ना.",
+    "calendar": "कॅलेंडर",
+    "homework_tag": "गृहकाम",
+    "complaint_tag": "तक्रार",
+    "result_tag": "निकाल",
+    "months": {
+      "january": "जानेवारी",
+      "february": "फेब्रुवारी",
+      "march": "मार्च",
+      "april": "एप्रिल",
+      "may": "मे",
+      "june": "जून",
+      "july": "जुलय",
+      "august": "ऑगस्ट",
+      "september": "सप्टेंबर",
+      "october": "ऑक्टोबर",
+      "november": "नोव्हेंबर",
+      "december": "डिसेंबर"
+    },
+    "days": {
+      "sun": "आय",
+      "mon": "सोम",
+      "tue": "मंगळ",
+      "wed": "बुध",
+      "thu": "बिर",
+      "fri": "शुक्र",
+      "sat": "शेन"
+    }
   }
 }

@@ -31,5 +31,43 @@
   "common": {
     "language": "زَبان",
     "select_language": "زَبان ژأرِو"
+  },
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "year_label": "ؤری",
+    "overall": "مجموعی",
+    "total_students": "مجموعی طالب علم",
+    "homework_sent": "ہوم ورک ٲسؠ سۄزمت",
+    "complaints_sent": "شکایژ ٲسہِ سۄزمژ",
+    "results_sent": "نتیجہٕ ٲسؠ سۄزمتؠ",
+    "activity_on": "سرگرمی",
+    "no_activity": "یہِ تاریخس پؠٹھ کانٛہہ سرگرمی چھِنہٕ۔",
+    "calendar": "کیلنڈر",
+    "homework_tag": "ہوم ورک",
+    "complaint_tag": "شکایت",
+    "result_tag": "نتیجہ",
+    "months": {
+      "january": "جنوری",
+      "february": "فروری",
+      "march": "مارچ",
+      "april": "اپریل",
+      "may": "مئی",
+      "june": "جون",
+      "july": "جولائی",
+      "august": "اگست",
+      "september": "ستمبر",
+      "october": "اکتوبر",
+      "november": "نومبر",
+      "december": "دسمبر"
+    },
+    "days": {
+      "sun": "آتھوار",
+      "mon": "ژٔندٕروار",
+      "tue": "بوموار",
+      "wed": "بۄدوار",
+      "thu": "برٛٛسوار",
+      "fri": "جُمہ",
+      "sat": "بٹہ وار"
+    }
   }
 }

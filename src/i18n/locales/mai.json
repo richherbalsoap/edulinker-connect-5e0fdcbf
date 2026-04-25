@@ -31,5 +31,43 @@
   "common": {
     "language": "भाषा",
     "select_language": "भाषा चुनू"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "year_label": "वर्ष",
+    "overall": "कुल",
+    "total_students": "कुल विद्यार्थी",
+    "homework_sent": "गृहकार्य पठाएल",
+    "complaints_sent": "शिकायत पठाएल",
+    "results_sent": "परिणाम पठाएल",
+    "activity_on": "गतिविधि",
+    "no_activity": "एहि तिथिक लेल कोनो गतिविधि नहि अछि।",
+    "calendar": "कैलेंडर",
+    "homework_tag": "गृहकार्य",
+    "complaint_tag": "शिकायत",
+    "result_tag": "परिणाम",
+    "months": {
+      "january": "जनवरी",
+      "february": "फरवरी",
+      "march": "मार्च",
+      "april": "अप्रैल",
+      "may": "मई",
+      "june": "जून",
+      "july": "जुलाई",
+      "august": "अगस्त",
+      "september": "सितंबर",
+      "october": "अक्टूबर",
+      "november": "नवंबर",
+      "december": "दिसंबर"
+    },
+    "days": {
+      "sun": "रवि",
+      "mon": "सोम",
+      "tue": "मंगल",
+      "wed": "बुध",
+      "thu": "गुरु",
+      "fri": "शुक्र",
+      "sat": "शनि"
+    }
   }
 }

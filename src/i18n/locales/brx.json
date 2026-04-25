@@ -31,5 +31,43 @@
   "common": {
     "language": "राव",
     "select_language": "राव सायख"
+  },
+  "dashboard": {
+    "title": "डेसबर्ड",
+    "year_label": "बोसोर",
+    "overall": "गासै",
+    "total_students": "गासै फरायसा",
+    "homework_sent": "नोंथों खामानि दैथायबाय",
+    "complaints_sent": "गोरोब दैथायबाय",
+    "results_sent": "फिथाइ दैथायबाय",
+    "activity_on": "खामानि",
+    "no_activity": "बे सान आव जेबो खामानि गैया।",
+    "calendar": "केलेन्डार",
+    "homework_tag": "नोंथों खामानि",
+    "complaint_tag": "गोरोब",
+    "result_tag": "फिथाइ",
+    "months": {
+      "january": "जानुवारी",
+      "february": "फेब्रुवारी",
+      "march": "मार्स",
+      "april": "एप्रिल",
+      "may": "मे",
+      "june": "जुन",
+      "july": "जुलाइ",
+      "august": "आगस्ट",
+      "september": "सेप्तेम्बार",
+      "october": "अक्तबर",
+      "november": "नबेम्बार",
+      "december": "दिसेम्बार"
+    },
+    "days": {
+      "sun": "रबि",
+      "mon": "सम",
+      "tue": "मंगल",
+      "wed": "बुध",
+      "thu": "बिसथि",
+      "fri": "सुक्र",
+      "sat": "सनि"
+    }
   }
 }

@@ -31,5 +31,43 @@
   "common": {
     "language": "ഭാഷ",
     "select_language": "ഭാഷ തിരഞ്ഞെടുക്കുക"
+  },
+  "dashboard": {
+    "title": "ഡാഷ്‌ബോർഡ്",
+    "year_label": "വർഷം",
+    "overall": "ആകെ",
+    "total_students": "ആകെ വിദ്യാർത്ഥികൾ",
+    "homework_sent": "ഹോംവർക്ക് അയച്ചു",
+    "complaints_sent": "പരാതികൾ അയച്ചു",
+    "results_sent": "ഫലങ്ങൾ അയച്ചു",
+    "activity_on": "പ്രവർത്തനം",
+    "no_activity": "ഈ തീയതിയിൽ പ്രവർത്തനങ്ങളൊന്നുമില്ല.",
+    "calendar": "കലണ്ടർ",
+    "homework_tag": "ഹോംവർക്ക്",
+    "complaint_tag": "പരാതി",
+    "result_tag": "ഫലം",
+    "months": {
+      "january": "ജനുവരി",
+      "february": "ഫെബ്രുവരി",
+      "march": "മാർച്ച്",
+      "april": "ഏപ്രിൽ",
+      "may": "മേയ്",
+      "june": "ജൂൺ",
+      "july": "ജൂലൈ",
+      "august": "ഓഗസ്റ്റ്",
+      "september": "സെപ്റ്റംബർ",
+      "october": "ഒക്ടോബർ",
+      "november": "നവംബർ",
+      "december": "ഡിസംബർ"
+    },
+    "days": {
+      "sun": "ഞായ",
+      "mon": "തിങ്ക",
+      "tue": "ചൊവ്വ",
+      "wed": "ബുധ",
+      "thu": "വ്യാഴ",
+      "fri": "വെള്ളി",
+      "sat": "ശനി"
+    }
   }
 }

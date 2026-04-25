@@ -31,5 +31,43 @@
   "common": {
     "language": "ଭାଷା",
     "select_language": "ଭାଷା ଚୟନ କରନ୍ତୁ"
+  },
+  "dashboard": {
+    "title": "ଡ୍ୟାସବୋର୍ଡ",
+    "year_label": "ବର୍ଷ",
+    "overall": "ସମୁଦାୟ",
+    "total_students": "ସମୁଦାୟ ଛାତ୍ର",
+    "homework_sent": "ଗୃହକାର୍ଯ୍ୟ ପଠାଗଲା",
+    "complaints_sent": "ଅଭିଯୋଗ ପଠାଗଲା",
+    "results_sent": "ଫଳାଫଳ ପଠାଗଲା",
+    "activity_on": "କାର୍ଯ୍ୟକଳାପ",
+    "no_activity": "ଏହି ତାରିଖରେ କୌଣସି କାର୍ଯ୍ୟକଳାପ ନାହିଁ।",
+    "calendar": "କ୍ୟାଲେଣ୍ଡର",
+    "homework_tag": "ଗୃହକାର୍ଯ୍ୟ",
+    "complaint_tag": "ଅଭିଯୋଗ",
+    "result_tag": "ଫଳାଫଳ",
+    "months": {
+      "january": "ଜାନୁଆରୀ",
+      "february": "ଫେବ୍ରୁଆରୀ",
+      "march": "ମାର୍ଚ୍ଚ",
+      "april": "ଏପ୍ରିଲ୍",
+      "may": "ମେ",
+      "june": "ଜୁନ୍",
+      "july": "ଜୁଲାଇ",
+      "august": "ଅଗଷ୍ଟ",
+      "september": "ସେପ୍ଟେମ୍ବର",
+      "october": "ଅକ୍ଟୋବର",
+      "november": "ନଭେମ୍ବର",
+      "december": "ଡିସେମ୍ବର"
+    },
+    "days": {
+      "sun": "ରବି",
+      "mon": "ସୋମ",
+      "tue": "ମଙ୍ଗଳ",
+      "wed": "ବୁଧ",
+      "thu": "ଗୁରୁ",
+      "fri": "ଶୁକ୍ର",
+      "sat": "ଶନି"
+    }
   }
 }

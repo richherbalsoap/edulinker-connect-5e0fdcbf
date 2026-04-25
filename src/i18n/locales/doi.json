@@ -31,5 +31,43 @@
   "common": {
     "language": "भाशा",
     "select_language": "भाशा चुनो"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "year_label": "बर्रा",
+    "overall": "कुल",
+    "total_students": "कुल विद्यार्थी",
+    "homework_sent": "गृहकार्य भेजेआ",
+    "complaints_sent": "शकैतां भेजियां",
+    "results_sent": "नतीजे भेजे",
+    "activity_on": "गतिविधि",
+    "no_activity": "इस तरीक लेई कोई गतिविधि नेईं ऐ।",
+    "calendar": "कैलेंडर",
+    "homework_tag": "गृहकार्य",
+    "complaint_tag": "शकैत",
+    "result_tag": "नतीजा",
+    "months": {
+      "january": "जनवरी",
+      "february": "फरवरी",
+      "march": "मार्च",
+      "april": "अप्रैल",
+      "may": "मई",
+      "june": "जून",
+      "july": "जुलाई",
+      "august": "अगस्त",
+      "september": "सितंबर",
+      "october": "अक्टूबर",
+      "november": "नवंबर",
+      "december": "दिसंबर"
+    },
+    "days": {
+      "sun": "तोआर",
+      "mon": "सोम",
+      "tue": "मंगल",
+      "wed": "बुध",
+      "thu": "बीर",
+      "fri": "शुक्कर",
+      "sat": "शनि"
+    }
   }
 }

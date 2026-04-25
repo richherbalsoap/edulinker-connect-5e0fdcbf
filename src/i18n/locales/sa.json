@@ -31,5 +31,43 @@
   "common": {
     "language": "भाषा",
     "select_language": "भाषां चिनुत"
+  },
+  "dashboard": {
+    "title": "फलकम्",
+    "year_label": "वर्षम्",
+    "overall": "सर्वम्",
+    "total_students": "सर्वे छात्राः",
+    "homework_sent": "गृहकार्यं प्रेषितम्",
+    "complaints_sent": "उपालम्भाः प्रेषिताः",
+    "results_sent": "फलानि प्रेषितानि",
+    "activity_on": "क्रिया",
+    "no_activity": "अस्मिन् दिनाङ्के कापि क्रिया नास्ति।",
+    "calendar": "पञ्चाङ्गम्",
+    "homework_tag": "गृहकार्यम्",
+    "complaint_tag": "उपालम्भः",
+    "result_tag": "फलम्",
+    "months": {
+      "january": "जनवरी",
+      "february": "फरवरी",
+      "march": "मार्च",
+      "april": "अप्रैल",
+      "may": "मई",
+      "june": "जून",
+      "july": "जुलाई",
+      "august": "अगस्त",
+      "september": "सितम्बर",
+      "october": "अक्टूबर",
+      "november": "नवम्बर",
+      "december": "दिसम्बर"
+    },
+    "days": {
+      "sun": "रवि",
+      "mon": "सोम",
+      "tue": "मङ्गल",
+      "wed": "बुध",
+      "thu": "गुरु",
+      "fri": "शुक्र",
+      "sat": "शनि"
+    }
   }
 }

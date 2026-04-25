@@ -31,5 +31,43 @@
   "common": {
     "language": "भाषा",
     "select_language": "भाषा छान्नुहोस्"
+  },
+  "dashboard": {
+    "title": "ड्यासबोर्ड",
+    "year_label": "वर्ष",
+    "overall": "कुल",
+    "total_students": "कुल विद्यार्थी",
+    "homework_sent": "गृहकार्य पठाइयो",
+    "complaints_sent": "उजुरी पठाइए",
+    "results_sent": "नतिजा पठाइयो",
+    "activity_on": "गतिविधि",
+    "no_activity": "यो मितिमा कुनै गतिविधि छैन।",
+    "calendar": "क्यालेन्डर",
+    "homework_tag": "गृहकार्य",
+    "complaint_tag": "उजुरी",
+    "result_tag": "नतिजा",
+    "months": {
+      "january": "जनवरी",
+      "february": "फेब्रुअरी",
+      "march": "मार्च",
+      "april": "अप्रिल",
+      "may": "मे",
+      "june": "जुन",
+      "july": "जुलाई",
+      "august": "अगस्ट",
+      "september": "सेप्टेम्बर",
+      "october": "अक्टोबर",
+      "november": "नोभेम्बर",
+      "december": "डिसेम्बर"
+    },
+    "days": {
+      "sun": "आइत",
+      "mon": "सोम",
+      "tue": "मङ्गल",
+      "wed": "बुध",
+      "thu": "बिहि",
+      "fri": "शुक्र",
+      "sat": "शनि"
+    }
   }
 }

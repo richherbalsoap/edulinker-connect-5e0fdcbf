@@ -31,5 +31,43 @@
   "common": {
     "language": "ٻولي",
     "select_language": "ٻولي چونڊيو"
+  },
+  "dashboard": {
+    "title": "ڊيش بورڊ",
+    "year_label": "سال",
+    "overall": "ڪل",
+    "total_students": "ڪل شاگرد",
+    "homework_sent": "گهرڪار موڪليو ويو",
+    "complaints_sent": "شڪايتون موڪليون ويون",
+    "results_sent": "نتيجا موڪليا ويا",
+    "activity_on": "سرگرمي",
+    "no_activity": "هن تاريخ لاءِ ڪا سرگرمي درج ناهي.",
+    "calendar": "ڪئلينڊر",
+    "homework_tag": "گهرڪار",
+    "complaint_tag": "شڪايت",
+    "result_tag": "نتيجو",
+    "months": {
+      "january": "جنوري",
+      "february": "فيبروري",
+      "march": "مارچ",
+      "april": "اپريل",
+      "may": "مئي",
+      "june": "جون",
+      "july": "جولاءِ",
+      "august": "آگسٽ",
+      "september": "سيپٽمبر",
+      "october": "آڪٽوبر",
+      "november": "نومبر",
+      "december": "ڊسمبر"
+    },
+    "days": {
+      "sun": "آچر",
+      "mon": "سومر",
+      "tue": "اڱارو",
+      "wed": "اربع",
+      "thu": "خميس",
+      "fri": "جمع",
+      "sat": "ڇنڇر"
+    }
   }
 }

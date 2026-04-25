@@ -31,5 +31,43 @@
   "common": {
     "language": "زبان",
     "select_language": "زبان منتخب کریں"
+  },
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "year_label": "سال",
+    "overall": "مجموعی",
+    "total_students": "کل طلباء",
+    "homework_sent": "ہوم ورک بھیجا گیا",
+    "complaints_sent": "شکایات بھیجی گئیں",
+    "results_sent": "نتائج بھیجے گئے",
+    "activity_on": "سرگرمی",
+    "no_activity": "اس تاریخ کے لیے کوئی سرگرمی درج نہیں ہے۔",
+    "calendar": "کیلنڈر",
+    "homework_tag": "ہوم ورک",
+    "complaint_tag": "شکایت",
+    "result_tag": "نتیجہ",
+    "months": {
+      "january": "جنوری",
+      "february": "فروری",
+      "march": "مارچ",
+      "april": "اپریل",
+      "may": "مئی",
+      "june": "جون",
+      "july": "جولائی",
+      "august": "اگست",
+      "september": "ستمبر",
+      "october": "اکتوبر",
+      "november": "نومبر",
+      "december": "دسمبر"
+    },
+    "days": {
+      "sun": "اتوار",
+      "mon": "پیر",
+      "tue": "منگل",
+      "wed": "بدھ",
+      "thu": "جمعرات",
+      "fri": "جمعہ",
+      "sat": "ہفتہ"
+    }
   }
 }

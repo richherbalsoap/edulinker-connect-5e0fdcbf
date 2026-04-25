@@ -31,5 +31,43 @@
   "common": {
     "language": "ভাষা",
     "select_language": "ভাষা নির্বাচন করুন"
+  },
+  "dashboard": {
+    "title": "ড্যাশবোর্ড",
+    "year_label": "বছর",
+    "overall": "সব",
+    "total_students": "মোট শিক্ষার্থী",
+    "homework_sent": "হোমওয়ার্ক পাঠানো",
+    "complaints_sent": "অভিযোগ পাঠানো",
+    "results_sent": "ফলাফল পাঠানো",
+    "activity_on": "কার্যকলাপ",
+    "no_activity": "এই তারিখের জন্য কোন কার্যকলাপ নেই।",
+    "calendar": "ক্যালেন্ডার",
+    "homework_tag": "হোমওয়ার্ক",
+    "complaint_tag": "অভিযোগ",
+    "result_tag": "ফলাফল",
+    "months": {
+      "january": "জানুয়ারি",
+      "february": "ফেব্রুয়ারি",
+      "march": "মার্চ",
+      "april": "এপ্রিল",
+      "may": "মে",
+      "june": "জুন",
+      "july": "জুলাই",
+      "august": "আগস্ট",
+      "september": "সেপ্টেম্বর",
+      "october": "অক্টোবর",
+      "november": "নভেম্বর",
+      "december": "ডিসেম্বর"
+    },
+    "days": {
+      "sun": "রবি",
+      "mon": "সোম",
+      "tue": "মঙ্গল",
+      "wed": "বুধ",
+      "thu": "বৃহঃ",
+      "fri": "শুক্র",
+      "sat": "শনি"
+    }
   }
 }
