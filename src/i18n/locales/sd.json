@@ -31,25 +31,5 @@
   "common": {
     "language": "ٻولي",
     "select_language": "ٻولي چونڊيو"
-  },
-  "update": {
-    "title": "اپڊيٽ موجود آهي",
-    "version_label": "نسخو",
-    "choose_language": "ٻولي چونڊيو",
-    "intro": "EDULinker جو نئون نسخو موجود آهي! نوان فيچرز حاصل ڪرڻ لاءِ مهرباني ڪري هڪ ڀيرو سائيٽ ڊيٽا ري سيٽ ڪريو۔ پريشان نه ٿيو — توهان جو اڪائونٽ ۽ ڊيٽا ڪلائوڊ تي 100% محفوظ آهي۔",
-    "safety_title": "توهان جو ڊيٽا 100% محفوظ آهي",
-    "safety_desc": "هي صرف ايپ ڪيشي کي ريفريش ڪري ٿو۔ توهان جو اڪائونٽ، شاگرد، نتيجا يا فائلون ڪجهه به ڊليٽ نه ٿيندو۔ ري سيٽ کان پوءِ ٻيهر سائن ان ڪريو۔",
-    "step1_title": "Site Settings کوليو",
-    "step1_desc": "پنهنجي برائوزر جي مٿي-ساڄي ڪنڊ تي مينيو بٽڻ (3 ڊاٽ) ٽيپ ڪريو، پوءِ گيئر (⚙) آئڪن ٽيپ ڪري 'Site settings' چونڊيو۔",
-    "step1_highlight": "'Site settings' ٽيپ ڪريو",
-    "step2_title": "'Delete data and reset permissions' ٽيپ ڪريو",
-    "step2_desc": "Site settings صفحي تي هيٺ اسڪرول ڪريو۔ هيٺان هڪ بٽڻ نظر ايندو — ان تي ٽيپ ڪريو۔",
-    "step2_highlight": "'Delete data and reset permissions' ٽيپ ڪريو",
-    "step3_title": "'Delete and reset' جي تصديق ڪريو",
-    "step3_desc": "هڪ تصديقي پاپ اپ ايندو۔ 'Delete and reset' ٽيپ ڪري مڪمل ڪريو۔ پوءِ EDULinker ٻيهر کوليو ۽ سائن ان ڪريو۔",
-    "step3_highlight": "'Delete and reset' ٽيپ ڪريو",
-    "footer_note": "ري سيٽ کان پوءِ ساڳي اي ميل ۽ پاسورڊ سان ٻيهر لاگ ان ڪريو۔ توهان جو سمورو ڊيٽا اتي ئي هوندو۔",
-    "done_button": "ٿي ويو — مون اپڊيٽ ڪيو",
-    "default_notes": "بگ فڪسز ۽ ڪارڪردگي ۾ بهتري۔"
   }
 }

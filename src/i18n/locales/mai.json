@@ -31,25 +31,5 @@
   "common": {
     "language": "भाषा",
     "select_language": "भाषा चुनू"
-  },
-  "update": {
-    "title": "अपडेट उपलब्ध अछि",
-    "version_label": "संस्करण",
-    "choose_language": "भाषा चुनू",
-    "intro": "EDULinker केर नव संस्करण उपलब्ध अछि! नव सुविधा प्राप्त करबाक लेल कृपया एक बेर साइट डाटा रीसेट करू। चिन्ता नहि करू — अहाँक खाता आ डाटा क्लाउड पर 100% सुरक्षित अछि।",
-    "safety_title": "अहाँक डाटा 100% सुरक्षित अछि",
-    "safety_desc": "ई केवल एप कैश रिफ्रेश करैत अछि। अहाँक खाता, छात्र, परिणाम वा फाइल किछु डिलीट नहि हएत। रीसेट केर बाद फेर साइन इन करू।",
-    "step1_title": "Site Settings खोलू",
-    "step1_desc": "अपन ब्राउजर केर ऊपर-दहिना कोन में मेनू बटन (3 बिन्दु) टैप करू, फेर गियर (⚙) आइकन टैप कऽ 'Site settings' चुनू।",
-    "step1_highlight": "'Site settings' पर टैप करू",
-    "step2_title": "'Delete data and reset permissions' टैप करू",
-    "step2_desc": "Site settings पेज पर निच्चा स्क्रॉल करू। निच्चा एक बटन देखा देत — ओकरा पर टैप करू।",
-    "step2_highlight": "'Delete data and reset permissions' टैप करू",
-    "step3_title": "'Delete and reset' केर पुष्टि करू",
-    "step3_desc": "एक पुष्टिकरण पॉपअप आओत। 'Delete and reset' टैप कऽ पूरा करू। फेर EDULinker फेर खोलू आ साइन इन करू।",
-    "step3_highlight": "'Delete and reset' टैप करू",
-    "footer_note": "रीसेट केर बाद ओहि ईमेल आ पासवर्ड सँ फेर लॉगिन करू। अहाँक सब डाटा ओतहि रहत।",
-    "done_button": "भऽ गेल — हम अपडेट कऽ लेलौं",
-    "default_notes": "बग फिक्स आ प्रदर्शन सुधार।"
   }
 }

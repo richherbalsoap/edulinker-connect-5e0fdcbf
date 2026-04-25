@@ -31,25 +31,5 @@
   "common": {
     "language": "राव",
     "select_language": "राव सायख"
-  },
-  "update": {
-    "title": "अपडेट मोनथायजोब",
-    "version_label": "बहागो",
-    "choose_language": "राव सायख",
-    "intro": "EDULinker आव गोदान बहागो मोनथायजोब! गोदान आनजादफोर मोननो थाखाय अननानै सायट डाटा एखेबनो रिसेट खालाम। चिनथा मा खालाम — नोंथांनि एकाउन्ट आरो डाटा क्लाउडआव 100% रैखाथि।",
-    "safety_title": "नोंथांनि डाटा 100% रैखाथि",
-    "safety_desc": "बेयो खालि एप क्यासखौ रिफ्रेश खालामो। नोंथांनि एकाउन्ट, फरायसा, फिथाय एबा फायल जायोबो डिलिट नङा। रिसेट उनाव फिन साइन इन खालाम।",
-    "step1_title": "Site Settings खेव",
-    "step1_desc": "नोंथांनि ब्राउजरनि गजासिम-आगानजों मेनु बटन (3 बिन्दु) टेप खालाम, उन गियर (⚙) आइकन टेप खालामनानै 'Site settings' सायख।",
-    "step1_highlight": "'Site settings' टेप खालाम",
-    "step2_title": "'Delete data and reset permissions' टेप खालाम",
-    "step2_desc": "Site settings सानजायाव गाहायआव स्क्रोल खालाम। गाहायआव मोनसे बटन नुजागोन — बेयाव टेप खालाम।",
-    "step2_highlight": "'Delete data and reset permissions' टेप खालाम",
-    "step3_title": "'Delete and reset' थि खालाम",
-    "step3_desc": "मोनसे थिखोनाय पपअप फैगोन। 'Delete and reset' टेप खालामनानै आबुं खालाम। उन EDULinker फिन खेव आरो साइन इन खालाम।",
-    "step3_highlight": "'Delete and reset' टेप खालाम",
-    "footer_note": "रिसेट उनाव बैदिनो ईमेल आरो पासवर्डजों फिन लगिन खालाम। नोंथांनि गासै डाटा बैजों थागोन।",
-    "done_button": "जादों — आं अपडेट खालामदों",
-    "default_notes": "बग फिक्स आरो प्रदर्शन सुधार।"
   }
 }

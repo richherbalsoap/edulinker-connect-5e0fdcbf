@@ -31,25 +31,5 @@
   "common": {
     "language": "भाषा",
     "select_language": "भाषा निवडा"
-  },
-  "update": {
-    "title": "अपडेट उपलब्ध आहे",
-    "version_label": "आवृत्ती",
-    "choose_language": "भाषा निवडा",
-    "intro": "EDULinker ची नवीन आवृत्ती उपलब्ध आहे! नवीन वैशिष्ट्ये मिळविण्यासाठी कृपया साइट डेटा एकदा रीसेट करा. काळजी करू नका — तुमचे खाते आणि डेटा क्लाउडवर 100% सुरक्षित आहे.",
-    "safety_title": "तुमचा डेटा 100% सुरक्षित आहे",
-    "safety_desc": "हे फक्त अॅप कॅशे रिफ्रेश करते. तुमचे खाते, विद्यार्थी, निकाल किंवा फायली काहीही हटवले जाणार नाही. रीसेटनंतर पुन्हा लॉगिन करा.",
-    "step1_title": "Site Settings उघडा",
-    "step1_desc": "तुमच्या ब्राउझरच्या वर-उजवीकडे मेनू बटण (3 ठिपके) टॅप करा, नंतर गिअर (⚙) आयकॉन टॅप करून 'Site settings' निवडा.",
-    "step1_highlight": "'Site settings' वर टॅप करा",
-    "step2_title": "'Delete data and reset permissions' टॅप करा",
-    "step2_desc": "Site settings पृष्ठावर खाली स्क्रोल करा. खाली एक बटण दिसेल — त्यावर टॅप करा.",
-    "step2_highlight": "'Delete data and reset permissions' टॅप करा",
-    "step3_title": "'Delete and reset' पुष्टी करा",
-    "step3_desc": "एक पुष्टीकरण पॉपअप येईल. 'Delete and reset' टॅप करून पूर्ण करा. नंतर EDULinker पुन्हा उघडा आणि लॉगिन करा.",
-    "step3_highlight": "'Delete and reset' टॅप करा",
-    "footer_note": "रीसेटनंतर त्याच ईमेल आणि पासवर्डने पुन्हा लॉगिन करा. तुमचा सर्व डेटा तिथेच असेल.",
-    "done_button": "झाले — मी अपडेट केले",
-    "default_notes": "बग फिक्स आणि कामगिरी सुधारणा."
   }
 }
