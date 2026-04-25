@@ -31,25 +31,5 @@
   "common": {
     "language": "Language",
     "select_language": "Select Language"
-  },
-  "update": {
-    "title": "Update Available",
-    "version_label": "Version",
-    "choose_language": "Choose language",
-    "intro": "A new version of EDULinker is available! To get the latest features, please reset the site data once. Don't worry — your account & data are 100% safe on our cloud.",
-    "safety_title": "Your data is 100% safe",
-    "safety_desc": "This only refreshes the app cache. Nothing on your account, students, results, or files will be deleted. Just sign in again after reset.",
-    "step1_title": "Open Site Settings",
-    "step1_desc": "Tap the menu button (3 dots) at the top-right of your browser, then tap the gear (⚙) icon and select 'Site settings'.",
-    "step1_highlight": "Tap on 'Site settings'",
-    "step2_title": "Tap 'Delete data and reset permissions'",
-    "step2_desc": "Scroll down on the Site settings page. You will see a button at the bottom — tap it.",
-    "step2_highlight": "Tap 'Delete data and reset permissions'",
-    "step3_title": "Confirm 'Delete and reset'",
-    "step3_desc": "A confirmation popup will appear. Tap 'Delete and reset' to finish. Then re-open EDULinker and sign in again.",
-    "step3_highlight": "Tap 'Delete and reset'",
-    "footer_note": "After reset, simply log in again with the same email & password. All your data will be there.",
-    "done_button": "Done — I've Updated",
-    "default_notes": "Bug fixes & performance improvements."
   }
 }
