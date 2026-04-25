@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { BookOpen, MessageSquare, FileText, Calendar, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import useAppStore from "@/store/appStore";
 import { useSchoolId } from "@/hooks/useSchoolId";
 
@@ -24,7 +23,6 @@ const getYearRange = (yearStr: string) => {
 const DashboardPage = () => {
   const navigate = useNavigate();
   const schoolId = useSchoolId();
-  const { t, i18n } = useTranslation();
   const { homework, complaints, results, students, fetchAll } = useAppStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const academicYears = useMemo(() => getYears(), []);
@@ -96,7 +94,7 @@ const DashboardPage = () => {
       ? [
           {
             icon: Users,
-            label: t("dashboard.total_students"),
+            label: "Total Students",
             value: students.length,
             color: "from-primary to-secondary",
             path: "/students",
@@ -105,21 +103,21 @@ const DashboardPage = () => {
       : []),
     {
       icon: BookOpen,
-      label: t("dashboard.homework_sent"),
+      label: "Homework Sent",
       value: filteredHomework.length,
       color: "from-primary to-secondary",
       path: "/homework",
     },
     {
       icon: MessageSquare,
-      label: t("dashboard.complaints_sent"),
+      label: "Complaints Sent",
       value: filteredComplaints.length,
       color: "from-primary to-[hsl(43,76%,50%)]",
       path: "/complaints",
     },
     {
       icon: FileText,
-      label: t("dashboard.results_sent"),
+      label: "Results Sent",
       value: filteredResults.length,
       color: "from-[hsl(43,76%,50%)] to-primary",
       path: "/results",
@@ -132,28 +130,18 @@ const DashboardPage = () => {
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const monthNames = [
-    t("dashboard.months.january"),
-    t("dashboard.months.february"),
-    t("dashboard.months.march"),
-    t("dashboard.months.april"),
-    t("dashboard.months.may"),
-    t("dashboard.months.june"),
-    t("dashboard.months.july"),
-    t("dashboard.months.august"),
-    t("dashboard.months.september"),
-    t("dashboard.months.october"),
-    t("dashboard.months.november"),
-    t("dashboard.months.december"),
-  ];
-
-  const dayNames = [
-    t("dashboard.days.sun"),
-    t("dashboard.days.mon"),
-    t("dashboard.days.tue"),
-    t("dashboard.days.wed"),
-    t("dashboard.days.thu"),
-    t("dashboard.days.fri"),
-    t("dashboard.days.sat"),
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const prevMonth = () => setSelectedDate(new Date(calYear, calMonth - 1, 1));
@@ -162,7 +150,7 @@ const DashboardPage = () => {
   return (
     <div className="space-y-6 relative z-10 w-full max-w-full overflow-hidden px-4 sm:px-6 lg:px-8 py-6">
       <div className="relative flex flex-col sm:flex-row sm:justify-center items-center w-full gap-4 sm:gap-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">{t("dashboard.title")}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center">Dashboard</h1>
         <div className="sm:absolute sm:right-0 flex items-center gap-2">
           <select
             value={selectedYear}
@@ -171,7 +159,7 @@ const DashboardPage = () => {
           >
             {academicYears.map((y) => (
               <option key={y} value={y} className="bg-black text-white">
-                {t("dashboard.year_label")} {y === "Overall" ? t("dashboard.overall") : y}
+                Year {y}
               </option>
             ))}
           </select>
@@ -201,13 +189,13 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-foreground mb-3">
-            {t("dashboard.activity_on")} {selectedDate.toLocaleDateString(i18n.language || "en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            Activity on {selectedDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
           </h2>
           {hasDateData ? (
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {dateHomework.map((h) => (
                 <div key={h.id} className="bg-black/40 rounded-lg p-3 border border-primary/10">
-                  <span className="text-xs text-primary/60 font-bold">{t("dashboard.homework_tag")}</span>
+                  <span className="text-xs text-primary/60 font-bold">HOMEWORK</span>
                   <p className="text-foreground text-sm">
                     {h.subject} — {h.standard}-{h.section}
                   </p>
@@ -215,13 +203,13 @@ const DashboardPage = () => {
               ))}
               {dateComplaints.map((c) => (
                 <div key={c.id} className="bg-black/40 rounded-lg p-3 border border-primary/10">
-                  <span className="text-xs text-primary/60 font-bold">{t("dashboard.complaint_tag")}</span>
+                  <span className="text-xs text-primary/60 font-bold">COMPLAINT</span>
                   <p className="text-foreground text-sm truncate">{c.description}</p>
                 </div>
               ))}
               {dateResults.map((r) => (
                 <div key={r.id} className="bg-black/40 rounded-lg p-3 border border-primary/10">
-                  <span className="text-xs text-primary/60 font-bold">{t("dashboard.result_tag")}</span>
+                  <span className="text-xs text-primary/60 font-bold">RESULT</span>
                   <p className="text-foreground text-sm">
                     {r.subject} — {r.marks_obtained}/{r.total_marks} ({r.percentage}%)
                   </p>
@@ -229,14 +217,14 @@ const DashboardPage = () => {
               ))}
             </div>
           ) : (
-            <p className="text-foreground/40 text-sm">{t("dashboard.no_activity")}</p>
+            <p className="text-foreground/40 text-sm">No activity recorded for this date.</p>
           )}
         </div>
 
         <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Calendar size={20} className="text-primary" /> {t("dashboard.calendar")}
+              <Calendar size={20} className="text-primary" /> Calendar
             </h2>
             <div className="flex items-center gap-2">
               <button onClick={prevMonth} className="p-1 rounded hover:bg-primary/10 text-primary transition-colors">
@@ -251,7 +239,7 @@ const DashboardPage = () => {
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center text-xs">
-            {dayNames.map((d) => (
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
               <div key={d} className="text-primary/60 font-semibold py-1">
                 {d}
               </div>
