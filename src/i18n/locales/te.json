@@ -31,5 +31,43 @@
   "common": {
     "language": "భాష",
     "select_language": "భాషను ఎంచుకోండి"
+  },
+  "dashboard": {
+    "title": "డాష్‌బోర్డ్",
+    "year_label": "సంవత్సరం",
+    "overall": "మొత్తం",
+    "total_students": "మొత్తం విద్యార్థులు",
+    "homework_sent": "హోంవర్క్ పంపబడింది",
+    "complaints_sent": "ఫిర్యాదులు పంపబడ్డాయి",
+    "results_sent": "ఫలితాలు పంపబడ్డాయి",
+    "activity_on": "కార్యకలాపం",
+    "no_activity": "ఈ తేదీకి కార్యకలాపం లేదు.",
+    "calendar": "క్యాలెండర్",
+    "homework_tag": "హోంవర్క్",
+    "complaint_tag": "ఫిర్యాదు",
+    "result_tag": "ఫలితం",
+    "months": {
+      "january": "జనవరి",
+      "february": "ఫిబ్రవరి",
+      "march": "మార్చి",
+      "april": "ఏప్రిల్",
+      "may": "మే",
+      "june": "జూన్",
+      "july": "జూలై",
+      "august": "ఆగస్టు",
+      "september": "సెప్టెంబర్",
+      "october": "అక్టోబర్",
+      "november": "నవంబర్",
+      "december": "డిసెంబర్"
+    },
+    "days": {
+      "sun": "ఆది",
+      "mon": "సోమ",
+      "tue": "మంగళ",
+      "wed": "బుధ",
+      "thu": "గురు",
+      "fri": "శుక్ర",
+      "sat": "శని"
+    }
   }
 }

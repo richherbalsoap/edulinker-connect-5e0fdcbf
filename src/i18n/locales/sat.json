@@ -31,5 +31,43 @@
   "common": {
     "language": "ᱯᱟᱹᱨᱥᱤ",
     "select_language": "ᱯᱟᱹᱨᱥᱤ ᱵᱟᱪᱷᱟᱣ ᱢᱮ"
+  },
+  "dashboard": {
+    "title": "ᱰᱮᱥᱵᱚᱨᱰ",
+    "year_label": "ᱥᱮᱨᱢᱟ",
+    "overall": "ᱥᱟᱱᱟᱢ",
+    "total_students": "ᱥᱟᱱᱟᱢ ᱪᱮᱞᱟᱭ",
+    "homework_sent": "ᱚᱲᱟᱜ ᱠᱟᱹᱢᱤ ᱠᱩᱞᱮᱱᱟ",
+    "complaints_sent": "ᱱᱟᱹᱞᱤᱥ ᱠᱩᱞᱮᱱᱟ",
+    "results_sent": "ᱯᱷᱚᱞ ᱠᱩᱞᱮᱱᱟ",
+    "activity_on": "ᱠᱟᱹᱢᱤ",
+    "no_activity": "ᱱᱚᱣᱟ ᱢᱟᱦᱟᱸ ᱨᱮ ᱪᱮᱫ ᱦᱚᱸ ᱠᱟᱹᱢᱤ ᱵᱟᱹᱱᱩᱜ-ᱟ ᱾",
+    "calendar": "ᱪᱟᱸᱫᱚᱭ ᱯᱚᱛᱚᱵ",
+    "homework_tag": "ᱚᱲᱟᱜ ᱠᱟᱹᱢᱤ",
+    "complaint_tag": "ᱱᱟᱹᱞᱤᱥ",
+    "result_tag": "ᱯᱷᱚᱞ",
+    "months": {
+      "january": "ᱡᱟᱱᱣᱟᱨᱤ",
+      "february": "ᱯᱷᱟᱨᱣᱟᱨᱤ",
+      "march": "ᱢᱟᱨᱪ",
+      "april": "ᱟᱯᱨᱤᱞ",
+      "may": "ᱢᱮ",
+      "june": "ᱡᱩᱱ",
+      "july": "ᱡᱩᱞᱟᱭ",
+      "august": "ᱟᱜᱚᱥᱛ",
+      "september": "ᱥᱮᱯᱴᱮᱢᱵᱟᱨ",
+      "october": "ᱚᱠᱴᱳᱵᱟᱨ",
+      "november": "ᱱᱚᱣᱮᱢᱵᱟᱨ",
+      "december": "ᱰᱤᱥᱮᱢᱵᱟᱨ"
+    },
+    "days": {
+      "sun": "ᱥᱤᱸ",
+      "mon": "ᱚᱛ",
+      "tue": "ᱵᱟ",
+      "wed": "ᱥᱟ",
+      "thu": "ᱥᱟᱹ",
+      "fri": "ᱡᱟᱹ",
+      "sat": "ᱧᱩ"
+    }
   }
 }

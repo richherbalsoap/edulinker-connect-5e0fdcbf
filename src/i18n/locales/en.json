@@ -31,5 +31,43 @@
   "common": {
     "language": "Language",
     "select_language": "Select Language"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "year_label": "Year",
+    "overall": "Overall",
+    "total_students": "Total Students",
+    "homework_sent": "Homework Sent",
+    "complaints_sent": "Complaints Sent",
+    "results_sent": "Results Sent",
+    "activity_on": "Activity on",
+    "no_activity": "No activity recorded for this date.",
+    "calendar": "Calendar",
+    "homework_tag": "HOMEWORK",
+    "complaint_tag": "COMPLAINT",
+    "result_tag": "RESULT",
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
   }
 }

@@ -31,5 +31,43 @@
   "common": {
     "language": "ભાષા",
     "select_language": "ભાષા પસંદ કરો"
+  },
+  "dashboard": {
+    "title": "ડેશબોર્ડ",
+    "year_label": "વર્ષ",
+    "overall": "કુલ",
+    "total_students": "કુલ વિદ્યાર્થીઓ",
+    "homework_sent": "ગૃહકાર્ય મોકલ્યું",
+    "complaints_sent": "ફરિયાદો મોકલી",
+    "results_sent": "પરિણામો મોકલ્યા",
+    "activity_on": "પ્રવૃત્તિ",
+    "no_activity": "આ તારીખ માટે કોઈ પ્રવૃત્તિ નોંધાઈ નથી.",
+    "calendar": "કેલેન્ડર",
+    "homework_tag": "ગૃહકાર્ય",
+    "complaint_tag": "ફરિયાદ",
+    "result_tag": "પરિણામ",
+    "months": {
+      "january": "જાન્યુઆરી",
+      "february": "ફેબ્રુઆરી",
+      "march": "માર્ચ",
+      "april": "એપ્રિલ",
+      "may": "મે",
+      "june": "જૂન",
+      "july": "જુલાઈ",
+      "august": "ઓગસ્ટ",
+      "september": "સપ્ટેમ્બર",
+      "october": "ઓક્ટોબર",
+      "november": "નવેમ્બર",
+      "december": "ડિસેમ્બર"
+    },
+    "days": {
+      "sun": "રવિ",
+      "mon": "સોમ",
+      "tue": "મંગળ",
+      "wed": "બુધ",
+      "thu": "ગુરુ",
+      "fri": "શુક્ર",
+      "sat": "શનિ"
+    }
   }
 }

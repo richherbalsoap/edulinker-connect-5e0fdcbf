@@ -31,5 +31,43 @@
   "common": {
     "language": "ಭಾಷೆ",
     "select_language": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ"
+  },
+  "dashboard": {
+    "title": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "year_label": "ವರ್ಷ",
+    "overall": "ಒಟ್ಟು",
+    "total_students": "ಒಟ್ಟು ವಿದ್ಯಾರ್ಥಿಗಳು",
+    "homework_sent": "ಮನೆಪಾಠ ಕಳುಹಿಸಲಾಗಿದೆ",
+    "complaints_sent": "ದೂರುಗಳು ಕಳುಹಿಸಲಾಗಿದೆ",
+    "results_sent": "ಫಲಿತಾಂಶಗಳು ಕಳುಹಿಸಲಾಗಿದೆ",
+    "activity_on": "ಚಟುವಟಿಕೆ",
+    "no_activity": "ಈ ದಿನಾಂಕಕ್ಕೆ ಯಾವುದೇ ಚಟುವಟಿಕೆ ಇಲ್ಲ.",
+    "calendar": "ಕ್ಯಾಲೆಂಡರ್",
+    "homework_tag": "ಮನೆಪಾಠ",
+    "complaint_tag": "ದೂರು",
+    "result_tag": "ಫಲಿತಾಂಶ",
+    "months": {
+      "january": "ಜನವರಿ",
+      "february": "ಫೆಬ್ರವರಿ",
+      "march": "ಮಾರ್ಚ್",
+      "april": "ಏಪ್ರಿಲ್",
+      "may": "ಮೇ",
+      "june": "ಜೂನ್",
+      "july": "ಜುಲೈ",
+      "august": "ಆಗಸ್ಟ್",
+      "september": "ಸೆಪ್ಟೆಂಬರ್",
+      "october": "ಅಕ್ಟೋಬರ್",
+      "november": "ನವೆಂಬರ್",
+      "december": "ಡಿಸೆಂಬರ್"
+    },
+    "days": {
+      "sun": "ಭಾನು",
+      "mon": "ಸೋಮ",
+      "tue": "ಮಂಗಳ",
+      "wed": "ಬುಧ",
+      "thu": "ಗುರು",
+      "fri": "ಶುಕ್ರ",
+      "sat": "ಶನಿ"
+    }
   }
 }

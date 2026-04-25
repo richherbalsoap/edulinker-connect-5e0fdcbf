@@ -31,5 +31,43 @@
   "common": {
     "language": "ਭਾਸ਼ਾ",
     "select_language": "ਭਾਸ਼ਾ ਚੁਣੋ"
+  },
+  "dashboard": {
+    "title": "ਡੈਸ਼ਬੋਰਡ",
+    "year_label": "ਸਾਲ",
+    "overall": "ਕੁੱਲ",
+    "total_students": "ਕੁੱਲ ਵਿਦਿਆਰਥੀ",
+    "homework_sent": "ਘਰ ਦਾ ਕੰਮ ਭੇਜਿਆ",
+    "complaints_sent": "ਸ਼ਿਕਾਇਤਾਂ ਭੇਜੀਆਂ",
+    "results_sent": "ਨਤੀਜੇ ਭੇਜੇ",
+    "activity_on": "ਗਤੀਵਿਧੀ",
+    "no_activity": "ਇਸ ਮਿਤੀ ਲਈ ਕੋਈ ਗਤੀਵਿਧੀ ਦਰਜ ਨਹੀਂ ਹੈ।",
+    "calendar": "ਕੈਲੰਡਰ",
+    "homework_tag": "ਘਰ ਦਾ ਕੰਮ",
+    "complaint_tag": "ਸ਼ਿਕਾਇਤ",
+    "result_tag": "ਨਤੀਜਾ",
+    "months": {
+      "january": "ਜਨਵਰੀ",
+      "february": "ਫਰਵਰੀ",
+      "march": "ਮਾਰਚ",
+      "april": "ਅਪ੍ਰੈਲ",
+      "may": "ਮਈ",
+      "june": "ਜੂਨ",
+      "july": "ਜੁਲਾਈ",
+      "august": "ਅਗਸਤ",
+      "september": "ਸਤੰਬਰ",
+      "october": "ਅਕਤੂਬਰ",
+      "november": "ਨਵੰਬਰ",
+      "december": "ਦਸੰਬਰ"
+    },
+    "days": {
+      "sun": "ਐਤ",
+      "mon": "ਸੋਮ",
+      "tue": "ਮੰਗਲ",
+      "wed": "ਬੁੱਧ",
+      "thu": "ਵੀਰ",
+      "fri": "ਸ਼ੁੱਕਰ",
+      "sat": "ਸ਼ਨੀ"
+    }
   }
 }

@@ -31,5 +31,43 @@
   "common": {
     "language": "மொழி",
     "select_language": "மொழியைத் தேர்ந்தெடுக்கவும்"
+  },
+  "dashboard": {
+    "title": "டாஷ்போர்டு",
+    "year_label": "ஆண்டு",
+    "overall": "மொத்தம்",
+    "total_students": "மொத்த மாணவர்கள்",
+    "homework_sent": "வீட்டுப்பாடம் அனுப்பப்பட்டது",
+    "complaints_sent": "புகார்கள் அனுப்பப்பட்டன",
+    "results_sent": "முடிவுகள் அனுப்பப்பட்டன",
+    "activity_on": "செயல்பாடு",
+    "no_activity": "இந்த தேதிக்கு செயல்பாடு இல்லை.",
+    "calendar": "காலண்டர்",
+    "homework_tag": "வீட்டுப்பாடம்",
+    "complaint_tag": "புகார்",
+    "result_tag": "முடிவு",
+    "months": {
+      "january": "ஜனவரி",
+      "february": "பிப்ரவரி",
+      "march": "மார்ச்",
+      "april": "ஏப்ரல்",
+      "may": "மே",
+      "june": "ஜூன்",
+      "july": "ஜூலை",
+      "august": "ஆகஸ்ட்",
+      "september": "செப்டம்பர்",
+      "october": "அக்டோபர்",
+      "november": "நவம்பர்",
+      "december": "டிசம்பர்"
+    },
+    "days": {
+      "sun": "ஞாயி",
+      "mon": "திங்",
+      "tue": "செவ்",
+      "wed": "புத",
+      "thu": "வியா",
+      "fri": "வெள்",
+      "sat": "சனி"
+    }
   }
 }
