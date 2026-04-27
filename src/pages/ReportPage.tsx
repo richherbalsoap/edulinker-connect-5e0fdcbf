@@ -213,6 +213,36 @@ const ReportPage = () => {
     return opt?.label.replace(/\s+/g, "") || "";
   }, [range, customFrom, customTo]);
 
+  const downloadBlob = (blob: Blob, fileName: string) => {
+    // Mobile-safe download path. WebViews (Android Studio app, some iOS browsers)
+    // often block XLSX.writeFile's internal anchor click. Manually triggering
+    // a click on a same-origin object URL works across mobile + desktop.
+    try {
+      const nav = navigator as Navigator & {
+        msSaveOrOpenBlob?: (blob: Blob, name: string) => boolean;
+      };
+      if (typeof nav.msSaveOrOpenBlob === "function") {
+        nav.msSaveOrOpenBlob(blob, fileName);
+        return;
+      }
+    } catch {
+      // ignore and fall through
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1500);
+  };
+
   const handleDownload = () => {
     if (!reportData) return;
     const wb = XLSX.utils.book_new();
@@ -312,7 +342,25 @@ const ReportPage = () => {
     });
 
     const fileName = `EDULinker_Report_${schoolName.replace(/\s+/g, "_")}_${dateLabel}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+
+    try {
+      // Build the file as an array buffer so we control the download trigger.
+      // XLSX.writeFile relies on internal anchor-click that fails in many
+      // mobile WebViews (Android Studio wrapper, in-app browsers).
+      const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+      const blob = new Blob([wbout], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      downloadBlob(blob, fileName);
+    } catch (err) {
+      console.error("Excel download failed:", err);
+      // Last-resort fallback to library writer
+      try {
+        XLSX.writeFile(wb, fileName);
+      } catch (e) {
+        console.error("Fallback writeFile also failed:", e);
+      }
+    }
   };
 
   const handlePrint = () => {
