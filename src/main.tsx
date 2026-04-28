@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import "./i18n";
+import { initNativeBridge } from "./utils/nativeBridge";
 
 const rootElement = document.getElementById("root")!;
 
@@ -28,3 +29,4 @@ const cleanupServiceWorkers = async () => {
 
 mountApp();
 cleanupServiceWorkers();
+initNativeBridge();
