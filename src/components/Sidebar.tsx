@@ -30,7 +30,6 @@ const principalTools: NavItemType[] = [
   { path: '/ai-chatbot', icon: Bot, label: 'nav.ai_chatbot' },
   { path: '/promotion', icon: TrendingUp, label: 'nav.promotion' },
   { path: '/fees', icon: DollarSign, label: 'nav.fees' },
-  // { path: '/impact-dashboard', icon: Award, label: 'Impact Dashboard' }, // Hidden for now — feature planned for future
 ];
 
 const principalPaths = new Set(principalTools.map(t => t.path));
@@ -58,14 +57,13 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
   );
 };
 
-// PIN-protected nav item — intercepts click, asks for PIN first
 const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType; onClick: () => void; requestAccess: () => Promise<boolean> }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    onClick(); // close sidebar
+    onClick();
     const granted = await requestAccess();
     if (granted) {
       navigate(item.path);
@@ -154,7 +152,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
         bg-background/95 border-r border-primary/20
         flex flex-col transition-transform duration-200 ease-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `} style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      `} style={{ paddingTop: 'calc(env(safe-area-inset-top) + 64px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="p-5 border-b border-primary/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={edulinkerLogo} alt="EDULinker" className="w-9 h-9 rounded-lg object-contain" />
@@ -177,7 +175,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           <CollapsibleSection titleKey="nav.principal_tools" icon={Users} items={principalTools} onClick={toggleSidebar} protected requestAccess={requestAccess} />
           <ul className="space-y-1 pt-3 border-t border-primary/10">
             <li>
-              <a
+              
                 href="/settings"
                 onClick={handleSettingsClick}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent transition-colors duration-200"
