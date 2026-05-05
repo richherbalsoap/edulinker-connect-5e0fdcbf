@@ -9,7 +9,8 @@
     "login": "Login",
     "signing_in": "Signing in...",
     "create_account": "Create Account",
-    "forgot_password": "Forgot Password?"
+    "forgot_password": "Forgot Password?",
+    "refresh_tip": "Page not loading? Press Ctrl + Shift + R or Ctrl + F5 (Mac: Cmd + Shift + R) to refresh."
   },
   "nav": {
     "dashboard": "Dashboard",

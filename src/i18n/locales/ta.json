@@ -9,7 +9,8 @@
     "login": "உள்நுழை",
     "signing_in": "உள்நுழைகிறது...",
     "create_account": "கணக்கை உருவாக்கு",
-    "forgot_password": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?"
+    "forgot_password": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
+    "refresh_tip": "பக்கம் ஏற்றப்படவில்லையா? புதுப்பிக்க Ctrl + Shift + R அல்லது Ctrl + F5 அழுத்தவும் (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "டாஷ்போர்டு",

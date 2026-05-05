@@ -9,7 +9,8 @@
     "login": "లాగిన్",
     "signing_in": "సైన్ ఇన్ అవుతోంది...",
     "create_account": "ఖాతాను సృష్టించండి",
-    "forgot_password": "పాస్‌వర్డ్ మర్చిపోయారా?"
+    "forgot_password": "పాస్‌వర్డ్ మర్చిపోయారా?",
+    "refresh_tip": "పేజీ లోడ్ అవ్వడం లేదా? రిఫ్రెష్ చేయడానికి Ctrl + Shift + R లేదా Ctrl + F5 నొక్కండి (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "డాష్‌బోర్డ్",

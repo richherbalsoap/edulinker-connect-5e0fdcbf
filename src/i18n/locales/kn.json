@@ -9,7 +9,8 @@
     "login": "ಲಾಗಿನ್",
     "signing_in": "ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...",
     "create_account": "ಖಾತೆ ರಚಿಸಿ",
-    "forgot_password": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?"
+    "forgot_password": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?",
+    "refresh_tip": "ಪುಟ ಲೋಡ್ ಆಗುತ್ತಿಲ್ಲವೇ? ರಿಫ್ರೆಶ್ ಮಾಡಲು Ctrl + Shift + R ಅಥವಾ Ctrl + F5 ಒತ್ತಿರಿ (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",

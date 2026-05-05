@@ -9,7 +9,8 @@
     "login": "لاگ اِن",
     "signing_in": "سائن اِن گَژھان...",
     "create_account": "اکاوُنٹ بناوِو",
-    "forgot_password": "پاسوُرڈ بِسرِو؟"
+    "forgot_password": "پاسوُرڈ بِسرِو؟",
+    "refresh_tip": "صَفہٕ لوڈ چھُ نہٕ گژھان؟ ریفریش کرنہٕ خٲطرٕ Ctrl + Shift + R یا Ctrl + F5 دَبیو (Mac: Cmd + Shift + R)۔"
   },
   "nav": {
     "dashboard": "ڈَیش بورڈ",
