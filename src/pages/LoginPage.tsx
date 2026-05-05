@@ -54,7 +54,7 @@ const LoginPage = () => {
           <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-card/90 backdrop-blur-md px-3 py-2 shadow-lg">
             <Info size={16} className="text-primary mt-0.5 shrink-0" />
             <p className="text-xs text-foreground/90 flex-1 leading-snug">
-              Page load nahi ho raha? <span className="font-semibold text-primary">Ctrl + Shift + R</span> ya <span className="font-semibold text-primary">Ctrl + F5</span> dabaayein (Mac: <span className="font-semibold text-primary">Cmd + Shift + R</span>).
+              {t("auth.refresh_tip")}
             </p>
             <button
               type="button"
