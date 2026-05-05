@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
+import { LogIn, Info, X } from "lucide-react";
 import GoldenBackground from "@/components/GoldenBackground";
 import InstallBanner from "@/components/InstallBanner";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -16,6 +16,9 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showTip, setShowTip] = useState(
+    typeof window !== "undefined" && sessionStorage.getItem("edulinker-refresh-tip-dismissed") !== "1"
+  );
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -46,6 +49,27 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
       <GoldenBackground />
       <InstallBanner />
+      {showTip && (
+        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
+          <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-card/90 backdrop-blur-md px-3 py-2 shadow-lg">
+            <Info size={16} className="text-primary mt-0.5 shrink-0" />
+            <p className="text-xs text-foreground/90 flex-1 leading-snug">
+              Page load nahi ho raha? <span className="font-semibold text-primary">Ctrl + Shift + R</span> ya <span className="font-semibold text-primary">Ctrl + F5</span> dabaayein (Mac: <span className="font-semibold text-primary">Cmd + Shift + R</span>).
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.setItem("edulinker-refresh-tip-dismissed", "1");
+                setShowTip(false);
+              }}
+              className="text-muted-foreground hover:text-foreground shrink-0"
+              aria-label="Dismiss"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-primary/20 relative z-10">
         <CardHeader className="text-center space-y-3">
           <img
