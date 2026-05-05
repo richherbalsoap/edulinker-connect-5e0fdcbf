@@ -9,7 +9,8 @@
     "login": "लग - इन",
     "signing_in": "साइन इन गर्दै...",
     "create_account": "खाता सिर्जना गर्नुहोस्",
-    "forgot_password": "पासवर्ड बिर्सनुभयो?"
+    "forgot_password": "पासवर्ड बिर्सनुभयो?",
+    "refresh_tip": "पेज लोड भइरहेको छैन? रिफ्रेस गर्न Ctrl + Shift + R वा Ctrl + F5 थिच्नुहोस् (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "ड्यासबोर्ड",

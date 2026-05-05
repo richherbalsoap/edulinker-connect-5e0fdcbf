@@ -9,7 +9,8 @@
     "login": "ലോഗിൻ",
     "signing_in": "സൈൻ ഇൻ ചെയ്യുന്നു...",
     "create_account": "അക്കൗണ്ട് സൃഷ്ടിക്കുക",
-    "forgot_password": "പാസ്‌വേഡ് മറന്നോ?"
+    "forgot_password": "പാസ്‌വേഡ് മറന്നോ?",
+    "refresh_tip": "പേജ് ലോഡ് ആകുന്നില്ലേ? പുതുക്കാൻ Ctrl + Shift + R അല്ലെങ്കിൽ Ctrl + F5 അമർത്തുക (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "ഡാഷ്‌ബോർഡ്",

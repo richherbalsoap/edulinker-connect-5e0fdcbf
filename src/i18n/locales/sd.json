@@ -9,7 +9,8 @@
     "login": "لاگ ان",
     "signing_in": "سائن ان ٿي رهيو آهي...",
     "create_account": "اڪائونٽ ٺاهيو",
-    "forgot_password": "پاسورڊ وساري ڇڏيو؟"
+    "forgot_password": "پاسورڊ وساري ڇڏيو؟",
+    "refresh_tip": "صفحو لوڊ نه پيو ٿئي؟ ريفريش لاءِ Ctrl + Shift + R يا Ctrl + F5 دٻايو (Mac: Cmd + Shift + R)۔"
   },
   "nav": {
     "dashboard": "ڊيش بورڊ",

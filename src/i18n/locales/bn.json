@@ -9,7 +9,8 @@
     "login": "লগইন",
     "signing_in": "সাইন ইন হচ্ছে...",
     "create_account": "অ্যাকাউন্ট তৈরি করুন",
-    "forgot_password": "পাসওয়ার্ড ভুলে গেছেন?"
+    "forgot_password": "পাসওয়ার্ড ভুলে গেছেন?",
+    "refresh_tip": "পেজ লোড হচ্ছে না? রিফ্রেশ করতে Ctrl + Shift + R বা Ctrl + F5 চাপুন (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "ড্যাশবোর্ড",

@@ -9,7 +9,8 @@
     "login": "लॉगिन",
     "signing_in": "साइन इन भ' रहल अछि...",
     "create_account": "खाता बनाउ",
-    "forgot_password": "पासवर्ड बिसरि गेलहुं?"
+    "forgot_password": "पासवर्ड बिसरि गेलहुं?",
+    "refresh_tip": "पेज लोड नहि भ' रहल अछि? रिफ्रेश लेल Ctrl + Shift + R वा Ctrl + F5 दबाउ (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "डैशबोर्ड",

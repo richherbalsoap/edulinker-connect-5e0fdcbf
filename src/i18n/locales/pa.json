@@ -9,7 +9,8 @@
     "login": "ਲੌਗਇਨ",
     "signing_in": "ਸਾਈਨ ਇਨ ਹੋ ਰਿਹਾ ਹੈ...",
     "create_account": "ਖਾਤਾ ਬਣਾਓ",
-    "forgot_password": "ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?"
+    "forgot_password": "ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?",
+    "refresh_tip": "ਪੇਜ ਲੋਡ ਨਹੀਂ ਹੋ ਰਿਹਾ? ਰਿਫਰੈਸ਼ ਕਰਨ ਲਈ Ctrl + Shift + R ਜਾਂ Ctrl + F5 ਦਬਾਓ (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "ਡੈਸ਼ਬੋਰਡ",

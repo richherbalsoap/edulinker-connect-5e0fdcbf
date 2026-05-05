@@ -9,7 +9,8 @@
     "login": "ଲଗଇନ୍",
     "signing_in": "ସାଇନ୍ ଇନ୍ ହେଉଛି...",
     "create_account": "ଆକାଉଣ୍ଟ୍ ସୃଷ୍ଟି କରନ୍ତୁ",
-    "forgot_password": "ପାସୱାର୍ଡ ଭୁଲିଗଲେ?"
+    "forgot_password": "ପାସୱାର୍ଡ ଭୁଲିଗଲେ?",
+    "refresh_tip": "ପୃଷ୍ଠା ଲୋଡ୍ ହେଉନାହିଁ? ରିଫ୍ରେସ୍ କରିବାକୁ Ctrl + Shift + R କିମ୍ବା Ctrl + F5 ଦବାନ୍ତୁ (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "ଡ୍ୟାସବୋର୍ଡ",

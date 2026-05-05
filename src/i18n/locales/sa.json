@@ -9,7 +9,8 @@
     "login": "प्रवेशः",
     "signing_in": "प्रवेशः क्रियते...",
     "create_account": "खातं रचयतु",
-    "forgot_password": "गुप्तपदं विस्मृतम्?"
+    "forgot_password": "गुप्तपदं विस्मृतम्?",
+    "refresh_tip": "पृष्ठं न उद्घाटितम्? पुनःप्रापणाय Ctrl + Shift + R अथवा Ctrl + F5 नुदतु (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "मुख्यपटलम्",

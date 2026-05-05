@@ -9,7 +9,8 @@
     "login": "লগ ইন",
     "signing_in": "সাইন ইন তৌরি...",
     "create_account": "একাউন্ট সেমগৎপীয়ু",
-    "forgot_password": "পাসৱার্দ কাওবিরবরা?"
+    "forgot_password": "পাসৱার্দ কাওবিরবরা?",
+    "refresh_tip": "ꯄꯦꯖ ꯂꯣꯗ ꯇꯧꯗ꯭ꯔꯕ꯭ꯔꯥ? ꯔꯤꯐ꯭ꯔꯦꯁ ꯇꯧꯅꯕꯥ Ctrl + Shift + R ꯅꯇ꯭ꯔꯒꯥ Ctrl + F5 ꯅꯝꯕꯤꯌꯨ (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "দেশবোর্দ",

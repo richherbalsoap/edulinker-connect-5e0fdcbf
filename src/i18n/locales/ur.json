@@ -9,7 +9,8 @@
     "login": "لاگ ان",
     "signing_in": "سائن ان ہو رہا ہے...",
     "create_account": "اکاؤنٹ بنائیں",
-    "forgot_password": "پاس ورڈ بھول گئے؟"
+    "forgot_password": "پاس ورڈ بھول گئے؟",
+    "refresh_tip": "صفحہ لوڈ نہیں ہو رہا؟ ریفریش کرنے کے لیے Ctrl + Shift + R یا Ctrl + F5 دبائیں (Mac: Cmd + Shift + R)۔"
   },
   "nav": {
     "dashboard": "ڈیش بورڈ",

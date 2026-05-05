@@ -9,7 +9,8 @@
     "login": "लग इन",
     "signing_in": "साइन इन जायगासिनो...",
     "create_account": "एकाउन्ट बानाय",
-    "forgot_password": "पासवर्ड बेइखर्बाय?"
+    "forgot_password": "पासवर्ड बेइखर्बाय?",
+    "refresh_tip": "पेज लोड जायाखै? रिफ्रेश खालामनो Ctrl + Shift + R एबा Ctrl + F5 सानथ (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "देशबर्ड",

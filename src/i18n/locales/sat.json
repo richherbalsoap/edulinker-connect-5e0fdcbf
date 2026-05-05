@@ -9,7 +9,8 @@
     "login": "ᱞᱚᱜᱤᱱ",
     "signing_in": "ᱥᱟᱭᱤᱱ ᱤᱱ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ...",
     "create_account": "ᱮᱠᱟᱣᱩᱱᱴ ᱛᱮᱭᱟᱨ ᱢᱮ",
-    "forgot_password": "ᱯᱟᱥᱣᱟᱨᱰ ᱦᱤᱲᱤᱧ ᱮᱱᱟ?"
+    "forgot_password": "ᱯᱟᱥᱣᱟᱨᱰ ᱦᱤᱲᱤᱧ ᱮᱱᱟ?",
+    "refresh_tip": "ᱥᱟᱦᱴᱟ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ? ᱨᱤᱯᱷᱨᱮᱥ ᱞᱟᱹᱜᱤᱫ Ctrl + Shift + R ᱟᱨᱵᱟᱝ Ctrl + F5 ᱚᱛᱟᱭ ᱢᱮ (Mac: Cmd + Shift + R)."
   },
   "nav": {
     "dashboard": "ᱰᱮᱥᱵᱚᱨᱰ",

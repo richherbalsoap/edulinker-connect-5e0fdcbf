@@ -9,7 +9,8 @@
     "login": "লগ ইন",
     "signing_in": "ছাইন ইন হৈ আছে...",
     "create_account": "একাউণ্ট সৃষ্টি কৰক",
-    "forgot_password": "পাছৱৰ্ড পাহৰিলে?"
+    "forgot_password": "পাছৱৰ্ড পাহৰিলে?",
+    "refresh_tip": "পৃষ্ঠা লোড হোৱা নাই নেকি? ৰিফ্ৰেছ কৰিবলৈ Ctrl + Shift + R বা Ctrl + F5 টিপক (Mac: Cmd + Shift + R)।"
   },
   "nav": {
     "dashboard": "ডেচবৰ্ড",
