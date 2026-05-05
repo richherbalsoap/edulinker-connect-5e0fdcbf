@@ -175,7 +175,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           <CollapsibleSection titleKey="nav.principal_tools" icon={Users} items={principalTools} onClick={toggleSidebar} protected requestAccess={requestAccess} />
           <ul className="space-y-1 pt-3 border-t border-primary/10">
             <li>
-              
+              <a
                 href="/settings"
                 onClick={handleSettingsClick}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent transition-colors duration-200"
