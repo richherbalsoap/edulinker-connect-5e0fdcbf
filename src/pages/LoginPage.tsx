@@ -50,7 +50,10 @@ const LoginPage = () => {
       <GoldenBackground />
       <InstallBanner />
       {showTip && (
-        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
+        <div
+          className="fixed left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+        >
           <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-card/90 backdrop-blur-md px-3 py-2 shadow-lg">
             <Info size={16} className="text-primary mt-0.5 shrink-0" />
             <p className="text-xs text-foreground/90 flex-1 leading-snug">
