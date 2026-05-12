@@ -1,11 +1,46 @@
 import { Menu, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
-  const displayName = localStorage.getItem('schoolName') || 'My School';
-  const { signOut } = useAuth();
+  const { signOut, schoolId } = useAuth();
   const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState<string>(
+    () => localStorage.getItem('schoolName') || 'My School'
+  );
+
+  // Fetch live school name from DB whenever schoolId becomes available
+  useEffect(() => {
+    if (!schoolId) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('schools')
+        .select('school_name')
+        .eq('id', schoolId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (!error && data?.school_name) {
+        setDisplayName(data.school_name);
+        localStorage.setItem('schoolName', data.school_name);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [schoolId]);
+
+  // Live update when Settings page saves a new name
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (typeof detail === 'string' && detail.trim()) {
+        setDisplayName(detail.trim());
+      }
+    };
+    window.addEventListener('schoolNameUpdated', handler);
+    return () => window.removeEventListener('schoolNameUpdated', handler);
+  }, []);
 
   const handleLogout = async () => {
     localStorage.clear();
