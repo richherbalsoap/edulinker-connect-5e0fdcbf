@@ -122,7 +122,11 @@ const PinModal = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto"
+          style={{
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 24px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
+          }}
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
           <motion.div
