@@ -62,8 +62,15 @@ const PinModal = () => {
   const handleVerify = async (enteredPin: string) => {
     setLoading(true);
     const correct = await handleModalSubmit(enteredPin);
+    if (correct) {
+      // Reset state immediately so dots/loader don't linger after success
+      setPin('');
+      setLoading(false);
+      processingRef.current = false;
+      return;
+    }
     setLoading(false);
-    if (!correct) {
+    {
       setShake(true);
       setTimeout(() => setShake(false), 500);
       setPin('');
