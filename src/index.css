@@ -53,6 +53,9 @@
   html {
     overscroll-behavior: none;
     -webkit-text-size-adjust: 100%;
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground;
@@ -61,13 +64,23 @@
     -webkit-overflow-scrolling: touch;
     touch-action: manipulation;
     user-select: none;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  #root {
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  *, *::before, *::after {
+    min-width: 0;
   }
   input, textarea, select, [contenteditable] {
     user-select: text;
+  }
+  img, video, canvas, svg {
+    max-width: 100%;
   }
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
