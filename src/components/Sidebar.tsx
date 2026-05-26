@@ -42,7 +42,7 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
       to={item.path}
       onClick={onClick}
       className={({ isActive }) => `
-        flex items-center gap-3 px-4 py-3 rounded-lg
+        flex items-center gap-3 px-4 py-3 rounded-lg min-w-0
         transition-colors duration-200 group
         ${isActive
           ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
@@ -50,8 +50,8 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
         }
       `}
     >
-      <item.icon size={20} />
-      <span className="font-medium text-sm">{t(item.label)}</span>
+      <item.icon size={20} className="shrink-0" />
+      <span className="font-medium text-sm truncate">{t(item.label)}</span>
     </NavLink>
   </li>
   );
@@ -76,7 +76,7 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
         to={item.path}
         onClick={handleClick}
         className={({ isActive }) => `
-          flex items-center gap-3 px-4 py-3 rounded-lg
+          flex items-center gap-3 px-4 py-3 rounded-lg min-w-0
           transition-colors duration-200 group
           ${isActive
             ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
@@ -84,8 +84,8 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
           }
         `}
       >
-        <item.icon size={20} />
-        <span className="font-medium text-sm">{t(item.label)}</span>
+        <item.icon size={20} className="shrink-0" />
+        <span className="font-medium text-sm truncate">{t(item.label)}</span>
       </NavLink>
     </li>
   );
