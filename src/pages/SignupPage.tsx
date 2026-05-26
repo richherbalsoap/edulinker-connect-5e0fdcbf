@@ -56,7 +56,10 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
+    <div
+      className="min-h-[100dvh] flex items-center justify-center bg-background relative overflow-hidden p-4"
+      style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
+    >
       <GoldenBackground />
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border-primary/20 relative z-10">
         <CardHeader className="text-center space-y-3">
