@@ -202,9 +202,13 @@ const ImportStudentsModal = ({ isOpen, onClose, schoolId, onImportComplete }: Im
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center p-4" onClick={handleClose}>
+    <div
+      className="fixed inset-0 bg-black/70 z-50 flex justify-center items-start overflow-y-auto p-4"
+      style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
+      onClick={handleClose}
+    >
       <div
-        className="bg-black/90 backdrop-blur-2xl rounded-2xl p-6 sm:p-8 w-full max-w-lg border border-primary/30 relative max-h-[90vh] overflow-y-auto"
+        className="bg-black/90 backdrop-blur-2xl rounded-2xl p-5 sm:p-8 w-full max-w-lg border border-primary/30 relative max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-2rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold text-primary mb-2">Import Students</h2>

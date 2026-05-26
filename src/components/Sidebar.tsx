@@ -42,7 +42,7 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
       to={item.path}
       onClick={onClick}
       className={({ isActive }) => `
-        flex items-center gap-3 px-4 py-3 rounded-lg
+        flex items-center gap-3 px-4 py-3 rounded-lg min-w-0
         transition-colors duration-200 group
         ${isActive
           ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
@@ -50,8 +50,8 @@ const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) 
         }
       `}
     >
-      <item.icon size={20} />
-      <span className="font-medium text-sm">{t(item.label)}</span>
+      <item.icon size={20} className="shrink-0" />
+      <span className="font-medium text-sm truncate">{t(item.label)}</span>
     </NavLink>
   </li>
   );
@@ -76,7 +76,7 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
         to={item.path}
         onClick={handleClick}
         className={({ isActive }) => `
-          flex items-center gap-3 px-4 py-3 rounded-lg
+          flex items-center gap-3 px-4 py-3 rounded-lg min-w-0
           transition-colors duration-200 group
           ${isActive
             ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
@@ -84,8 +84,8 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
           }
         `}
       >
-        <item.icon size={20} />
-        <span className="font-medium text-sm">{t(item.label)}</span>
+        <item.icon size={20} className="shrink-0" />
+        <span className="font-medium text-sm truncate">{t(item.label)}</span>
       </NavLink>
     </li>
   );
@@ -148,17 +148,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
         <div onClick={toggleSidebar} className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-200" />
       )}
       <aside className={`
-        fixed top-0 left-0 h-[100dvh] w-[280px] z-50
+        fixed top-0 left-0 h-[100dvh] w-[min(280px,85vw)] z-50
         bg-background/95 border-r border-primary/20
         flex flex-col transition-transform duration-200 ease-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `} style={{ paddingTop: 'calc(env(safe-area-inset-top) + 64px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      `} style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="p-5 border-b border-primary/20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <img src={edulinkerLogo} alt="EDULinker" className="w-9 h-9 rounded-lg object-contain" />
-            <div>
-              <h1 className="text-lg font-bold text-primary">EDULinker</h1>
-              <p className="text-xs text-foreground/40">{schoolName}</p>
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-primary truncate">EDULinker</h1>
+              <p className="text-xs text-foreground/40 truncate">{schoolName}</p>
             </div>
           </div>
           <button onClick={toggleSidebar} className="p-1.5 rounded-lg text-foreground/50 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-colors duration-200">

@@ -49,9 +49,9 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-primary/20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      <div className="px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+    <header className="sticky top-0 z-30 w-full max-w-full bg-background/90 backdrop-blur-md border-b border-primary/20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg border border-primary/20 bg-card/30 text-primary hover:bg-primary/10 hover:border-primary/40 active:bg-primary/20 transition-colors duration-200 flex-shrink-0"
@@ -63,8 +63,8 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <div className="px-2 sm:px-3 py-1.5 bg-card/30 rounded-lg border border-primary/20 max-w-[120px] sm:max-w-none">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0">
+          <div className="px-2 sm:px-3 py-1.5 bg-card/30 rounded-lg border border-primary/20 max-w-[35vw] sm:max-w-none min-w-0">
             <span className="text-foreground/90 text-xs sm:text-sm font-medium truncate block">{displayName}</span>
           </div>
           <button

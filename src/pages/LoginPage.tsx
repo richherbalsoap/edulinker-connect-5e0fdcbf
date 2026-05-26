@@ -80,7 +80,6 @@ const LoginPage = () => {
             alt="EDULinker Logo"
             className="mx-auto w-20 h-20 rounded-xl object-contain"
             loading="eager"
-            fetchPriority="high"
             decoding="sync"
           />
           <CardTitle className="text-2xl text-primary">{t("app.name")}</CardTitle>
