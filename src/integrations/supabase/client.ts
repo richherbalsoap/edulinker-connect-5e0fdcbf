@@ -1,14 +1,306 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
+// Cloudflare Worker API wrapper replacing Supabase client
+const WORKER_URL = "https://edulinker-worker.dominatorenterprise04.workers.dev";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Helper: Get JWT token from localStorage
+const getAuthToken = () => localStorage.getItem('edulinker_admin_token');
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
+// Helper: Parse JWT payload
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
+class SupabaseQueryBuilder {
+  private tableName: string;
+  private method: 'select' | 'insert' | 'update' | 'delete' = 'select';
+  private filters: { column: string; value: any; type: string }[] = [];
+  private payload: any = null;
+  private isSingle = false;
+
+  constructor(tableName: string) {
+    this.tableName = tableName;
+  }
+
+  select(fields: string = '*') {
+    this.method = 'select';
+    return this;
+  }
+
+  insert(data: any) {
+    this.method = 'insert';
+    this.payload = data;
+    return this;
+  }
+
+  update(data: any) {
+    this.method = 'update';
+    this.payload = data;
+    return this;
+  }
+
+  delete() {
+    this.method = 'delete';
+    return this;
+  }
+
+  eq(column: string, value: any) {
+    this.filters.push({ column, value, type: 'eq' });
+    return this;
+  }
+
+  ilike(column: string, value: any) {
+    this.filters.push({ column, value, type: 'ilike' });
+    return this;
+  }
+
+  order(column: string, options?: { ascending: boolean }) {
+    // Basic sorting stub
+    return this;
+  }
+
+  single() {
+    this.isSingle = true;
+    return this;
+  }
+
+  // Support for Promise then/catch (async/await)
+  async then(onfulfilled?: (value: any) => any, onrejected?: (reason: any) => any) {
+    try {
+      const result = await this.execute();
+      if (onfulfilled) return onfulfilled(result);
+      return result;
+    } catch (error) {
+      if (onrejected) return onrejected(error);
+      throw error;
+    }
+  }
+
+  private async execute() {
+    const token = getAuthToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Determine endpoint
+    // Standardize endpoint mapping
+    let endpoint = `/api/${this.tableName}`;
+    if (this.tableName === 'fees_reminders') {
+      endpoint = '/api/fees';
+    }
+
+    const idFilter = this.filters.find(f => f.column === 'id' && f.type === 'eq');
+
+    let url = `${WORKER_URL}${endpoint}`;
+    let method = 'GET';
+    let body = null;
+
+    if (this.method === 'select') {
+      method = 'GET';
+      // Append query params
+      const params = new URLSearchParams();
+      this.filters.forEach(f => {
+        params.append(f.column, String(f.value));
+      });
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+    } else if (this.method === 'insert') {
+      method = 'POST';
+      body = JSON.stringify(this.payload);
+    } else if (this.method === 'update') {
+      method = 'PUT';
+      if (idFilter) {
+        url += `/${idFilter.value}`;
+      }
+      body = JSON.stringify(this.payload);
+    } else if (this.method === 'delete') {
+      method = 'DELETE';
+      if (idFilter) {
+        url += `/${idFilter.value}`;
+      }
+    }
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers,
+        body
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        return { data: null, error: new Error(errData.error || 'Request failed') };
+      }
+
+      let data = await res.json();
+      if (this.isSingle && Array.isArray(data)) {
+        data = data[0] || null;
+      }
+      return { data, error: null };
+    } catch (e: any) {
+      return { data: null, error: e };
+    }
+  }
+}
+
+// Emulate supabase client structure
+export const supabase = {
+  from(tableName: string) {
+    return new SupabaseQueryBuilder(tableName);
   },
-});
+
+  // Mock RPC functions calling the API
+  async rpc(fnName: string, args: any) {
+    if (fnName === 'upsert_school_for_clerk_user') {
+      // Return user's school_id
+      const token = getAuthToken();
+      if (!token) return { data: null, error: new Error('Unauthorized') };
+      const payload = parseJwt(token);
+      return { data: payload?.schoolId || null, error: null };
+    }
+    return { data: null, error: new Error(`RPC ${fnName} not implemented`) };
+  },
+
+  // Mock auth service
+  auth: {
+    async signInWithPassword({ email, password }: any) {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          return { data: { user: null }, error: new Error(result.error || 'Login failed') };
+        }
+        localStorage.setItem('edulinker_admin_token', result.token);
+        // Call auth state change listeners
+        authListeners.forEach(listener => listener('SIGNED_IN', this.getSessionSync()));
+        return {
+          data: {
+            user: { id: result.user.id, email: result.user.email, email_confirmed_at: new Date().toISOString() }
+          },
+          error: null
+        };
+      } catch (e: any) {
+        return { data: { user: null }, error: e };
+      }
+    },
+
+    async signUp({ email, password, options }: any) {
+      try {
+        const schoolName = options?.data?.school_name || "My School";
+        const res = await fetch(`${WORKER_URL}/api/admin/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, schoolName })
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          return { data: { user: null }, error: new Error(result.error || 'Signup failed') };
+        }
+        localStorage.setItem('edulinker_admin_token', result.token);
+        authListeners.forEach(listener => listener('SIGNED_UP', this.getSessionSync()));
+        return {
+          data: {
+            user: { id: result.user.id, email: result.user.email, email_confirmed_at: new Date().toISOString() }
+          },
+          error: null
+        };
+      } catch (e: any) {
+        return { data: { user: null }, error: e };
+      }
+    },
+
+    async signOut() {
+      localStorage.removeItem('edulinker_admin_token');
+      authListeners.forEach(listener => listener('SIGNED_OUT', null));
+      return { error: null };
+    },
+
+    getSessionSync() {
+      const token = getAuthToken();
+      if (!token) return null;
+      const payload = parseJwt(token);
+      if (!payload) return null;
+      return {
+        access_token: token,
+        user: { id: payload.userId, email: payload.email, email_confirmed_at: new Date().toISOString() }
+      };
+    },
+
+    async getSession() {
+      const session = this.getSessionSync();
+      return { data: { session }, error: null };
+    },
+
+    onAuthStateChange(callback: (event: string, session: any) => void) {
+      authListeners.push(callback);
+      // Run immediately
+      const session = this.getSessionSync();
+      callback(session ? 'SIGNED_IN' : 'SIGNED_OUT', session);
+      return {
+        data: {
+          subscription: {
+            unsubscribe() {
+              const index = authListeners.indexOf(callback);
+              if (index !== -1) authListeners.splice(index, 1);
+            }
+          }
+        }
+      };
+    }
+  },
+
+  // Mock Storage for R2
+  storage: {
+    from(bucketName: string) {
+      return {
+        async upload(path: string, file: File, options?: any) {
+          try {
+            const formData = new FormData();
+            formData.append('file', file, file.name);
+
+            const res = await fetch(`${WORKER_URL}/api/upload`, {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!res.ok) {
+              const result = await res.json();
+              return { data: null, error: new Error(result.error || 'Upload failed') };
+            }
+
+            const result = await res.json();
+            return { data: { path: result.key, publicUrl: `${WORKER_URL}${result.url}` }, error: null };
+          } catch (e: any) {
+            return { data: null, error: e };
+          }
+        },
+
+        getPublicUrl(path: string) {
+          // Serve files directly from Worker proxy endpoint
+          return { data: { publicUrl: `${WORKER_URL}/api/files/${path}` } };
+        }
+      };
+    }
+  }
+};
+
+const authListeners: ((event: string, session: any) => void)[] = [];
+export type { Database } from './types';
