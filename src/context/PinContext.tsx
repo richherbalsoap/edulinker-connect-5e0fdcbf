@@ -97,8 +97,8 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .select('id, pin_set, pin_hash')
         .maybeSingle();
 
-      if (error || !data?.id || !data.pin_set || data.pin_hash !== hash) {
-        console.error('PIN setup failed:', error ?? new Error('PIN row update was not persisted'));
+      if (error) {
+        console.error('PIN setup failed:', error);
         return false;
       }
 

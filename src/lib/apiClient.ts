@@ -33,7 +33,10 @@ class ApiQueryBuilder {
   }
 
   select(fields: string = '*') {
-    this.method = 'select';
+    if (this.method === 'select') {
+      // only set if it's currently select, otherwise keep it as insert/update/delete
+      this.method = 'select';
+    }
     return this;
   }
 
