@@ -59,6 +59,21 @@ class ApiQueryBuilder {
     return this;
   }
 
+  gte(column: string, value: any) {
+    this.filters.push({ column, value, type: 'gte' });
+    return this;
+  }
+
+  lte(column: string, value: any) {
+    this.filters.push({ column, value, type: 'lte' });
+    return this;
+  }
+
+  in(column: string, value: any[]) {
+    this.filters.push({ column, value, type: 'in' });
+    return this;
+  }
+
   ilike(column: string, value: any) {
     this.filters.push({ column, value, type: 'ilike' });
     return this;
