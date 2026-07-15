@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import * as XLSX from "xlsx";
 
 interface ImportStudentsModalProps {
@@ -145,7 +145,7 @@ const ImportStudentsModal = ({ isOpen, onClose, schoolId, onImportComplete }: Im
     setErrorMsg("");
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await apiClient.auth.getUser();
       if (!user) {
         setErrorMsg("Not authenticated.");
         setStatus("error");
@@ -181,7 +181,7 @@ const ImportStudentsModal = ({ isOpen, onClose, schoolId, onImportComplete }: Im
       let inserted = 0;
       for (let i = 0; i < rows.length; i += BATCH) {
         const chunk = rows.slice(i, i + BATCH);
-        const { data, error } = await supabase.from("students").insert(chunk as any).select();
+        const { data, error } = await apiClient.from("students").insert(chunk as any).select();
         if (error) {
           setErrorMsg(`Import error at batch ${Math.floor(i / BATCH) + 1}: ${error.message}`);
           setStatus("error");

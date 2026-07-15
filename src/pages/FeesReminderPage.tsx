@@ -4,7 +4,7 @@ import { DollarSign, Trash2, AlertTriangle, Filter, Upload, QrCode, CheckCircle,
 import jsQR from "jsqr";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
 
@@ -113,7 +113,7 @@ const FeesReminderPage = () => {
 
   const fetchReminders = async () => {
     if (!schoolId) return;
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("fees_reminders")
       .select("*, student:students(id, name, standard, section)")
       .eq("school_id", schoolId)
@@ -123,7 +123,7 @@ const FeesReminderPage = () => {
 
   const fetchSchoolQR = async () => {
     if (!schoolId) return;
-    const { data } = await (supabase.from("schools") as any).select("id, payment_qr_url").eq("id", schoolId).single();
+    const { data } = await (apiClient.from("schools") as any).select("id, payment_qr_url").eq("id", schoolId).single();
     if (data) {
       setSchoolDbId(data.id);
       setQrUrl(data.payment_qr_url || null);
@@ -192,9 +192,9 @@ const FeesReminderPage = () => {
     const filePath = `payment-qr/${schoolId}/qr.png`;
 
     // Delete old file first to avoid cache issues
-    await supabase.storage.from("edulinker-files").remove([filePath]);
+    await apiClient.storage.from("edulinker-files").remove([filePath]);
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await apiClient.storage
       .from("edulinker-files")
       .upload(filePath, file, { upsert: true });
 
@@ -205,11 +205,11 @@ const FeesReminderPage = () => {
       return;
     }
 
-    const { data: urlData } = supabase.storage.from("edulinker-files").getPublicUrl(filePath);
+    const { data: urlData } = apiClient.storage.from("edulinker-files").getPublicUrl(filePath);
     // Add cache-buster so new image shows immediately
     const publicUrl = urlData.publicUrl + "?t=" + Date.now();
 
-    const { error: updateError } = await (supabase.from("schools") as any)
+    const { error: updateError } = await (apiClient.from("schools") as any)
       .update({ payment_qr_url: publicUrl })
       .eq("id", schoolId);
 
@@ -229,9 +229,9 @@ const FeesReminderPage = () => {
   const handleRemoveQR = async () => {
     if (!schoolId) return;
     // Remove from storage
-    await supabase.storage.from("edulinker-files").remove([`payment-qr/${schoolId}/qr.png`]);
+    await apiClient.storage.from("edulinker-files").remove([`payment-qr/${schoolId}/qr.png`]);
     // Remove from DB
-    await (supabase.from("schools") as any).update({ payment_qr_url: null }).eq("id", schoolId);
+    await (apiClient.from("schools") as any).update({ payment_qr_url: null }).eq("id", schoolId);
     setQrUrl(null);
     if (qrInputRef.current) qrInputRef.current.value = "";
     toast({ title: "QR Removed", description: "Payment QR hata diya gaya." });
@@ -248,7 +248,7 @@ const FeesReminderPage = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("fees_reminders").insert({
+    const { error } = await apiClient.from("fees_reminders").insert({
       student_id: studentId,
       title,
       message: title,
@@ -286,7 +286,7 @@ const FeesReminderPage = () => {
       danger: true,
       onConfirm: async () => {
         setConfirm((c) => ({ ...c, open: false }));
-        await supabase.from("fees_reminders").delete().eq("id", id);
+        await apiClient.from("fees_reminders").delete().eq("id", id);
         setReminders((prev) => prev.filter((r) => r.id !== id));
         toast({ title: "Deleted", description: "Reminder deleted.", variant: "destructive" });
       },
@@ -305,7 +305,7 @@ const FeesReminderPage = () => {
       onConfirm: async () => {
         setConfirm((c) => ({ ...c, open: false }));
         const ids = filteredReminders.map((r) => r.id);
-        await supabase.from("fees_reminders").delete().in("id", ids);
+        await apiClient.from("fees_reminders").delete().in("id", ids);
         setReminders((prev) => prev.filter((r) => !ids.includes(r.id)));
         toast({
           title: "All Deleted",

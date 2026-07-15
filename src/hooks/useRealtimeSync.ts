@@ -1,58 +1,30 @@
 import { useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import useAppStore from "@/store/appStore";
 
-const TABLES = ["students", "homework", "complaints", "results", "announcements"] as const;
-
 export function useRealtimeSync(schoolId: string | null | undefined) {
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;
 
     const store = useAppStore.getState();
 
-    // Clean up previous channel
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
+    // Polling interval (every 10 seconds)
+    const interval = window.setInterval(() => {
+      // Re-fetch everything
+      store.fetchStudents(schoolId);
+      store.fetchHomework(schoolId);
+      store.fetchComplaints(schoolId);
+      store.fetchResults(schoolId);
+      store.fetchAnnouncements(schoolId);
+    }, 10000);
 
-    const channel = supabase.channel(`realtime-sync-${schoolId}`);
-
-    TABLES.forEach((table) => {
-      channel.on(
-        "postgres_changes" as any,
-        { event: "*", schema: "public", table, filter: `school_id=eq.${schoolId}` },
-        () => {
-          // Re-fetch the changed table
-          switch (table) {
-            case "students":
-              store.fetchStudents(schoolId);
-              break;
-            case "homework":
-              store.fetchHomework(schoolId);
-              break;
-            case "complaints":
-              store.fetchComplaints(schoolId);
-              break;
-            case "results":
-              store.fetchResults(schoolId);
-              break;
-            case "announcements":
-              store.fetchAnnouncements(schoolId);
-              break;
-          }
-        }
-      );
-    });
-
-    channel.subscribe();
-    channelRef.current = channel;
+    intervalRef.current = interval;
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [schoolId]);

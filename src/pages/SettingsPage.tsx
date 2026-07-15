@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { usePin } from "@/context/PinContext";
 import { User, KeyRound, Loader2, LockKeyhole } from "lucide-react";
@@ -24,10 +24,10 @@ const SettingsPage = () => {
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
-  // Load school name from Supabase on mount — localStorage nahi, DB se
+  // Load school name from apiClient on mount — localStorage nahi, DB se
   useEffect(() => {
     if (!schoolId) return;
-    supabase
+    apiClient
       .from("schools")
       .select("school_name")
       .eq("id", schoolId)
@@ -50,7 +50,7 @@ const SettingsPage = () => {
 
       if (type === "recovery" && accessToken && refreshToken) {
         setRecoveryLoading(true);
-        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
+        apiClient.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
           if (error) {
             toast({ title: "Error", description: "Invalid or expired recovery link.", variant: "destructive" });
           } else {
@@ -75,7 +75,7 @@ const SettingsPage = () => {
     }
 
     setNameLoading(true);
-    const { error } = await supabase.from("schools").update({ school_name: newName.trim() }).eq("id", schoolId);
+    const { error } = await apiClient.from("schools").update({ school_name: newName.trim() }).eq("id", schoolId);
     setNameLoading(false);
 
     if (error) {
@@ -102,13 +102,13 @@ const SettingsPage = () => {
         return;
       }
       setPasswordLoading(true);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await apiClient.auth.updateUser({ password: newPassword });
       setPasswordLoading(false);
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Success", description: "Password updated successfully. Please log in again." });
-        await supabase.auth.signOut();
+        await apiClient.auth.signOut();
         navigate("/login", { replace: true });
       }
       return;
@@ -124,7 +124,7 @@ const SettingsPage = () => {
     }
 
     setPasswordLoading(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    const { error } = await apiClient.auth.updateUser({ password: newPassword });
     setPasswordLoading(false);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

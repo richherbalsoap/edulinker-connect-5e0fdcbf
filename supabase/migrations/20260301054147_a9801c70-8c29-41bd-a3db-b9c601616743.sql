@@ -1,1 +1,0 @@
-ALTER TABLE public.students ADD COLUMN IF NOT EXISTS roll_no integer;

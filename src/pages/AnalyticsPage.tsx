@@ -14,7 +14,7 @@ import {
   BarChart3,
   RefreshCw,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useSchoolId } from "@/hooks/useSchoolId";
 import {
   RadarChart,
@@ -337,7 +337,7 @@ const AnalyticsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data: resultsData, error: resultsErr } = await supabase
+      const { data: resultsData, error: resultsErr } = await apiClient
         .from("results")
         .select(
           `
@@ -363,7 +363,7 @@ const AnalyticsPage = () => {
 
       if (resultsErr) throw resultsErr;
 
-      const { data: studentsData, error: studentsErr } = await supabase
+      const { data: studentsData, error: studentsErr } = await apiClient
         .from("students")
         .select("id, name, standard, section")
         .eq("school_id", schoolId)

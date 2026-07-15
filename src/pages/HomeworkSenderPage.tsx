@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Send, Upload, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
 
@@ -75,11 +75,11 @@ const HomeworkSenderPage = () => {
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    const { data: { user: currentUser } } = await apiClient.auth.getUser();
     if (!currentUser) return null;
     const ext = file.name.split(".").pop();
     const filePath = `${currentUser.id}/homework/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-    const { error } = await supabase.storage.from("edulinker-files").upload(filePath, file);
+    const { error } = await apiClient.storage.from("edulinker-files").upload(filePath, file);
     if (error) {
       toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
       return null;

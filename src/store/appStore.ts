@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 
 interface Student {
   id: string;
@@ -149,7 +149,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchStudents: async (schoolId) => {
     try {
-      let query = supabase.from("students").select("*").order("created_at", { ascending: false });
+      let query = apiClient.from("students").select("*").order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ students: data as unknown as Student[] });
@@ -160,7 +160,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchHomework: async (schoolId) => {
     try {
-      let query = supabase.from("homework").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+      let query = apiClient.from("homework").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ homework: data as unknown as Homework[] });
@@ -171,7 +171,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchComplaints: async (schoolId) => {
     try {
-      let query = supabase
+      let query = apiClient
         .from("complaints")
         .select("*, student:students(*)")
         .eq("is_deleted", false)
@@ -186,7 +186,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchResults: async (schoolId) => {
     try {
-      let query = supabase.from("results").select("*, student:students(*)").eq("is_deleted", false).order("created_at", { ascending: false });
+      let query = apiClient.from("results").select("*, student:students(*)").eq("is_deleted", false).order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ results: data as unknown as Result[] });
@@ -197,7 +197,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
 
   fetchAnnouncements: async (schoolId) => {
     try {
-      let query = supabase.from("announcements").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+      let query = apiClient.from("announcements").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
       if (schoolId) query = query.eq("school_id", schoolId);
       const { data } = await query;
       if (data) set({ announcements: data as unknown as Announcement[] });
@@ -226,8 +226,8 @@ const useAppStore = create<AppStore>()((set, get) => ({
   addStudent: async (student, manualKey, schoolId) => {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
-    const { data, error } = await supabase
+    } = await apiClient.auth.getUser();
+    const { data, error } = await apiClient
       .from("students")
       .insert([
         {
@@ -253,7 +253,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   updateStudent: async (id, updatedData) => {
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("students")
       .update(updatedData as any)
       .eq("id", id);
@@ -265,7 +265,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   deleteStudent: async (id) => {
-    const { error } = await supabase.from("students").delete().eq("id", id);
+    const { error } = await apiClient.from("students").delete().eq("id", id);
     if (!error) {
       set((state) => ({ students: state.students.filter((s) => s.id !== id) }));
     }
@@ -274,8 +274,8 @@ const useAppStore = create<AppStore>()((set, get) => ({
   addHomework: async (hw) => {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
-    const { data, error } = await supabase
+    } = await apiClient.auth.getUser();
+    const { data, error } = await apiClient
       .from("homework")
       .insert({
         standard: hw.standard,
@@ -300,8 +300,8 @@ const useAppStore = create<AppStore>()((set, get) => ({
   addComplaint: async (complaint) => {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
-    const { data, error } = await supabase
+    } = await apiClient.auth.getUser();
+    const { data, error } = await apiClient
       .from("complaints")
       .insert({
         student_id: complaint.student_id,
@@ -320,8 +320,8 @@ const useAppStore = create<AppStore>()((set, get) => ({
   addResult: async (result) => {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
-    const { data, error } = await supabase
+    } = await apiClient.auth.getUser();
+    const { data, error } = await apiClient
       .from("results")
       .insert({
         student_id: result.student_id,
@@ -344,8 +344,8 @@ const useAppStore = create<AppStore>()((set, get) => ({
   addAnnouncement: async (announcement) => {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
-    const { data, error } = await supabase
+    } = await apiClient.auth.getUser();
+    const { data, error } = await apiClient
       .from("announcements")
       .insert({
         title: announcement.title || null,
@@ -366,7 +366,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth();
       const startYear = currentMonth >= 3 ? currentYear : currentYear - 1;
-      await supabase.from("student_history").insert({
+      await apiClient.from("student_history").insert({
         student_id: studentId,
         school_id: schoolId,
         standard,
@@ -380,7 +380,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   resetFailedAttempts: async (studentId) => {
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("students")
       .update({ failed_attempts: 0 } as any)
       .eq("id", studentId);

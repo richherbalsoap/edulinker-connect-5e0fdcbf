@@ -1,7 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 
-const EDGE_FUNCTION_URL = "https://sdvxekymbfyrznhuvvtj.supabase.co/functions/v1/send-notification";
-
+const EDGE_FUNCTION_URL = `${import.meta.env.VITE_WORKER_URL || "https://edulinker-worker.dominatorenterprise04.workers.dev"}/api/send-notification`;
 export const sendNotification = async (type: string, data: object) => {
   try {
     await fetch(EDGE_FUNCTION_URL, {

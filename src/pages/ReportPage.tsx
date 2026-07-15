@@ -14,7 +14,7 @@ import {
   Bell,
 } from "lucide-react";
 import * as XLSX from "xlsx";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useSchoolId } from "@/hooks/useSchoolId";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -56,7 +56,7 @@ const ReportPage = () => {
 
   useEffect(() => {
     if (!schoolId) return;
-    supabase
+    apiClient
       .from("schools")
       .select("school_name")
       .eq("id", schoolId)
@@ -143,7 +143,7 @@ const ReportPage = () => {
     setData(null);
 
     try {
-      // FIX #1: Apply date filter only in Supabase query — no double filtering
+      // FIX #1: Apply date filter only in apiClient query — no double filtering
       const applyDateFilter = (query: any) => {
         let q = query.eq("school_id", schoolId).eq("is_deleted", false);
         if (startDate) q = q.gte("created_at", startDate.toISOString());
@@ -159,21 +159,21 @@ const ReportPage = () => {
       };
 
       const responses = await Promise.all([
-        applyDateFilter(supabase.from("results").select("*, student:students(name, standard, section, roll_no)")).order(
+        applyDateFilter(apiClient.from("results").select("*, student:students(name, standard, section, roll_no)")).order(
           "created_at",
           { ascending: false },
         ),
-        applyDateFilter(supabase.from("homework").select("*")).order("created_at", { ascending: false }),
-        applyDateFilter(supabase.from("announcements").select("*")).order("created_at", { ascending: false }),
-        applyDateFilter(supabase.from("complaints").select("*, student:students(name, standard, section)")).order(
+        applyDateFilter(apiClient.from("homework").select("*")).order("created_at", { ascending: false }),
+        applyDateFilter(apiClient.from("announcements").select("*")).order("created_at", { ascending: false }),
+        applyDateFilter(apiClient.from("complaints").select("*, student:students(name, standard, section)")).order(
           "created_at",
           { ascending: false },
         ),
         applyDateFilterSimple(
-          supabase.from("fees_reminders").select("*, student:students(name, standard, section)"),
+          apiClient.from("fees_reminders").select("*, student:students(name, standard, section)"),
         ).order("created_at", { ascending: false }),
         // Students are permanent entities — never date-filtered, always fetch all for school
-        supabase.from("students").select("*").eq("school_id", schoolId).order("created_at", { ascending: false }),
+        apiClient.from("students").select("*").eq("school_id", schoolId).order("created_at", { ascending: false }),
       ]);
 
       const [resResults, resHomework, resAnnouncements, resComplaints, resFees, resStudents] = responses;
@@ -181,7 +181,7 @@ const ReportPage = () => {
 
       if (firstError) throw firstError;
 
-      // FIX #1: Set data directly — Supabase already filtered, no redundant filterRowsByCreatedAt
+      // FIX #1: Set data directly — apiClient already filtered, no redundant filterRowsByCreatedAt
       setData({
         results: resResults.data || [],
         homework: resHomework.data || [],

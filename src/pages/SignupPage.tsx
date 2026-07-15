@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ const SignupPage = () => {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await apiClient.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/login` },
@@ -41,7 +41,7 @@ const SignupPage = () => {
 
     // Fire-and-forget welcome email via Resend (won't block signup if it fails)
     if (data.user?.email) {
-      supabase.functions
+      apiClient.functions
         .invoke("send-welcome-email", { body: { email: data.user.email } })
         .catch((err) => console.warn("Welcome email failed:", err));
     }

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from "@/lib/apiClient";
 import { useAuth } from '@/context/AuthContext';
 
 interface PinContextType {
@@ -35,7 +35,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (schoolId) return schoolId;
     if (!user?.id) return null;
 
-    const { data, error } = await supabase.rpc('upsert_school_for_clerk_user', {
+    const { data, error } = await apiClient.rpc('upsert_school_for_clerk_user', {
       p_clerk_user_id: user.id,
       p_school_name: 'My School',
     });
@@ -56,7 +56,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const fetchPinStatus = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from('schools')
         .select('pin_set, pin_hash')
         .eq('id', schoolId)
@@ -90,7 +90,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (modalMode === 'setup') {
       const hash = await hashPin(pin);
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from('schools')
         .update({ pin_hash: hash, pin_set: true } as any)
         .eq('id', effectiveSchoolId)
@@ -108,7 +108,7 @@ export const PinProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       resolveRef.current = null;
       return true;
     } else {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from('schools')
         .select('pin_hash')
         .eq('id', effectiveSchoolId)

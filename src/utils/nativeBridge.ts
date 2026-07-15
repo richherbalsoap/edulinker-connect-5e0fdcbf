@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 
 /**
  * Native Android bridge.
@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
  *
  * We save the FCM token into the `fcm_tokens` table keyed by the logged-in
  * user's id (stored in the table's `student_id` text column — the column is
- * loosely typed and shared with the student app). The Supabase
+ * loosely typed and shared with the student app). The apiClient
  * `send-notification` edge function reads from this table to deliver pushes.
  */
 
@@ -18,7 +18,7 @@ const persistToken = async (token: string) => {
   if (!token || token === lastSavedToken) return;
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await apiClient.auth.getUser();
     if (!user) {
       // Not logged in yet — retry once auth is ready.
       pendingToken = token;
@@ -28,9 +28,9 @@ const persistToken = async (token: string) => {
     const ownerKey = user.id;
 
     // Remove any previous rows for this owner so we don't accumulate stale tokens.
-    await supabase.from("fcm_tokens").delete().eq("student_id", ownerKey);
+    await apiClient.from("fcm_tokens").delete().eq("student_id", ownerKey);
 
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("fcm_tokens")
       .insert({ student_id: ownerKey, token });
 
@@ -58,7 +58,7 @@ export const initNativeBridge = () => {
   };
 
   // If the token arrived before the user logged in, retry on auth changes.
-  supabase.auth.onAuthStateChange((_event, session) => {
+  apiClient.auth.onAuthStateChange((_event, session) => {
     if (session?.user && pendingToken) {
       const t = pendingToken;
       pendingToken = null;

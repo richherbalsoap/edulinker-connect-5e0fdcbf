@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useSchoolId } from "@/hooks/useSchoolId";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -219,7 +219,7 @@ export const ImpactDashboardPage = () => {
   // Fetch school info
   useEffect(() => {
     if (!schoolId) return;
-    supabase
+    apiClient
       .from("schools")
       .select("school_name, created_at")
       .eq("id", schoolId)
@@ -238,7 +238,7 @@ export const ImpactDashboardPage = () => {
     setLoading(true);
 
     // Fetch existing baselines
-    const { data: baselineData } = await supabase
+    const { data: baselineData } = await apiClient
       .from("impact_baselines")
       .select("*")
       .eq("school_id", schoolId)
@@ -247,7 +247,7 @@ export const ImpactDashboardPage = () => {
     setBaselines(baselineData || []);
 
     // Fetch milestones
-    const { data: milestoneData } = await supabase
+    const { data: milestoneData } = await apiClient
       .from("impact_milestones")
       .select("*")
       .eq("school_id", schoolId)
@@ -269,7 +269,7 @@ export const ImpactDashboardPage = () => {
       toast.loading("Refreshing metrics from real data...");
 
       // Call the calculate function
-      const { data: autoMetrics, error } = (await (supabase.rpc as any)("calculate_impact_metrics", {
+      const { data: autoMetrics, error } = (await (apiClient.rpc as any)("calculate_impact_metrics", {
         p_school_id: schoolId,
       })) as { data: AutoMetric[] | null; error: any };
 
@@ -289,7 +289,7 @@ export const ImpactDashboardPage = () => {
 
         if (existing) {
           // Update current value only
-          const { error: updateError } = await supabase
+          const { error: updateError } = await apiClient
             .from("impact_baselines")
             .update({
               current_value: metric.current_value,
@@ -300,7 +300,7 @@ export const ImpactDashboardPage = () => {
           if (updateError) throw updateError;
         } else {
           // Create new baseline with current value, baseline_value starts at 0
-          const { error: insertError } = await supabase.from("impact_baselines").insert({
+          const { error: insertError } = await apiClient.from("impact_baselines").insert({
             school_id: schoolId,
             category: metric.metric_category,
             metric_name: metric.metric_name,
@@ -324,7 +324,7 @@ export const ImpactDashboardPage = () => {
   };
 
   const deleteMetric = async (id: string) => {
-    const { error } = await supabase.from("impact_baselines").delete().eq("id", id);
+    const { error } = await apiClient.from("impact_baselines").delete().eq("id", id);
     if (error) {
       toast.error(error.message);
     } else {
@@ -338,7 +338,7 @@ export const ImpactDashboardPage = () => {
       toast.error("Title is required");
       return;
     }
-    const { error } = await supabase.from("impact_milestones").insert({
+    const { error } = await apiClient.from("impact_milestones").insert({
       school_id: schoolId,
       title: msTitle.trim(),
       date: msDate,
@@ -356,7 +356,7 @@ export const ImpactDashboardPage = () => {
   };
 
   const deleteMilestone = async (id: string) => {
-    const { error } = await supabase.from("impact_milestones").delete().eq("id", id);
+    const { error } = await apiClient.from("impact_milestones").delete().eq("id", id);
     if (error) {
       toast.error(error.message);
     } else {

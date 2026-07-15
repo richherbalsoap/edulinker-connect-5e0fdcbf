@@ -4,7 +4,7 @@ import { Send, Upload, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
 
@@ -128,7 +128,7 @@ const ResultSenderPage = () => {
   const uploadFile = async (studentUuid: string, file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop() || "bin";
     const storagePath = `results/${studentUuid}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage
+    const { error } = await apiClient.storage
       .from("edulinker-files")
       .upload(storagePath, file, { contentType: file.type, upsert: false });
     if (error) {

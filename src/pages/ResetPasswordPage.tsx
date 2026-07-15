@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from "@/lib/apiClient";
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ const ResetPasswordPage = () => {
 
   useEffect(() => {
     // Listen for the PASSWORD_RECOVERY event from the URL token
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setIsValidSession(true);
         setChecking(false);
@@ -36,7 +36,7 @@ const ResetPasswordPage = () => {
 
     // Check if we already have a session (page might have loaded with token already processed)
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (session) {
         setIsValidSession(true);
       }
@@ -63,13 +63,13 @@ const ResetPasswordPage = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await apiClient.auth.updateUser({ password });
     setLoading(false);
     if (error) {
       toast({ title: 'Error', description: 'Unable to update password. Please try again or request a new reset link.', variant: 'destructive' });
     } else {
       toast({ title: 'Success', description: 'Password updated successfully. Please log in.' });
-      await supabase.auth.signOut();
+      await apiClient.auth.signOut();
       navigate('/login');
     }
   };

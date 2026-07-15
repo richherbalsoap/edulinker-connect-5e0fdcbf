@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import GoldenBackground from "@/components/GoldenBackground";
 import InstallBanner from "@/components/InstallBanner";
 import edulinkerLogo from "@/assets/edulinker-logo.png";
@@ -16,7 +16,7 @@ const ForgotPasswordPage = () => {
     if (!email.trim()) return;
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      const { error } = await apiClient.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;

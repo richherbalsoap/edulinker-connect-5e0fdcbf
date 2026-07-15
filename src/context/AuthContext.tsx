@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Session, User } from "@supabase/supabase-js";
+import { apiClient } from "@/lib/apiClient";
+import type { Session, User } from "@apiClient/apiClient-js";
 
 interface AuthContextType {
   user: User | null;
@@ -28,13 +28,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Set up listener FIRST, then read existing session.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session: existing } }) => {
+    apiClient.auth.getSession().then(({ data: { session: existing } }) => {
       setSession(existing);
       setUser(existing?.user ?? null);
       setLoading(false);
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const ensureSchoolExists = async (userId: string) => {
     try {
-      const { data, error } = await supabase.rpc("upsert_school_for_clerk_user", {
+      const { data, error } = await apiClient.rpc("upsert_school_for_clerk_user", {
         p_clerk_user_id: userId,
         p_school_name: "My School",
       });
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await apiClient.auth.signOut();
     } catch (e) {
       console.error("signOut failed:", e);
     }

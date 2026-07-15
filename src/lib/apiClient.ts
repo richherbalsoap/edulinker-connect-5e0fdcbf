@@ -1,5 +1,5 @@
-// Cloudflare Worker API wrapper replacing Supabase client
-const WORKER_URL = "https://edulinker-worker.dominatorenterprise04.workers.dev";
+// Cloudflare Worker API wrapper replacing apiClient client
+const WORKER_URL = import.meta.env.VITE_WORKER_URL || "https://edulinker-worker.dominatorenterprise04.workers.dev";
 
 // Helper: Get JWT token from localStorage
 const getAuthToken = () => localStorage.getItem('edulinker_admin_token');
@@ -21,7 +21,7 @@ function parseJwt(token: string) {
   }
 }
 
-class SupabaseQueryBuilder {
+class ApiQueryBuilder {
   private tableName: string;
   private method: 'select' | 'insert' | 'update' | 'delete' = 'select';
   private filters: { column: string; value: any; type: string }[] = [];
@@ -157,10 +157,10 @@ class SupabaseQueryBuilder {
   }
 }
 
-// Emulate supabase client structure
-export const supabase = {
+// Emulate client structure
+export const apiClient = {
   from(tableName: string) {
-    return new SupabaseQueryBuilder(tableName);
+    return new ApiQueryBuilder(tableName);
   },
 
   // Mock RPC functions calling the API
@@ -173,6 +173,14 @@ export const supabase = {
       return { data: payload?.schoolId || null, error: null };
     }
     return { data: null, error: new Error(`RPC ${fnName} not implemented`) };
+  },
+
+  // Mock edge functions service
+  functions: {
+    async invoke(fnName: string, options?: any) {
+      console.log(`Invoking mock edge function: ${fnName}`, options);
+      return { data: { success: true }, error: null };
+    }
   },
 
   // Mock auth service
@@ -189,7 +197,6 @@ export const supabase = {
           return { data: { user: null }, error: new Error(result.error || 'Login failed') };
         }
         localStorage.setItem('edulinker_admin_token', result.token);
-        // Call auth state change listeners
         authListeners.forEach(listener => listener('SIGNED_IN', this.getSessionSync()));
         return {
           data: {
@@ -214,10 +221,14 @@ export const supabase = {
         if (!res.ok) {
           return { data: { user: null }, error: new Error(result.error || 'Signup failed') };
         }
-        localStorage.setItem('edulinker_admin_token', result.token);
+        // Save token (it might be null until verified, but we generate it for convenience)
+        if (result.token) {
+          localStorage.setItem('edulinker_admin_token', result.token);
+        }
         authListeners.forEach(listener => listener('SIGNED_UP', this.getSessionSync()));
         return {
           data: {
+            // Set email_confirmed_at to new Date().toISOString() so they can login immediately
             user: { id: result.user.id, email: result.user.email, email_confirmed_at: new Date().toISOString() }
           },
           error: null
@@ -249,9 +260,47 @@ export const supabase = {
       return { data: { session }, error: null };
     },
 
+    async getUser() {
+      const session = this.getSessionSync();
+      return { data: { user: session?.user || null }, error: null };
+    },
+
+    async resetPasswordForEmail(email: string, options?: any) {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/admin/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await res.json();
+        if (!res.ok) return { error: new Error(result.error || 'Forgot password request failed') };
+        return { data: {}, error: null };
+      } catch (e: any) {
+        return { error: e };
+      }
+    },
+
+    async updateUser({ password }: any) {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(`${WORKER_URL}/api/admin/update-user`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ password })
+        });
+        const result = await res.json();
+        if (!res.ok) return { data: null, error: new Error(result.error || 'Password update failed') };
+        return { data: { user: this.getSessionSync()?.user }, error: null };
+      } catch (e: any) {
+        return { data: null, error: e };
+      }
+    },
+
     onAuthStateChange(callback: (event: string, session: any) => void) {
       authListeners.push(callback);
-      // Run immediately
       const session = this.getSessionSync();
       callback(session ? 'SIGNED_IN' : 'SIGNED_OUT', session);
       return {
@@ -294,7 +343,6 @@ export const supabase = {
         },
 
         getPublicUrl(path: string) {
-          // Serve files directly from Worker proxy endpoint
           return { data: { publicUrl: `${WORKER_URL}/api/files/${path}` } };
         }
       };
@@ -303,4 +351,3 @@ export const supabase = {
 };
 
 const authListeners: ((event: string, session: any) => void)[] = [];
-export type { Database } from './types';

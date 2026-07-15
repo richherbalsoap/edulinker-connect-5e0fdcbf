@@ -19,7 +19,7 @@ import {
 import ImportStudentsModal from "@/components/ImportStudentsModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -67,21 +67,21 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       }
       const {
         data: { user: currentUser },
-      } = await supabase.auth.getUser();
+      } = await apiClient.auth.getUser();
       if (!currentUser) {
         alert("Not authenticated");
         return;
       }
       const ext = file.name.split(".").pop() || "jpg";
       const filePath = `${currentUser.id}/avatars/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
+      const { error } = await apiClient.storage
         .from("edulinker-files")
         .upload(filePath, file, { contentType: file.type, upsert: false });
       if (error) {
         alert("Upload failed: " + error.message);
         return;
       }
-      const { data: signedData } = await supabase.storage
+      const { data: signedData } = await apiClient.storage
         .from("edulinker-files")
         .createSignedUrl(filePath, 60 * 60 * 24 * 365);
       setFileName(file.name);
@@ -120,7 +120,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
     let matchedKey = key;
 
     for (const candidate of candidates) {
-      const { data } = await supabase.rpc("lookup_student_by_secret_id", { _secret_id: candidate });
+      const { data } = await apiClient.rpc("lookup_student_by_secret_id", { _secret_id: candidate });
       if (data && (data as any[]).length > 0) {
         found = (data as any[])[0];
         matchedKey = candidate;
@@ -165,7 +165,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       }
       if (!keyFound) {
         // Use RPC to check across all schools, then only block same-school duplicates
-        const { data: lookupData } = await supabase.rpc("lookup_student_by_secret_id", { _secret_id: manualKey });
+        const { data: lookupData } = await apiClient.rpc("lookup_student_by_secret_id", { _secret_id: manualKey });
         const existing = lookupData && (lookupData as any[]).length > 0 ? (lookupData as any[])[0] : null;
         if (existing && existing.school_id === schoolId) {
           setKeyError(
@@ -174,7 +174,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
           return;
         }
         // Archive check: only block if archived by THIS school
-        const { data: archived } = await supabase
+        const { data: archived } = await apiClient
           .from("student_keys_archive")
           .select("id, school_id")
           .eq("secret_id", manualKey)
@@ -419,7 +419,7 @@ const StudentManagementPage = () => {
     if (schoolId) {
       fetchStudents(schoolId);
       // Fetch fee reminders for all students
-      supabase
+      apiClient
         .from("fees_reminders")
         .select("student_id, message, created_at")
         .eq("school_id", schoolId)

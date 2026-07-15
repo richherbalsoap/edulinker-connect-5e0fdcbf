@@ -2,7 +2,7 @@ import { Menu, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from "@/lib/apiClient";
 
 const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   const { signOut, schoolId } = useAuth();
@@ -16,7 +16,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
     if (!schoolId) return;
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from('schools')
         .select('school_name')
         .eq('id', schoolId)

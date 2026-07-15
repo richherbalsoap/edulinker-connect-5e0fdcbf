@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,14 +26,14 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await apiClient.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast({ title: "Login Failed", description: "Invalid email or password.", variant: "destructive" });
       return;
     }
     if (!data.user?.email_confirmed_at) {
-      await supabase.auth.signOut();
+      await apiClient.auth.signOut();
       toast({
         title: "Email Not Verified",
         description: "Please verify your email before logging in.",

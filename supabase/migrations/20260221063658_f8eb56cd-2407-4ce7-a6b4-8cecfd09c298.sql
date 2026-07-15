@@ -1,8 +1,0 @@
-
--- Ensure RLS is enabled on all data tables
-ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.homework ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.complaints ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.results ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.announcements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
