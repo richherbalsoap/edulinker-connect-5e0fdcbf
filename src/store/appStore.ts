@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { apiClient } from "@/lib/apiClient";
+import { sendNotification } from "@/utils/sendNotification";
 
 interface Student {
   id: string;
@@ -292,6 +293,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
     }
     if (data) {
       set((state) => ({ homework: [data as unknown as Homework, ...state.homework] }));
+      sendNotification('homework_update', { school_id: hw.school_id, standard: hw.standard, section: hw.section });
     }
   },
 
@@ -312,6 +314,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       .single();
     if (data && !error) {
       set((state) => ({ complaints: [data as unknown as Complaint, ...state.complaints] }));
+      sendNotification('complaint_update', { school_id: complaint.school_id, student_id: complaint.student_id });
     }
   },
 
@@ -336,6 +339,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       .single();
     if (data && !error) {
       set((state) => ({ results: [data as unknown as Result, ...state.results] }));
+      sendNotification('result_update', { school_id: result.school_id, student_id: result.student_id });
     }
   },
 
@@ -356,6 +360,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
       .single();
     if (data && !error) {
       set((state) => ({ announcements: [data as unknown as Announcement, ...state.announcements] }));
+      sendNotification('announcement_update', { school_id: announcement.school_id });
     }
   },
 
