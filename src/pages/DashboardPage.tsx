@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { BookOpen, MessageSquare, FileText, Calendar, Users, Sparkles, Loader2 } from "lucide-react";
+import { BookOpen, MessageSquare, FileText, Calendar, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useAppStore from "@/store/appStore";
 import { useSchoolId } from "@/hooks/useSchoolId";
-import { generateDashboardInsights } from "@/utils/aiHelpers";
 import { useToast } from "@/hooks/use-toast";
 
 const getYears = () => {
@@ -30,8 +29,6 @@ const DashboardPage = () => {
   const academicYears = useMemo(() => getYears(), []);
   const defaultYear = `${new Date().getFullYear()}`;
   const [selectedYear, setSelectedYear] = useState(defaultYear);
-  const [aiInsight, setAiInsight] = useState("");
-  const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -129,27 +126,6 @@ const DashboardPage = () => {
     },
   ];
 
-  const handleGenerateInsight = async () => {
-    setIsGeneratingInsight(true);
-    setAiInsight("");
-    try {
-      const summary = {
-        total_students: students.length,
-        homework_sent: filteredHomework.length,
-        complaints_sent: filteredComplaints.length,
-        results_sent: filteredResults.length,
-        period: selectedYear === "Overall" ? "All Time" : selectedYear
-      };
-      const insight = await generateDashboardInsights(JSON.stringify(summary));
-      setAiInsight(insight);
-      toast({ title: "Insights Generated ✨" });
-    } catch (err: any) {
-      toast({ title: "Failed to generate insights", description: err.message, variant: "destructive" });
-    } finally {
-      setIsGeneratingInsight(false);
-    }
-  };
-
   const today = new Date();
   const calMonth = selectedDate.getMonth();
   const calYear = selectedDate.getFullYear();
@@ -210,31 +186,6 @@ const DashboardPage = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="bg-gradient-to-r from-primary/10 via-black/40 to-black/40 backdrop-blur-md border border-primary/30 rounded-xl p-5 shadow-[0_0_20px_hsl(51,100%,50%,0.1)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-          <h2 className="text-lg font-bold text-primary flex items-center gap-2">
-            <Sparkles size={20} /> AI Principal Assistant
-          </h2>
-          <button
-            onClick={handleGenerateInsight}
-            disabled={isGeneratingInsight}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/40 rounded-lg text-sm font-semibold transition-all duration-300"
-          >
-            {isGeneratingInsight ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            Generate Insights
-          </button>
-        </div>
-        {aiInsight ? (
-          <p className="text-foreground/80 text-sm leading-relaxed border-l-2 border-primary pl-4 py-1 italic">
-            "{aiInsight}"
-          </p>
-        ) : (
-          <p className="text-foreground/40 text-sm">
-            Click generate to get an AI analysis of the current stats. Data is safely aggregated locally before analysis.
-          </p>
-        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">

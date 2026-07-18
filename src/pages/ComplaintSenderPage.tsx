@@ -1,13 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, Upload, X, Sparkles, Loader2 } from "lucide-react";
+import { AlertTriangle, Upload, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
-import { draftPoliteComplaint } from "@/utils/aiHelpers";
 import { motion } from "framer-motion";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -23,26 +22,6 @@ const ComplaintSenderPage = () => {
   const [formData, setFormData] = useState({ studentId: "", standard: "", class: "", description: "" });
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [severity, setSeverity] = useState<"soft" | "serious">("soft");
-
-  const handleAiPoliteDrafter = async () => {
-    if (!formData.description.trim()) {
-      toast({ title: "No Text", description: "Write some rough notes in the box first.", variant: "destructive" });
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const politeText = await draftPoliteComplaint(formData.description, severity);
-      setFormData(prev => ({ ...prev, description: politeText }));
-      toast({ title: "AI Magic ✨", description: "Complaint drafted politely!" });
-    } catch (err: any) {
-      toast({ title: "AI Error", description: err.message, variant: "destructive" });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   useEffect(() => {
     if (schoolId) fetchStudents(schoolId);
   }, [schoolId]);
@@ -221,27 +200,6 @@ const ComplaintSenderPage = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-primary/60">COMPLAINT DETAILS *</label>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={() => setSeverity(prev => prev === "soft" ? "serious" : "soft")}
-                  variant="outline"
-                  className={`h-8 px-2 text-xs border-primary/30 ${severity === "serious" ? "bg-destructive/20 text-destructive border-destructive/50" : "bg-primary/10 text-primary"}`}
-                >
-                  Tone: {severity === "soft" ? "Soft" : "Serious"}
-                </Button>
-                <Button 
-                  type="button" 
-                  onClick={handleAiPoliteDrafter}
-                  disabled={isGenerating || !formData.description.trim()}
-                  size="sm"
-                  variant="outline"
-                  className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
-                >
-                  {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                  Make it Pro (AI)
-                </Button>
-              </div>
             </div>
             <textarea
               value={formData.description}

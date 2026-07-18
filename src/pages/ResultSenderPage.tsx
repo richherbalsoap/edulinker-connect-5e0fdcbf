@@ -28,7 +28,6 @@ const ResultSenderPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [subjects, setSubjects] = useState([{ name: "", marks_obtained: "", total_marks: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const subjectsStorageKey = schoolId ? `edulinker_subjects_${schoolId}` : "edulinker_subjects_global";
   const [availableSubjects, setAvailableSubjects] = useState<string[]>(() => {
     try {
@@ -235,23 +234,6 @@ const ResultSenderPage = () => {
       <div className="text-center pt-4 flex flex-col items-center">
         <h1 className="text-3xl font-bold text-foreground">Result Sender</h1>
         <p className="text-foreground/70 mb-4">Enter or upload student marks</p>
-        <Button 
-          onClick={() => {
-            if (!standard || !section) {
-              toast({ title: "Select Class", description: "Please select Standard and Section first.", variant: "destructive" });
-              return;
-            }
-            if (!subjects[0].name || !subjects[0].total_marks) {
-              toast({ title: "Enter Subject & Max Marks", description: "Please enter at least the first Subject and its Total Marks.", variant: "destructive" });
-              return;
-            }
-            setIsAiModalOpen(true);
-          }} 
-          className="bg-primary/20 text-primary border border-primary hover:bg-primary/30"
-          type="button"
-        >
-          <Sparkles className="mr-2" size={16} /> AI Bulk Entry (Camera/Voice)
-        </Button>
       </div>
       <form
         onSubmit={handleSubmit}
@@ -465,19 +447,6 @@ const ResultSenderPage = () => {
           )}
         </Button>
       </form>
-      {schoolId && (
-        <AiResultEntryModal
-          isOpen={isAiModalOpen}
-          onClose={() => setIsAiModalOpen(false)}
-          schoolId={schoolId}
-          students={filteredStudents}
-          standard={standard}
-          section={section}
-          examName={examName}
-          subject={subjects[0]?.name || ""}
-          totalMarks={parseFloat(subjects[0]?.total_marks) || 100}
-        />
-      )}
     </div>
   );
 };

@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Send, Sparkles, Loader2 } from "lucide-react";
+import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
-import { draftFormalAnnouncement } from "@/utils/aiHelpers";
 import { motion } from "framer-motion";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -21,25 +20,6 @@ const AnnouncementsPage = () => {
   const [standard, setStandard] = useState("");
   const [section, setSection] = useState("");
   const [message, setMessage] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const handleAiCircularWriter = async () => {
-    if (!message.trim()) {
-      toast({ title: "No Text", description: "Write some rough points in the box first.", variant: "destructive" });
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const formalText = await draftFormalAnnouncement(message);
-      setMessage(formalText);
-      toast({ title: "AI Magic ✨", description: "Formal Circular generated!" });
-    } catch (err: any) {
-      toast({ title: "AI Error", description: err.message, variant: "destructive" });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!schoolId) {
@@ -141,17 +121,6 @@ const AnnouncementsPage = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-xs font-bold tracking-wider text-primary/60">ANNOUNCEMENT MESSAGE</label>
-              <Button 
-                type="button" 
-                onClick={handleAiCircularWriter}
-                disabled={isGenerating || !message.trim()}
-                size="sm"
-                variant="outline"
-                className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
-              >
-                {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                AI Circular Writer
-              </Button>
             </div>
             <textarea
               value={message}
@@ -159,13 +128,12 @@ const AnnouncementsPage = () => {
               required
               rows={8}
               className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-xl text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none transition-all"
-              placeholder="Type rough points (e.g. 'holiday tomorrow due to rain') and click AI Circular Writer..."
+              placeholder="Type announcement here..."
             />
           </div>
           <motion.div>
             <Button
               type="submit"
-              disabled={isGenerating}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-6 text-lg rounded-xl transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)] hover:shadow-[0_0_30px_hsl(51,100%,50%,0.5)]"
             >
               <Send size={20} className="mr-2" /> Broadcast Announcement
