@@ -480,7 +480,7 @@ const StudentManagementPage = () => {
     return students
       .filter((s) => selectedClass === "All Classes" || `Class ${s.standard}` === selectedClass)
       .filter((s) => selectedSection === "All Sections" || s.section === selectedSection)
-      .filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      .filter((s) => s.name?.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [students, selectedClass, selectedSection, searchTerm]);
 
   const groupedStudents = useMemo(() => {

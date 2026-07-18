@@ -17,7 +17,7 @@ export function useRealtimeSync(schoolId: string | null | undefined) {
       store.fetchComplaints(schoolId);
       store.fetchResults(schoolId);
       store.fetchAnnouncements(schoolId);
-    }, 10000);
+    }, 3000);
 
     intervalRef.current = interval;
 

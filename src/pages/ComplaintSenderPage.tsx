@@ -60,12 +60,12 @@ const ComplaintSenderPage = () => {
     if (!currentUser) return null;
     const ext = file.name.split(".").pop();
     const filePath = `${currentUser.id}/complaints/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-    const { error } = await apiClient.storage.from("edulinker-files").upload(filePath, file);
+    const { data, error } = await apiClient.storage.from("edulinker-files").upload(filePath, file);
     if (error) {
       toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
       return null;
     }
-    return filePath;
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

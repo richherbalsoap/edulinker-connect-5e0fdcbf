@@ -194,7 +194,7 @@ const FeesReminderPage = () => {
     // Delete old file first to avoid cache issues
     await apiClient.storage.from("edulinker-files").remove([filePath]);
 
-    const { error: uploadError } = await apiClient.storage
+    const { data, error: uploadError } = await apiClient.storage
       .from("edulinker-files")
       .upload(filePath, file, { upsert: true });
 
@@ -205,9 +205,8 @@ const FeesReminderPage = () => {
       return;
     }
 
-    const { data: urlData } = apiClient.storage.from("edulinker-files").getPublicUrl(filePath);
-    // Add cache-buster so new image shows immediately
-    const publicUrl = urlData.publicUrl + "?t=" + Date.now();
+    // Use server's actual URL + cache-buster so new image shows immediately
+    const publicUrl = data.publicUrl + "?t=" + Date.now();
 
     const { error: updateError } = await (apiClient.from("schools") as any)
       .update({ payment_qr_url: publicUrl })

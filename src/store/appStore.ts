@@ -229,20 +229,18 @@ const useAppStore = create<AppStore>()((set, get) => ({
     } = await apiClient.auth.getUser();
     const { data, error } = await apiClient
       .from("students")
-      .insert([
-        {
-          name: student.name,
-          standard: student.standard,
-          section: student.section,
-          roll_no: student.roll_no || null,
-          parent_name: student.parent_name || null,
-          parent_contact: student.parent_contact || null,
-          avatar_url: student.avatar_url || null,
-          secret_id: manualKey || "TEMP",
-          school_id: schoolId || null,
-          created_by: user?.id || null,
-        } as any,
-      ])
+      .insert({
+        name: student.name,
+        standard: student.standard,
+        section: student.section,
+        roll_no: student.roll_no || null,
+        parent_name: student.parent_name || null,
+        parent_contact: student.parent_contact || null,
+        avatar_url: student.avatar_url || null,
+        secret_id: manualKey || "TEMP",
+        school_id: schoolId || null,
+        created_by: user?.id || null,
+      })
       .select()
       .single();
     if (data && !error) {

@@ -128,14 +128,14 @@ const ResultSenderPage = () => {
   const uploadFile = async (studentUuid: string, file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop() || "bin";
     const storagePath = `results/${studentUuid}/${Date.now()}.${ext}`;
-    const { error } = await apiClient.storage
+    const { data, error } = await apiClient.storage
       .from("edulinker-files")
       .upload(storagePath, file, { contentType: file.type, upsert: false });
     if (error) {
       toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
       return null;
     }
-    return storagePath;
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -217,16 +217,38 @@ export const apiClient = {
     return new ApiQueryBuilder(tableName);
   },
 
-  // Mock RPC functions calling the API
+  // RPC functions calling the Worker API
   async rpc(fnName: string, args: any) {
     if (fnName === 'upsert_school_for_clerk_user') {
-      // Return user's school_id
+      // Return user's school_id from JWT
       const token = getAuthToken();
       if (!token) return { data: null, error: new Error('Unauthorized') };
       const payload = parseJwt(token);
       return { data: payload?.schoolId || null, error: null };
     }
-    return { data: null, error: new Error(`RPC ${fnName} not implemented`) };
+
+    // Call actual worker RPC endpoints
+    try {
+      const token = getAuthToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${WORKER_URL}/api/rpc/${fnName}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(args)
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        return { data: null, error: new Error((errData as any).error || 'RPC failed') };
+      }
+
+      const data = await res.json();
+      return { data, error: null };
+    } catch (e: any) {
+      return { data: null, error: e };
+    }
   },
 
   // Mock edge functions service
@@ -399,7 +421,26 @@ export const apiClient = {
         },
 
         getPublicUrl(path: string) {
-          return { data: { publicUrl: `${WORKER_URL}/api/files/${path}` } };
+          const finalPath = path.startsWith(`${bucketName}/`) ? path : `${bucketName}/${path}`;
+          return { data: { publicUrl: `${WORKER_URL}/api/files/${finalPath}` } };
+        },
+
+        async remove(paths: string[]) {
+          try {
+            const fullPaths = paths.map(p => p.startsWith(`${bucketName}/`) ? p : `${bucketName}/${p}`);
+            const res = await fetch(`${WORKER_URL}/api/delete`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paths: fullPaths })
+            });
+            if (!res.ok) {
+              const result = await res.json();
+              return { data: null, error: new Error(result.error || 'Delete failed') };
+            }
+            return { data: { message: 'Deleted' }, error: null };
+          } catch (e: any) {
+            return { data: null, error: e };
+          }
         }
       };
     }
