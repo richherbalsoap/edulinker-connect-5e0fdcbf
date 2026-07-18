@@ -147,57 +147,38 @@ Example:
 }
 `;
 
-  const tryBulkModel = async (model: string) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    const body = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-        responseMimeType: "application/json"
-      }
-    };
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error("RATE_LIMIT");
-      }
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || "Failed to generate remarks");
-    }
-
-    const data = await response.json();
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!textResponse) throw new Error("Invalid response from AI");
-
-    try {
-      return JSON.parse(textResponse);
-    } catch (e) {
-      throw new Error("Failed to parse AI output as JSON: " + textResponse);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.7,
+      responseMimeType: "application/json"
     }
   };
 
-  try {
-    return await tryBulkModel("gemini-2.0-flash");
-  } catch (error: any) {
-    if (error.message === "RATE_LIMIT") {
-      console.warn("Gemini 2.0 Flash rate limited (429). Falling back to Gemini 1.5 Flash...");
-      try {
-        return await tryBulkModel("gemini-1.5-flash");
-      } catch (fallbackError: any) {
-        if (fallbackError.message === "RATE_LIMIT") {
-          throw new Error("AI Rate Limit Exceeded: The Google Gemini API is currently receiving too many requests. Please wait a minute and try again.");
-        }
-        throw fallbackError;
-      }
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("AI Rate Limit Exceeded: Google Gemini API is currently receiving too many requests. Please wait 1 minute and try again.");
     }
-    throw error;
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || "Failed to generate remarks");
+  }
+
+  const data = await response.json();
+  const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  if (!textResponse) throw new Error("Invalid response from AI");
+
+  try {
+    return JSON.parse(textResponse);
+  } catch (e) {
+    throw new Error("Failed to parse AI output as JSON: " + textResponse);
   }
 };
 
@@ -239,41 +220,22 @@ export const generateDashboardInsights = async (aggregatedDataStr: string): Prom
 
 // Internal helper for simple text generation
 const fetchGeminiText = async (prompt: string, apiKey: string): Promise<string> => {
-  const tryModel = async (model: string) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    const body = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7 }
-    };
-    const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    
-    if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error("RATE_LIMIT");
-      }
-      throw new Error(`Failed to generate AI content with ${model}`);
-    }
-    
-    const data = await response.json();
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!textResponse) throw new Error("Invalid response from AI");
-    return textResponse.trim();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7 }
   };
-
-  try {
-    return await tryModel("gemini-2.0-flash");
-  } catch (error: any) {
-    if (error.message === "RATE_LIMIT") {
-      console.warn("Gemini 2.0 Flash rate limited (429). Falling back to Gemini 1.5 Flash...");
-      try {
-        return await tryModel("gemini-1.5-flash");
-      } catch (fallbackError: any) {
-        if (fallbackError.message === "RATE_LIMIT") {
-          throw new Error("AI Rate Limit Exceeded: The Google Gemini API is currently receiving too many requests. Please wait a minute and try again.");
-        }
-        throw fallbackError;
-      }
+  const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("AI Rate Limit Exceeded: Google Gemini API is currently receiving too many requests. Please wait 1 minute and try again.");
     }
-    throw error;
+    throw new Error("Failed to generate AI content");
   }
+  
+  const data = await response.json();
+  const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!textResponse) throw new Error("Invalid response from AI");
+  return textResponse.trim();
 };
