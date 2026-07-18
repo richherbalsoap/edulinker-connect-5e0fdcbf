@@ -147,7 +147,7 @@ Example:
 }
 `;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
   const body = {
     contents: [
@@ -222,7 +222,7 @@ export const generateDashboardInsights = async (aggregatedDataStr: string): Prom
 
 // Internal helper for simple text generation
 const fetchGeminiText = async (prompt: string, apiKey: string): Promise<string> => {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { temperature: 0.7 }
