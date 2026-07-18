@@ -244,7 +244,7 @@ const ComplaintSenderPage = () => {
           <motion.div>
             <Button
               type="submit"
-              disabled={isSubmitting || isGenerating}
+              disabled={isSubmitting}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-6 text-lg rounded-xl transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
             >
               {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : <AlertTriangle size={20} className="mr-2" />}
