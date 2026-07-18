@@ -102,13 +102,13 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
       return;
     }
 
-    // Try multiple formats: as-is, with dashes added (EDU-XXXXX-XXXXX), and without dashes
+    // Try multiple formats: as-is, with dashes added (EDU-XXXX-XXXXX), and without dashes
     const keyNoDashes = key.replace(/-/g, "");
     const candidates = [key];
 
-    // If key has no dashes and starts with EDU, try adding dashes in EDU-XXXXX-XXXXX format
-    if (!key.includes("-") && keyNoDashes.startsWith("EDU") && keyNoDashes.length >= 13) {
-      const formatted = `EDU-${keyNoDashes.slice(3, 8)}-${keyNoDashes.slice(8, 13)}`;
+    // If key has no dashes and starts with EDU, try adding dashes in EDU-XXXX-XXXXX format
+    if (!key.includes("-") && keyNoDashes.startsWith("EDU") && keyNoDashes.length >= 12) {
+      const formatted = `EDU-${keyNoDashes.slice(3, 7)}-${keyNoDashes.slice(7, 12)}`;
       candidates.push(formatted);
     }
     // If key has dashes, also try without
@@ -330,7 +330,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }: any) => {
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
-                      placeholder="Enter key (e.g. EDU-XXXXX-XXXXX)"
+                      placeholder="Enter key (e.g. EDU-XXXX-XXXXX)"
                       value={manualKey}
                       onChange={(e) => {
                         const val = e.target.value.toUpperCase().replace(/\s/g, "");

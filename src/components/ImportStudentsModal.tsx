@@ -27,7 +27,7 @@ const generateSecretId = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const part = (len: number) =>
     Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-  return `EDU-${part(5)}-${part(5)}`;
+  return `EDU-${part(4)}-${part(5)}`;
 };
 
 const ImportStudentsModal = ({ isOpen, onClose, schoolId, onImportComplete }: ImportStudentsModalProps) => {
