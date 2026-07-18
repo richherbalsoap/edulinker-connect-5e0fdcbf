@@ -228,6 +228,12 @@ const useAppStore = create<AppStore>()((set, get) => ({
     const {
       data: { user },
     } = await apiClient.auth.getUser();
+    const generateSecretId = () => {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const part = (len: number) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+      return `EDU-${part(4)}-${part(5)}`;
+    };
+
     const { data, error } = await apiClient
       .from("students")
       .insert({
@@ -238,7 +244,7 @@ const useAppStore = create<AppStore>()((set, get) => ({
         parent_name: student.parent_name || null,
         parent_contact: student.parent_contact || null,
         avatar_url: student.avatar_url || null,
-        secret_id: manualKey || "TEMP",
+        secret_id: manualKey || generateSecretId(),
         school_id: schoolId || null,
         created_by: user?.id || null,
       })
