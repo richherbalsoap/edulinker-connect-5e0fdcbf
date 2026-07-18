@@ -7,6 +7,8 @@ import useAppStore from "@/store/appStore";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
+import { Sparkles } from "lucide-react";
+import AiResultEntryModal from "@/components/AiResultEntryModal";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const initialSubjects = ["Mathematics", "Science", "English", "Hindi", "Social Studies", "Computer Science"];
@@ -26,6 +28,7 @@ const ResultSenderPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [subjects, setSubjects] = useState([{ name: "", marks_obtained: "", total_marks: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const subjectsStorageKey = schoolId ? `edulinker_subjects_${schoolId}` : "edulinker_subjects_global";
   const [availableSubjects, setAvailableSubjects] = useState<string[]>(() => {
     try {
@@ -229,9 +232,26 @@ const ResultSenderPage = () => {
 
   return (
     <div className="space-y-6 px-4 pb-10 relative z-10 py-6">
-      <div className="text-center pt-4">
+      <div className="text-center pt-4 flex flex-col items-center">
         <h1 className="text-3xl font-bold text-foreground">Result Sender</h1>
-        <p className="text-foreground/70">Enter or upload student marks</p>
+        <p className="text-foreground/70 mb-4">Enter or upload student marks</p>
+        <Button 
+          onClick={() => {
+            if (!standard || !section) {
+              toast({ title: "Select Class", description: "Please select Standard and Section first.", variant: "destructive" });
+              return;
+            }
+            if (!subjects[0].name || !subjects[0].total_marks) {
+              toast({ title: "Enter Subject & Max Marks", description: "Please enter at least the first Subject and its Total Marks.", variant: "destructive" });
+              return;
+            }
+            setIsAiModalOpen(true);
+          }} 
+          className="bg-primary/20 text-primary border border-primary hover:bg-primary/30"
+          type="button"
+        >
+          <Sparkles className="mr-2" size={16} /> AI Bulk Entry (Camera/Voice)
+        </Button>
       </div>
       <form
         onSubmit={handleSubmit}
@@ -445,6 +465,19 @@ const ResultSenderPage = () => {
           )}
         </Button>
       </form>
+      {schoolId && (
+        <AiResultEntryModal
+          isOpen={isAiModalOpen}
+          onClose={() => setIsAiModalOpen(false)}
+          schoolId={schoolId}
+          students={filteredStudents}
+          standard={standard}
+          section={section}
+          examName={examName}
+          subject={subjects[0]?.name || ""}
+          totalMarks={parseFloat(subjects[0]?.total_marks) || 100}
+        />
+      )}
     </div>
   );
 };
