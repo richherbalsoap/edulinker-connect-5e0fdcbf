@@ -183,3 +183,39 @@ Example:
     throw new Error("Failed to parse AI output as JSON: " + textResponse);
   }
 };
+
+export const generateHomework = async (topic: string, standard: string, subject: string): Promise<string> => {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) throw new Error("Gemini API Key is missing. Please add VITE_GEMINI_API_KEY in .env");
+  const prompt = `You are a helpful school teacher. Create a 5-question engaging homework assignment for a Class ${standard} student on the subject of ${subject}. The specific topic is "${topic}". Return ONLY the text of the homework (no markdown backticks, just plain text with newlines for formatting).`;
+  return await fetchGeminiText(prompt, apiKey);
+};
+
+export const draftPoliteComplaint = async (rawNotes: string): Promise<string> => {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) throw new Error("Gemini API Key is missing.");
+  const prompt = `You are a professional school teacher writing a message to a parent. Rewrite the following rough notes into a polite, constructive, and professional 3-4 sentence message focusing on student improvement. Rough notes: "${rawNotes}". Return ONLY the message text without quotes or formatting.`;
+  return await fetchGeminiText(prompt, apiKey);
+};
+
+export const draftFormalAnnouncement = async (points: string): Promise<string> => {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) throw new Error("Gemini API Key is missing.");
+  const prompt = `You are a school Principal drafting an official notice. Convert these rough points into a formal, concise, and professional school circular. Points: "${points}". Return ONLY the circular text without markdown backticks.`;
+  return await fetchGeminiText(prompt, apiKey);
+};
+
+// Internal helper for simple text generation
+const fetchGeminiText = async (prompt: string, apiKey: string): Promise<string> => {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7 }
+  };
+  const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!response.ok) throw new Error("Failed to generate AI content");
+  const data = await response.json();
+  const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!textResponse) throw new Error("Invalid response from AI");
+  return textResponse.trim();
+};

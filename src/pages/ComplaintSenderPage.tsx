@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, Upload, X } from "lucide-react";
+import { AlertTriangle, Upload, X, Sparkles, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
+import { draftPoliteComplaint } from "@/utils/aiHelpers";
+import { motion } from "framer-motion";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const classes = ["A", "B", "C", "D", "E"];
@@ -21,6 +23,24 @@ const ComplaintSenderPage = () => {
   const [formData, setFormData] = useState({ studentId: "", standard: "", class: "", description: "" });
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleAiPoliteDrafter = async () => {
+    if (!formData.description.trim()) {
+      toast({ title: "No Text", description: "Write some rough notes in the box first.", variant: "destructive" });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const politeText = await draftPoliteComplaint(formData.description);
+      setFormData(prev => ({ ...prev, description: politeText }));
+      toast({ title: "AI Magic ✨", description: "Complaint drafted politely!" });
+    } catch (err: any) {
+      toast({ title: "AI Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   useEffect(() => {
     if (schoolId) fetchStudents(schoolId);
@@ -111,10 +131,18 @@ const ComplaintSenderPage = () => {
   };
 
   return (
-    <div className="space-y-6 relative z-10 px-4 py-6">
-      <h1 className="text-3xl font-bold text-foreground text-center">Log a Complaint</h1>
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-xl p-6 max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6 relative z-10 px-4 py-6"
+    >
+      <div className="text-center pt-4">
+        <h1 className="text-3xl font-bold text-foreground">Log a Complaint</h1>
+        <p className="text-foreground/70">Send feedback to parents</p>
+      </div>
+      <div className="bg-black/40 backdrop-blur-xl border border-primary/20 rounded-3xl p-6 md:p-8 max-w-2xl mx-auto shadow-2xl">
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-primary/60 mb-2">STANDARD *</label>
@@ -189,15 +217,28 @@ const ComplaintSenderPage = () => {
               </p>
             )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-primary/60 mb-2">COMPLAINT DETAILS *</label>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-primary/60">COMPLAINT DETAILS *</label>
+              <Button 
+                type="button" 
+                onClick={handleAiPoliteDrafter}
+                disabled={isGenerating || !formData.description.trim()}
+                size="sm"
+                variant="outline"
+                className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
+              >
+                {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                Make it Polite (AI)
+              </Button>
+            </div>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               required
               rows={5}
-              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-              placeholder="Describe the issue clearly..."
+              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-xl text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none transition-all"
+              placeholder="Type rough notes here, then click 'Make it Polite'..."
             />
           </div>
           <div>
@@ -231,22 +272,19 @@ const ComplaintSenderPage = () => {
               </div>
             </div>
           </div>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-lg transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
-          >
-            {isSubmitting ? (
-              "Submitting..."
-            ) : (
-              <>
-                <AlertTriangle size={20} className="mr-2" /> Send Complaint
-              </>
-            )}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || isGenerating}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-6 text-lg rounded-xl transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : <AlertTriangle size={20} className="mr-2" />}
+              {isSubmitting ? "Submitting..." : "Send Complaint"}
+            </Button>
+          </motion.div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

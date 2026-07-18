@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Upload, X } from "lucide-react";
+import { Send, Upload, X, Sparkles, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useAppStore from "@/store/appStore";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
+import { generateHomework } from "@/utils/aiHelpers";
+import { motion } from "framer-motion";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -33,6 +35,28 @@ const HomeworkSenderPage = () => {
   const [formData, setFormData] = useState({ standard: "", section: "", subject: "", homework: "" });
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleAiGenerate = async () => {
+    const finalSubject = showCustomSubject ? customSubject : formData.subject;
+    if (!formData.standard || !finalSubject) {
+      toast({ title: "Missing Info", description: "Please select Standard and Subject first.", variant: "destructive" });
+      return;
+    }
+    const topic = window.prompt("Enter the topic for the homework (e.g. 'Solar System', 'Fractions'):");
+    if (!topic) return;
+    
+    setIsGenerating(true);
+    try {
+      const generated = await generateHomework(topic, formData.standard, finalSubject);
+      setFormData(prev => ({ ...prev, homework: generated }));
+      toast({ title: "AI Magic ✨", description: "Homework generated successfully!" });
+    } catch (err: any) {
+      toast({ title: "AI Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   // Reload subjects when schoolId changes (login switch)
   useEffect(() => {
@@ -157,13 +181,22 @@ const HomeworkSenderPage = () => {
   };
 
   return (
-    <div className="space-y-6 px-4 pb-10 relative z-10 py-6">
-      <h1 className="text-3xl font-bold text-foreground text-center">Homework Sender</h1>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6 px-4 pb-10 relative z-10 py-6"
+    >
+      <div className="text-center pt-4">
+        <h1 className="text-3xl font-bold text-foreground">Homework Sender</h1>
+        <p className="text-foreground/70">Create and assign homework tasks</p>
+      </div>
+      
       <form
         onSubmit={handleSubmit}
-        className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-6 max-w-2xl mx-auto space-y-6"
+        className="bg-black/40 backdrop-blur-xl border border-primary/20 rounded-3xl p-6 md:p-8 max-w-2xl mx-auto space-y-8 shadow-2xl"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">STANDARD</label>
             <Select value={formData.standard} onValueChange={(value) => setFormData((prev) => ({ ...prev, standard: value }))}>
@@ -236,13 +269,26 @@ const HomeworkSenderPage = () => {
           )}
         </div>
 
-        <div>
-          <label className="block text-xs font-bold tracking-wider text-primary/60 mb-2">HOMEWORK DETAILS</label>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs font-bold tracking-wider text-primary/60">HOMEWORK DETAILS</label>
+            <Button 
+              type="button" 
+              onClick={handleAiGenerate}
+              disabled={isGenerating}
+              size="sm"
+              variant="outline"
+              className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
+            >
+              {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+              AI Magic Drafter
+            </Button>
+          </div>
           <textarea
             value={formData.homework}
             onChange={(e) => setFormData((prev) => ({ ...prev, homework: e.target.value }))}
-            placeholder="Enter homework description..."
-            className="w-full px-4 py-3 h-36 bg-black/40 border-primary/20 border rounded-lg text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
+            placeholder="Type manually or use AI Magic Drafter above..."
+            className="w-full px-4 py-3 h-40 bg-black/40 border-primary/20 border rounded-xl text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y transition-all"
           />
         </div>
 
@@ -275,19 +321,18 @@ const HomeworkSenderPage = () => {
           </div>
         </div>
 
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3 rounded-lg transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
-        >
-          {isSubmitting ? "Sending..." : (
-            <>
-              <Send size={20} className="mr-2" /> Send Homework
-            </>
-          )}
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            type="submit"
+            disabled={isSubmitting || isGenerating}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg py-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)]"
+          >
+            {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : <Send size={20} className="mr-2" />} 
+            {isSubmitting ? "Sending..." : "Send Homework"}
+          </Button>
+        </motion.div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 

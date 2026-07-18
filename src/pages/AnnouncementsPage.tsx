@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Send } from "lucide-react";
+import { Send, Sparkles, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useAppStore from "@/store/appStore";
 import { useAuth } from "@/context/AuthContext";
 import { sendNotification } from "@/utils/sendNotification";
+import { draftFormalAnnouncement } from "@/utils/aiHelpers";
+import { motion } from "framer-motion";
 
 const standards = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const sections = ["A", "B", "C", "D", "E"];
@@ -19,6 +21,24 @@ const AnnouncementsPage = () => {
   const [standard, setStandard] = useState("");
   const [section, setSection] = useState("");
   const [message, setMessage] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleAiCircularWriter = async () => {
+    if (!message.trim()) {
+      toast({ title: "No Text", description: "Write some rough points in the box first.", variant: "destructive" });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const formalText = await draftFormalAnnouncement(message);
+      setMessage(formalText);
+      toast({ title: "AI Magic ✨", description: "Formal Circular generated!" });
+    } catch (err: any) {
+      toast({ title: "AI Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +77,18 @@ const AnnouncementsPage = () => {
   };
 
   return (
-    <div className="space-y-6 relative z-10 px-4 py-6">
-      <h1 className="text-3xl font-bold text-foreground text-center">Announcement Bot</h1>
-      <div className="bg-black/30 backdrop-blur-md border border-primary/20 rounded-2xl p-8 max-w-md mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6 relative z-10 px-4 py-6"
+    >
+      <div className="text-center pt-4">
+        <h1 className="text-3xl font-bold text-foreground">Announcement Bot</h1>
+        <p className="text-foreground/70">Broadcast circulars to students</p>
+      </div>
+      <div className="bg-black/40 backdrop-blur-xl border border-primary/20 rounded-3xl p-8 max-w-2xl mx-auto shadow-2xl">
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div className="flex items-center space-x-2 bg-black/40 border border-primary/20 p-4 rounded-lg">
             <Checkbox
               id="broadcast"
@@ -110,26 +138,42 @@ const AnnouncementsPage = () => {
               </select>
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground/80 mb-2">ANNOUNCEMENT MESSAGE</label>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-xs font-bold tracking-wider text-primary/60">ANNOUNCEMENT MESSAGE</label>
+              <Button 
+                type="button" 
+                onClick={handleAiCircularWriter}
+                disabled={isGenerating || !message.trim()}
+                size="sm"
+                variant="outline"
+                className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
+              >
+                {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                AI Circular Writer
+              </Button>
+            </div>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               required
-              rows={6}
-              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-lg text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-              placeholder="Type your announcement here..."
+              rows={8}
+              className="w-full px-4 py-3 bg-black/40 border border-primary/20 rounded-xl text-foreground placeholder:text-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none transition-all"
+              placeholder="Type rough points (e.g. 'holiday tomorrow due to rain') and click AI Circular Writer..."
             />
           </div>
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-lg shadow-[0_0_20px_hsl(51,100%,50%,0.3)] hover:shadow-[0_0_30px_hsl(51,100%,50%,0.5)]"
-          >
-            <Send size={20} className="mr-2" /> Broadcast Announcement
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              type="submit"
+              disabled={isGenerating}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-6 text-lg rounded-xl transition-all duration-300 shadow-[0_0_20px_hsl(51,100%,50%,0.3)] hover:shadow-[0_0_30px_hsl(51,100%,50%,0.5)]"
+            >
+              <Send size={20} className="mr-2" /> Broadcast Announcement
+            </Button>
+          </motion.div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

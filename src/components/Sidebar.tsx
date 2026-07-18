@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { usePin } from '@/context/PinContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import edulinkerLogo from '@/assets/edulinker-logo.png';
+import { motion } from 'framer-motion';
 
 interface NavItemType {
   path: string;
@@ -37,23 +38,23 @@ const principalPaths = new Set(principalTools.map(t => t.path));
 const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) => {
   const { t } = useTranslation();
   return (
-  <li>
+  <motion.li whileHover={{ scale: 1.02, x: 2 }} whileTap={{ scale: 0.98 }}>
     <NavLink
       to={item.path}
       onClick={onClick}
       className={({ isActive }) => `
-        flex items-center gap-3 px-4 py-3 rounded-lg min-w-0
-        transition-colors duration-200 group
+        flex items-center gap-3 px-4 py-3 rounded-xl min-w-0
+        transition-all duration-300 group
         ${isActive
-          ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
-          : 'text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent'
+          ? 'bg-primary/20 text-primary border border-primary/30 shadow-[0_0_20px_hsl(51,100%,50%,0.2)]'
+          : 'text-foreground/70 hover:bg-primary/10 hover:text-foreground border border-transparent hover:border-primary/20'
         }
       `}
     >
       <item.icon size={20} className="shrink-0" />
       <span className="font-medium text-sm truncate">{t(item.label)}</span>
     </NavLink>
-  </li>
+  </motion.li>
   );
 };
 
@@ -71,23 +72,23 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
   };
 
   return (
-    <li>
+    <motion.li whileHover={{ scale: 1.02, x: 2 }} whileTap={{ scale: 0.98 }}>
       <NavLink
         to={item.path}
         onClick={handleClick}
         className={({ isActive }) => `
-          flex items-center gap-3 px-4 py-3 rounded-lg min-w-0
-          transition-colors duration-200 group
+          flex items-center gap-3 px-4 py-3 rounded-xl min-w-0
+          transition-all duration-300 group
           ${isActive
-            ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_hsl(51,100%,50%,0.15)]'
-            : 'text-foreground/70 hover:bg-primary/5 hover:text-foreground border border-transparent'
+            ? 'bg-primary/20 text-primary border border-primary/30 shadow-[0_0_20px_hsl(51,100%,50%,0.2)]'
+            : 'text-foreground/70 hover:bg-primary/10 hover:text-foreground border border-transparent hover:border-primary/20'
           }
         `}
       >
         <item.icon size={20} className="shrink-0" />
         <span className="font-medium text-sm truncate">{t(item.label)}</span>
       </NavLink>
-    </li>
+    </motion.li>
   );
 };
 
@@ -148,21 +149,28 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
         <div onClick={toggleSidebar} className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-200" />
       )}
       <aside className={`
-        fixed top-0 left-0 h-[100dvh] w-[min(280px,85vw)] z-50
-        bg-background/95 border-r border-primary/20
-        flex flex-col transition-transform duration-200 ease-out
+        fixed top-0 left-0 h-[100dvh] w-[min(300px,85vw)] z-50
+        bg-black/80 backdrop-blur-2xl border-r border-primary/30
+        flex flex-col transition-transform duration-300 ease-in-out shadow-2xl
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `} style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="p-5 border-b border-primary/20 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <img src={edulinkerLogo} alt="EDULinker" className="w-9 h-9 rounded-lg object-contain" />
+        <div className="p-6 border-b border-primary/20 flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
+          <div className="flex items-center gap-4 min-w-0">
+            <motion.img 
+              initial={{ rotate: -10 }} 
+              animate={{ rotate: 0 }} 
+              transition={{ type: "spring", stiffness: 300 }}
+              src={edulinkerLogo} 
+              alt="EDULinker" 
+              className="w-10 h-10 rounded-xl object-contain drop-shadow-[0_0_10px_hsl(51,100%,50%,0.5)]" 
+            />
             <div className="min-w-0">
-              <h1 className="text-lg font-bold text-primary truncate">EDULinker</h1>
-              <p className="text-xs text-foreground/40 truncate">{schoolName}</p>
+              <h1 className="text-xl font-black text-primary tracking-wide truncate drop-shadow-[0_0_5px_hsl(51,100%,50%,0.8)]">EDULinker</h1>
+              <p className="text-xs text-foreground/50 font-medium truncate tracking-wider">{schoolName}</p>
             </div>
           </div>
-          <button onClick={toggleSidebar} className="p-1.5 rounded-lg text-foreground/50 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-colors duration-200">
-            <X size={20} />
+          <button onClick={toggleSidebar} className="p-2 rounded-xl text-foreground/50 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/30 transition-all duration-300">
+            <X size={22} />
           </button>
         </div>
 
