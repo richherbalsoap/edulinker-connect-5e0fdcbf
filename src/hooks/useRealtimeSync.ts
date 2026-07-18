@@ -9,7 +9,7 @@ export function useRealtimeSync(schoolId: string | null | undefined) {
 
     const store = useAppStore.getState();
 
-    // Polling interval (every 10 seconds)
+    // Polling interval (every 30 seconds to save Cloudflare requests)
     const interval = window.setInterval(() => {
       // Re-fetch everything
       store.fetchStudents(schoolId);
@@ -17,7 +17,7 @@ export function useRealtimeSync(schoolId: string | null | undefined) {
       store.fetchComplaints(schoolId);
       store.fetchResults(schoolId);
       store.fetchAnnouncements(schoolId);
-    }, 3000);
+    }, 30000);
 
     intervalRef.current = interval;
 
