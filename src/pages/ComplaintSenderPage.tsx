@@ -24,6 +24,7 @@ const ComplaintSenderPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [severity, setSeverity] = useState<"soft" | "serious">("soft");
 
   const handleAiPoliteDrafter = async () => {
     if (!formData.description.trim()) {
@@ -32,7 +33,7 @@ const ComplaintSenderPage = () => {
     }
     setIsGenerating(true);
     try {
-      const politeText = await draftPoliteComplaint(formData.description);
+      const politeText = await draftPoliteComplaint(formData.description, severity);
       setFormData(prev => ({ ...prev, description: politeText }));
       toast({ title: "AI Magic ✨", description: "Complaint drafted politely!" });
     } catch (err: any) {
@@ -220,17 +221,27 @@ const ComplaintSenderPage = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-primary/60">COMPLAINT DETAILS *</label>
-              <Button 
-                type="button" 
-                onClick={handleAiPoliteDrafter}
-                disabled={isGenerating || !formData.description.trim()}
-                size="sm"
-                variant="outline"
-                className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
-              >
-                {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                Make it Polite (AI)
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={() => setSeverity(prev => prev === "soft" ? "serious" : "soft")}
+                  variant="outline"
+                  className={`h-8 px-2 text-xs border-primary/30 ${severity === "serious" ? "bg-destructive/20 text-destructive border-destructive/50" : "bg-primary/10 text-primary"}`}
+                >
+                  Tone: {severity === "soft" ? "Soft" : "Serious"}
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleAiPoliteDrafter}
+                  disabled={isGenerating || !formData.description.trim()}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 bg-primary/10 border-primary/30 text-primary hover:bg-primary/20 text-xs"
+                >
+                  {isGenerating ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                  Make it Pro (AI)
+                </Button>
+              </div>
             </div>
             <textarea
               value={formData.description}
@@ -272,7 +283,7 @@ const ComplaintSenderPage = () => {
               </div>
             </div>
           </div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div>
             <Button
               type="submit"
               disabled={isSubmitting || isGenerating}

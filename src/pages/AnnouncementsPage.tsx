@@ -162,7 +162,7 @@ const AnnouncementsPage = () => {
               placeholder="Type rough points (e.g. 'holiday tomorrow due to rain') and click AI Circular Writer..."
             />
           </div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div>
             <Button
               type="submit"
               disabled={isGenerating}

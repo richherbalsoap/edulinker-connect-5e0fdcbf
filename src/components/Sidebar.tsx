@@ -38,7 +38,7 @@ const principalPaths = new Set(principalTools.map(t => t.path));
 const NavItem = ({ item, onClick }: { item: NavItemType; onClick: () => void }) => {
   const { t } = useTranslation();
   return (
-  <motion.li whileHover={{ scale: 1.02, x: 2 }} whileTap={{ scale: 0.98 }}>
+  <motion.li whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
     <NavLink
       to={item.path}
       onClick={onClick}
@@ -72,7 +72,7 @@ const ProtectedNavItem = ({ item, onClick, requestAccess }: { item: NavItemType;
   };
 
   return (
-    <motion.li whileHover={{ scale: 1.02, x: 2 }} whileTap={{ scale: 0.98 }}>
+    <motion.li whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
       <NavLink
         to={item.path}
         onClick={handleClick}

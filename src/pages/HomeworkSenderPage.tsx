@@ -321,7 +321,7 @@ const HomeworkSenderPage = () => {
           </div>
         </div>
 
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <motion.div>
           <Button
             type="submit"
             disabled={isSubmitting || isGenerating}
